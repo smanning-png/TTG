@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Talk Track Generator — Homebase</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  /* Brand palette — exact from guidelines */
+  --purple-haze: #7E3DD4;
+  --deep-purple: #1E0B3A;
+  --purple-rain: #D5C7FF;
+  --yellowcard: #E0FF00;
+  --pink-floyd: #E55CCD;
+  --white-stripes: #FFFFFF;
+  --grey-01: #FBFBFB;
+
+  /* Functional tints */
+  --haze-tint: #F3EEFB;
+  --haze-tint-2: #EBE3F8;
+  --ink: #1E0B3A;
+  --ink-soft: #4A3A66;
+  --ink-faint: #8076A0;
+  --line: rgba(30,11,58,0.10);
+  --line-soft: rgba(30,11,58,0.06);
+
+  --success-bg: #E1F5EE;
+  --success-text: #085041;
+
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+}
+body {
+  font-family: "Plus Jakarta Sans", -apple-system, sans-serif;
+  background: var(--grey-01);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============ HEADER ============ */
+.topbar {
+  background: var(--deep-purple);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+.topbar-glow {
+  position: absolute;
+  right: -10%; top: -120%;
+  width: 480px; height: 480px;
+  background: radial-gradient(circle, rgba(126,61,212,0.85) 0%, rgba(126,61,212,0) 65%);
+  pointer-events: none;
+}
+.logo { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.03em; z-index: 1; }
+.topbar-tag {
+  z-index: 1; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--deep-purple); background: var(--yellowcard);
+  padding: 5px 12px; border-radius: var(--r-pill);
+}
+
+/* ============ HERO ============ */
+.hero {
+  background: var(--deep-purple);
+  padding: 1.75rem 2rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: padding 0.35s ease, max-height 0.35s ease;
+}
+/* When a call is live, the hero collapses away */
+body.calling .hero { padding: 0; max-height: 0; }
+.hero-gradient {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 90% at 85% 120%, rgba(126,61,212,0.9) 0%, rgba(126,61,212,0) 60%),
+    radial-gradient(ellipse 60% 80% at 10% -20%, rgba(213,199,255,0.25) 0%, rgba(213,199,255,0) 55%);
+  pointer-events: none;
+}
+.hero-inner { max-width: 980px; margin: 0 auto; position: relative; z-index: 1; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--yellowcard); margin-bottom: 0.6rem;
+}
+.hero h1 {
+  font-size: clamp(26px, 4.5vw, 38px);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -0.035em;
+  color: #fff;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.hero h1 .accent { color: var(--purple-rain); }
+.hero p { font-size: 14.5px; line-height: 1.5; color: rgba(255,255,255,0.78); max-width: 560px; font-weight: 500; }
+.hero-chev { color: var(--purple-haze); font-weight: 800; }
+
+/* ============ LAYOUT ============ */
+.shell { max-width: 980px; margin: -1.5rem auto 0; padding: 0 1.5rem 3rem; position: relative; z-index: 2; transition: margin 0.35s ease; }
+body.calling .shell { margin-top: 1.25rem; }
+
+/* ============ FORM CARD ============ */
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  padding: 1.5rem;
+  box-shadow: 0 8px 40px -16px rgba(30,11,58,0.18);
+}
+.card-eyebrow {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;
+}
+.card-eyebrow h2 {
+  font-size: 13px; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: 0.05em;
+}
+.pill-req { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #fff; background: var(--purple-haze); padding: 3px 10px; border-radius: var(--r-pill); }
+.pill-opt { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); background: var(--haze-tint); padding: 3px 10px; border-radius: var(--r-pill); }
+
+/* Optional fields shown condensed, always visible */
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0.85rem; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 0.85rem; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; }
+.field input, .field select {
+  font-family: inherit; font-size: 14px; font-weight: 500;
+  padding: 10px 12px; border: 1.5px solid var(--line); border-radius: var(--r-sm);
+  background: #fff; color: var(--ink); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field input::placeholder { color: var(--ink-faint); font-weight: 400; }
+.field input:focus, .field select:focus { border-color: var(--purple-haze); box-shadow: 0 0 0 3px var(--haze-tint-2); }
+.field input.req { border-color: rgba(126,61,212,0.4); background: var(--haze-tint); }
+.detect-hint { font-size: 11px; font-weight: 600; color: var(--purple-haze); min-height: 14px; display: flex; align-items: center; gap: 4px; }
+.detect-hint i { font-size: 13px; }
+.field select.autofilled { border-color: rgba(126,61,212,0.5); background: var(--haze-tint); }
+
+.rule { border: none; border-top: 1px solid var(--line); margin: 1.25rem 0; }
+
+/* Quick-start row: brand + industry + button on one line on desktop */
+.quickstart { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: start; }
+.quickstart .field { align-self: start; }
+.quickstart .btn-primary { width: auto; padding: 11px 22px; white-space: nowrap; margin-top: 22px; }
+@media (max-width: 620px) { .quickstart { grid-template-columns: 1fr; } .quickstart .btn-primary { width: 100%; } }
+
+/* ===== COLLAPSED RECAP BAR (during a live call) ===== */
+.recap {
+  display: none; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 0.75rem 1.1rem; box-shadow: 0 4px 20px -12px rgba(30,11,58,0.2);
+}
+body.calling .card { display: none; }
+body.calling .recap { display: flex; }
+.recap-brand { font-size: 15px; font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+.recap-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.recap-chip {
+  font-size: 11px; font-weight: 600; color: var(--purple-haze);
+  background: var(--haze-tint); padding: 4px 10px; border-radius: var(--r-pill);
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.recap-chip i { font-size: 13px; }
+.recap-spacer { flex: 1; }
+.recap-new {
+  display: inline-flex; align-items: center; gap: 6px; font-family: inherit;
+  font-size: 13px; font-weight: 700; color: #fff; background: var(--purple-haze);
+  border: none; border-radius: var(--r-sm); padding: 9px 16px; cursor: pointer; transition: background 0.15s;
+}
+.recap-new:hover { background: #6f30c2; }
+
+.btn-primary {
+  width: 100%; padding: 14px; font-family: inherit; font-size: 16px; font-weight: 700;
+  background: var(--purple-haze); color: #fff; border: none; border-radius: var(--r-md);
+  cursor: pointer; transition: transform 0.12s, background 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  letter-spacing: -0.01em;
+}
+.btn-primary:hover { background: #6f30c2; }
+.btn-primary:active { transform: scale(0.985); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ============ CALL VIEW ============ */
+.callview { display: none; margin-top: 1rem; }
+.callview.on { display: grid; grid-template-columns: 1fr 280px; gap: 1.25rem; align-items: stretch; }
+.track-col { min-width: 0; }
+/* Sidebar cell spans the full grid height so the sticky card has room to travel
+   as the transcript grows. The card itself sticks near the top of the viewport. */
+#sql-sidebar { height: 100%; }
+
+/* SQL PANEL */
+.sql-card {
+  background: var(--deep-purple); color: #fff;
+  border-radius: var(--r-xl); padding: 1.5rem;
+  position: sticky; top: 1.25rem; overflow: hidden;
+}
+.sql-card-glow {
+  position: absolute; right: -40%; bottom: -40%;
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(126,61,212,0.7) 0%, rgba(126,61,212,0) 65%);
+  pointer-events: none;
+}
+.sql-head { position: relative; z-index: 1; }
+.sql-title { font-size: 12px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--purple-rain); margin-bottom: 1rem; }
+.sql-num { font-size: 38px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: #fff; }
+.sql-num span { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 0; }
+.sql-track { height: 6px; background: rgba(255,255,255,0.14); border-radius: var(--r-pill); margin: 0.9rem 0 1.25rem; overflow: hidden; }
+.sql-fill { height: 100%; background: var(--yellowcard); border-radius: var(--r-pill); transition: width 0.45s cubic-bezier(.2,.8,.2,1); }
+.sql-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; position: relative; z-index: 1; }
+.sql-dot {
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  display: flex; align-items: center; justify-content: center; transition: all 0.25s;
+}
+.sql-dot.on { background: var(--yellowcard); border-color: var(--yellowcard); }
+.sql-dot.on::after { content: ""; width: 5px; height: 8px; border-right: 2px solid var(--deep-purple); border-bottom: 2px solid var(--deep-purple); transform: rotate(40deg) translateY(-1px); }
+.sql-dot.must { border-color: var(--yellowcard); }
+.sql-txt { font-size: 12.5px; color: rgba(255,255,255,0.65); line-height: 1.4; }
+.sql-txt strong { display: block; color: #fff; font-weight: 600; font-size: 12.5px; }
+.sql-txt .v { display: block; color: var(--yellowcard); font-weight: 600; font-size: 11px; margin-top: 1px; }
+.sql-note { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.12); position: relative; z-index: 1; }
+.sql-note span { color: var(--yellowcard); font-weight: 700; }
+
+/* TRACK CARDS */
+.track {
+  background: #fff; border: 1px solid var(--line); border-radius: var(--r-xl);
+  padding: 1.5rem; margin-bottom: 1.25rem;
+  box-shadow: 0 8px 40px -20px rgba(30,11,58,0.18);
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 5px 12px; border-radius: var(--r-pill); margin-bottom: 1rem;
+  background: var(--haze-tint); color: var(--purple-haze);
+}
+.badge.win { background: var(--yellowcard); color: var(--deep-purple); }
+.lbl { font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.script {
+  font-size: 18px; line-height: 1.7; color: var(--ink); font-weight: 500;
+  background: var(--haze-tint); border-radius: var(--r-md);
+  padding: 1.3rem 1.5rem; border-left: 4px solid var(--purple-haze); white-space: pre-wrap;
+}
+.script-coach { color: var(--ink-soft); font-weight: 500; font-style: italic; font-size: 15px; }
+
+.responses { margin-top: 1.35rem; }
+.resp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 9px; }
+.resp {
+  padding: 12px 14px; font-family: inherit; font-size: 13px; text-align: left;
+  background: #fff; border: 1.5px solid var(--line); border-radius: var(--r-md);
+  cursor: pointer; color: var(--ink); line-height: 1.4; transition: all 0.14s;
+}
+.resp:hover { background: var(--haze-tint); border-color: var(--purple-haze); transform: translateY(-1px); }
+.resp i { font-size: 17px; display: block; margin-bottom: 5px; color: var(--purple-haze); }
+.resp .rl { font-weight: 700; display: block; margin-bottom: 2px; font-size: 13px; letter-spacing: -0.01em; }
+.resp .rs { font-size: 11.5px; color: var(--ink-faint); font-weight: 500; }
+.resp:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.loading { display: flex; align-items: center; gap: 9px; font-size: 14px; color: var(--ink-soft); font-weight: 500; padding: 0.6rem 0 1rem; }
+.spin { width: 17px; height: 17px; border: 2.5px solid var(--haze-tint-2); border-top-color: var(--purple-haze); border-radius: 50%; animation: sp 0.7s linear infinite; flex-shrink: 0; }
+@keyframes sp { to { transform: rotate(360deg); } }
+
+.divider2 { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; }
+.past .track { opacity: 0.55; box-shadow: none; padding: 1rem 1.25rem; }
+.past .script { font-size: 14px; padding: 0.85rem 1rem; line-height: 1.55; }
+.past .script-coach { display: none; }
+.past-resp { margin-top: 9px; font-size: 12px; color: var(--ink-faint); font-weight: 500; }
+
+.tip {
+  font-size: 13px; color: var(--ink-soft); font-weight: 500; line-height: 1.6;
+  background: var(--haze-tint); border-radius: var(--r-md); padding: 0.9rem 1.1rem; margin-top: 1rem;
+  border-left: 4px solid var(--yellowcard);
+}
+.tip strong { color: var(--ink); font-weight: 700; }
+
+.restart {
+  display: inline-flex; align-items: center; gap: 7px; font-family: inherit;
+  font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer;
+  background: none; border: none; padding: 6px 0; margin-top: 0.5rem;
+}
+.restart:hover { color: var(--purple-haze); }
+
+@media (max-width: 720px) {
+  .callview.on { grid-template-columns: 1fr; }
+  .sql-card { position: static; }
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .resp-grid { grid-template-columns: 1fr; }
+  .hero { padding: 2rem 1.5rem 3rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-glow"></div>
+  <span class="logo">homebase</span>
+  <span class="topbar-tag">SDR Tool · FF Motion</span>
+</header>
+
+<section class="hero">
+  <div class="hero-gradient"></div>
+  <div class="hero-inner">
+    <span class="hero-eyebrow"><i class="ti ti-phone-outgoing" aria-hidden="true"></i> Cold call companion</span>
+    <h1>Know exactly<br>what to say <span class="accent">next.</span></h1>
+    <p>Drop in the brand and industry, get your opening line on the spot, then tap how they respond. We will write the next line while the call is live.</p>
+  </div>
+</section>
+
+<div class="shell">
+  <div class="card" id="form-card">
+    <div class="card-eyebrow">
+      <h2>Who are you calling?</h2>
+      <span class="pill-req">Brand + industry required</span>
+    </div>
+    <div class="quickstart">
+      <div class="field">
+        <label>Franchise brand</label>
+        <input type="text" id="brand" class="req" placeholder="e.g. Ace Hardware" oninput="autoDetectIndustry()" autocomplete="off" />
+        <span class="detect-hint" id="detect-hint"></span>
+      </div>
+      <div class="field">
+        <label>Industry</label>
+        <select id="industry" class="req" onchange="onIndustryManualChange()">
+          <option value="">Select industry...</option>
+          <option value="Food & Beverage">Food &amp; Beverage</option>
+          <option value="Retail">Retail</option>
+          <option value="Health & Fitness">Health &amp; Fitness</option>
+          <option value="Professional Services">Professional Services</option>
+          <option value="Lodging & Leisure">Lodging &amp; Leisure</option>
+          <option value="Pet Services">Pet Services</option>
+          <option value="Education & Arts">Education &amp; Arts</option>
+          <option value="Auto & Travel">Auto &amp; Travel</option>
+          <option value="Home Services">Home Services</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="gen-btn" onclick="startCall()">
+        <i class="ti ti-player-play" aria-hidden="true"></i>Start call
+      </button>
+    </div>
+
+    <hr class="rule" />
+    <div class="card-eyebrow">
+      <h2>Know any of this already?</h2>
+      <span class="pill-opt">Optional · the talk track asks if blank</span>
+    </div>
+    <div class="grid3">
+      <div class="field">
+        <label>Locations</label>
+        <input type="number" id="num_locs" placeholder="#" min="1" />
+      </div>
+      <div class="field">
+        <label>Prospect role</label>
+        <select id="prospect_role">
+          <option value="">Unknown</option>
+          <option value="franchise owner">Franchise owner</option>
+          <option value="multi-unit operator">Multi-unit operator</option>
+          <option value="office manager">Office / store manager</option>
+          <option value="gatekeeper">Gatekeeper / front desk</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Current solution</label>
+        <select id="current_solution">
+          <option value="">Unknown</option>
+          <option value="competitor">Using a competitor</option>
+          <option value="spreadsheets">Spreadsheets / manual</option>
+          <option value="internal">Internal tool</option>
+          <option value="nothing">No current solution</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Timeline signal</label>
+        <select id="timeline">
+          <option value="">Unknown</option>
+          <option value="immediate">Immediate (0–30 days)</option>
+          <option value="near">Near-term (1–3 months)</option>
+          <option value="mid">Mid-term (3+ months)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Budget signal</label>
+        <select id="budget">
+          <option value="">Unknown</option>
+          <option value="confirmed">Budget confirmed</option>
+          <option value="likely">Budget likely</option>
+          <option value="none">No budget identified</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Pain / use case known</label>
+        <input type="text" id="known_pain" placeholder="e.g. manual time card entry" />
+      </div>
+    </div>
+  </div>
+
+  <div class="recap" id="recap">
+    <span class="recap-brand" id="recap-brand">Ace Hardware</span>
+    <div class="recap-meta" id="recap-meta"></div>
+    <span class="recap-spacer"></span>
+    <button class="recap-new" onclick="resetAll()"><i class="ti ti-refresh" aria-hidden="true" style="font-size:14px;"></i> New call</button>
+  </div>
+
+  <div class="callview" id="callview">
+    <div class="track-col">
+      <div id="history"></div>
+      <div id="current-block"></div>
+    </div>
+    <div id="sql-sidebar" style="display:none;">
+      <div class="sql-card">
+        <div class="sql-card-glow"></div>
+        <div class="sql-head">
+          <div class="sql-title">SQL qualification</div>
+          <div class="sql-num" id="sql-count">0 <span>/ 8</span></div>
+          <div class="sql-track"><div class="sql-fill" id="sql-fill" style="width:0%"></div></div>
+        </div>
+        <div id="sql-rows"></div>
+        <div class="sql-note">Fields <span>7</span> &amp; <span>8</span> are mandatory to pass to the AE</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BRAND_INDUSTRY = {"7-eleven":"Retail","911 restoration":"Professional Services","9round":"Health & Fitness","a&w":"Food & Beverage","aamco":"Auto & Travel","aarons":"Professional Services","ac hotel":"Lodging & Leisure","ace hardware":"Retail","ace sushi":"Food & Beverage","advantaclean":"Professional Services","allegra marketing":"Professional Services","alphagraphic":"Professional Services","amazing lash studio":"Health & Fitness","american family care":"Health & Fitness","ampm":"Food & Beverage","anago cleaning systems":"Professional Services","anytime fitness":"Health & Fitness","applebees":"Food & Beverage","aqua tots":"Sports & Recreation","arbys":"Food & Beverage","aroma joes":"Food & Beverage","ashleys homestore":"Retail","assisting hands":"Health & Fitness","at&t":"Professional Services","au bon pain":"Food & Beverage","auntie annes":"Food & Beverage","aussie pet mobile":"Professional Services","bahama breeze":"Food & Beverage","bar louie":"Food & Beverage","baskin robbins":"Food & Beverage","batteriesplus":"Retail","beauty square":"Health & Fitness","beef jerky outlet":"Food & Beverage","ben & jerrys":"Food & Beverage","best in class education center":"Professional Services","best western":"Lodging & Leisure","big boy burgers":"Food & Beverage","big o tires":"Auto & Travel","big smoke burger":"Food & Beverage","biggby coffee":"Food & Beverage","black bear diner":"Food & Beverage","blaze pizza":"Food & Beverage","blow blow dry bar":"Health & Fitness","board & brush":"Lodging & Leisure","bojangles":"Food & Beverage","boomarang burritos":"Food & Beverage","boost mobile":"Professional Services","boston pizza":"Food & Beverage","bottoms up espresso":"Food & Beverage","brightstar":"Health & Fitness","brightway insurance":"Professional Services","brioche doree":"Food & Beverage","british swim school":"Education & Arts","bubbakoos burritos":"Food & Beverage","buddys home furnishings":"Retail","budget blinds":"Retail","buff city soap":"Health & Fitness","buffalo wild wings":"Food & Beverage","burger king":"Food & Beverage","burgerfi":"Food & Beverage","burgerim":"Food & Beverage","burrito shak":"Food & Beverage","byrider":"Auto & Travel","cafe barbera":"Food & Beverage","cafe2u":"Food & Beverage","caffebene":"Food & Beverage","caliburger":"Food & Beverage","camp bow wow":"Pet Services","capital grille":"Food & Beverage","capriottis":"Food & Beverage","captain ds":"Food & Beverage","caribou coffee":"Food & Beverage","carls":"Food & Beverage","carstar":"Auto & Travel","celebree school":"Education & Arts","central bark":"Professional Services","century 21":"Professional Services","certa pro painters":"Home Services","charleys":"Food & Beverage","charleys philly steaks":"Food & Beverage","cheba hut":"Food & Beverage","checkers":"Food & Beverage","cheddars":"Food & Beverage","chem-dry":"Home Services","cherry blow dry bar":"Health & Fitness","chesters":"Food & Beverage","chevron":"Auto & Travel","chick-fil-a":"Food & Beverage","chili's":"Food & Beverage","chilis":"Food & Beverage","chipotle":"Food & Beverage","chopt salad":"Food & Beverage","christian brothers automotive":"Auto & Travel","churchs chicken":"Food & Beverage","cinnabon":"Food & Beverage","circle k":"Food & Beverage","clarion hotels":"Lodging & Leisure","classic rock coffee":"Food & Beverage","clean eatz":"Food & Beverage","clean net":"Professional Services","closet factory":"Professional Services","club z! tutoring":"Education & Arts","code ninjas":"Professional Services","codefu":"Professional Services","coffee beanery":"Food & Beverage","cold stone":"Food & Beverage","college nannies":"Professional Services","comfort inn":"Lodging & Leisure","comfort keeper":"Health & Fitness","cookie cutters":"Health & Fitness","cooks torta":"Food & Beverage","corner bakery":"Food & Beverage","cornwell":"Retail","cost cutters":"Health & Fitness","country inn":"Lodging & Leisure","cousin subs":"Food & Beverage","coverall service":"Professional Services","cpr cell phone":"Professional Services","cricket wireless":"Professional Services","crown trophy":"Retail","crowne plaza":"Lodging & Leisure","cruise planners":"Auto & Travel","crunch fitness":"Health & Fitness","culvers":"Food & Beverage","d-bat academies":"Health & Fitness","dairy queen":"Food & Beverage","daylight donuts":"Food & Beverage","days inn":"Lodging & Leisure","deka lash":"Health & Fitness","del taco":"Food & Beverage","deli delicious":"Food & Beverage","dennys":"Food & Beverage","dickeys":"Food & Beverage","dickeys barbecue":"Food & Beverage","ding tea":"Food & Beverage","dippin dots":"Food & Beverage","dog haus":"Food & Beverage","dogtopia":"Professional Services","domino's":"Food & Beverage","dominos":"Food & Beverage","donatos pizza":"Food & Beverage","doubletree by hilton":"Lodging & Leisure","drama kids":"Education & Arts","dream vacations":"Auto & Travel","dry bar":"Health & Fitness","dunkin donuts":"Food & Beverage","dunn brothers":"Food & Beverage","dutch bros":"Food & Beverage","earthwise pet supply":"Pet Services","econo lodge":"Lodging & Leisure","edible arrangements":"Food & Beverage","einstein bros":"Food & Beverage","el pollo loco":"Food & Beverage","elements massage":"Health & Fitness","embassy suites":"Lodging & Leisure","enviro-master":"Professional Services","erbert & gerberts":"Food & Beverage","eye level learning":"Professional Services","fairfield inn":"Lodging & Leisure","famous daves":"Food & Beverage","fantastic sams":"Health & Fitness","farmer boys":"Food & Beverage","farmers insurance":"Professional Services","fastsigns":"Retail","fatburger":"Food & Beverage","fedex":"Professional Services","fetch! pet care":"Professional Services","fiesta auto":"Auto & Travel","firehouse subs":"Food & Beverage","first choice haircutters":"Health & Fitness","firstlight":"Health & Fitness","fish window cleaning":"Professional Services","five guys":"Food & Beverage","fleetfeet":"Retail","flying locksmith":"Home Services","flying squirrel sports":"Health & Fitness","footy rooty":"Health & Fitness","freddys frozen custard":"Food & Beverage","fuddruckers":"Food & Beverage","fuzzy taco":"Food & Beverage","fyzical therapy":"Health & Fitness","glass doctor":"Professional Services","gloria jeans coffee":"Food & Beverage","gnc":"Food & Beverage","goddard school":"Professional Services","godfather pizza":"Food & Beverage","golden corral":"Food & Beverage","golden krust":"Food & Beverage","goldfish swim school":"Health & Fitness","gong cha":"Food & Beverage","good stuff eatery":"Food & Beverage","goodcents":"Food & Beverage","gradepower":"Professional Services","grease monkey":"Auto & Travel","great american cookies":"Food & Beverage","great clips":"Health & Fitness","great harvest bread":"Food & Beverage","great steak":"Food & Beverage","grouchos":"Food & Beverage","gyu kaku":"Food & Beverage","h&r block":"Professional Services","hamburger marys":"Food & Beverage","hammer & nails":"Health & Fitness","hampton inn":"Lodging & Leisure","hand and stone":"Health & Fitness","happy lemon":"Food & Beverage","hardees":"Food & Beverage","hardware hank":"Retail","health mart pharmacy":"Retail","healthsource":"Health & Fitness","helping hands":"Health & Fitness","hertz":"Auto & Travel","hilton":"Lodging & Leisure","hobbytown":"Retail","holiday inn":"Lodging & Leisure","home depot":"Retail","home instead":"Health & Fitness","homewood suites":"Lodging & Leisure","honey baked ham":"Food & Beverage","hooters":"Food & Beverage","howard johnson":"Lodging & Leisure","human bean":"Food & Beverage","hungry howies":"Food & Beverage","huntington learning":"Professional Services","i9 sports":"Sports & Recreation","ifly":"Health & Fitness","ihop":"Food & Beverage","intercontinental":"Lodging & Leisure","interim healthcare":"Health & Fitness","jack in the box":"Food & Beverage","jacks donuts":"Food & Beverage","jackson hewitt":"Professional Services","jamba":"Food & Beverage","jan-pro":"Home Services","jani-king":"Home Services","jasons deli":"Food & Beverage","jersey mikes":"Food & Beverage","jets pizza":"Food & Beverage","jiffy lube":"Auto & Travel","jimmy johns":"Food & Beverage","johnny rockets":"Food & Beverage","just love coffee":"Food & Beverage","keller williams":"Professional Services","kfc":"Food & Beverage","kid to kid":"Professional Services","kiddie academy":"Education & Arts","kidstrong":"Professional Services","kilwin's":"Food & Beverage","kilwins":"Food & Beverage","kona ice":"Food & Beverage","krispy kreme":"Food & Beverage","kumon":"Education & Arts","la madeleine":"Food & Beverage","la michoacana":"Food & Beverage","la quinta":"Lodging & Leisure","lash lounge":"Health & Fitness","le macaron":"Food & Beverage","lennys grills":"Food & Beverage","liberty tax":"Professional Services","linc service":"Home Services","line-x":"Auto & Travel","little caesars":"Food & Beverage","little gym":"Professional Services","long john silvers":"Food & Beverage","longhorn steakhouse":"Food & Beverage","loving cup":"Food & Beverage","lowe's":"Retail","lowes":"Retail","maaco":"Auto & Travel","maidpro":"Professional Services","mainstream boutique":"Retail","mango crazy":"Food & Beverage","marcos pizza":"Food & Beverage","marriott":"Lodging & Leisure","massage envy":"Health & Fitness","massage green spa":"Health & Fitness","massage heights":"Health & Fitness","massageluxe":"Health & Fitness","mathnasium":"Professional Services","maui wowi":"Food & Beverage","mcalisters":"Food & Beverage","mcdonalds":"Food & Beverage","meineke":"Auto & Travel","meltys":"Food & Beverage","merle norman":"Health & Fitness","merry maids":"Home Services","metal supermarkets":"Retail","midas":"Auto & Travel","minuteman press":"Professional Services","mod pizza":"Food & Beverage","moes southwest grill":"Food & Beverage","molly maids":"Professional Services","mooyah burgers":"Food & Beverage","mosquito joes":"Home Services","motel 6":"Lodging & Leisure","mr. rooter":"Professional Services","my gym":"Professional Services","nathan's":"Food & Beverage","national property inspection":"Professional Services","navy federal":"Professional Services","nekter":"Food & Beverage","nexthome":"Professional Services","nothing bundt cakes":"Food & Beverage","nu spine":"Health & Fitness","nurse next door":"Health & Fitness","olive garden":"Food & Beverage","once upon a child":"Retail","orangetheory":"Health & Fitness","outback steakhouse":"Food & Beverage","painting with a twist":"Lodging & Leisure","paleta bar":"Food & Beverage","palm beach tan":"Health & Fitness","panera bread":"Food & Beverage","papa johns":"Food & Beverage","papa murphys":"Food & Beverage","paul davis restoration":"Professional Services","pearle vision":"Health & Fitness","peets coffee":"Food & Beverage","pelican snoballs":"Food & Beverage","penn station subs":"Food & Beverage","perfect pita":"Food & Beverage","perspire sauna":"Health & Fitness","pet supplies plus":"Retail","pet wants":"Professional Services","petland":"Professional Services","phenix salon":"Health & Fitness","pigtails & crewcuts":"Health & Fitness","pillar to post":"Professional Services","pinkberry":"Food & Beverage","pinot palette":"Lodging & Leisure","pita pit":"Food & Beverage","pizza hut":"Food & Beverage","pizza ranch":"Food & Beverage","pj's coffee":"Food & Beverage","planet fitness":"Health & Fitness","platos closet":"Retail","play it again":"Retail","playa bowls":"Food & Beverage","pop a lock":"Professional Services","popeyes":"Food & Beverage","postal annex":"Retail","potbelly sandwich shop":"Food & Beverage","precision tune":"Auto & Travel","primohoagies":"Food & Beverage","primrose school":"Professional Services","prosource":"Retail","pure barre":"Health & Fitness","puroclean":"Home Services","qdoba":"Food & Beverage","quality inn":"Lodging & Leisure","radisson":"Lodging & Leisure","rainbow international":"Professional Services","ramada":"Lodging & Leisure","re max":"Professional Services","realty one":"Professional Services","red robin":"Food & Beverage","red roof inn":"Lodging & Leisure","renaissance hotel":"Lodging & Leisure","rent-a-center":"Retail","residence inn":"Lodging & Leisure","restoration 1":"Professional Services","rhea lana":"Professional Services","right at home":"Health & Fitness","ritas italian ice":"Food & Beverage","ritz carlton":"Lodging & Leisure","rock n joe":"Food & Beverage","rockin jump":"Health & Fitness","rocky mountain chocolate":"Food & Beverage","rooter man":"Professional Services","rosatis":"Food & Beverage","round table pizza":"Food & Beverage","rush bowls":"Food & Beverage","ruth chris steak house":"Food & Beverage","safesplash":"Health & Fitness","saladworks":"Food & Beverage","salata":"Food & Beverage","sarpinos pizza":"Food & Beverage","sbarro":"Food & Beverage","schakolad":"Food & Beverage","schlotzkys":"Food & Beverage","school of rock":"Professional Services","scissors & scotch":"Health & Fitness","scooters coffee":"Food & Beverage","servpro":"Professional Services","share tea":"Food & Beverage","sharkeys cuts":"Health & Fitness","sheraton":"Lodging & Leisure","shipleys donuts":"Food & Beverage","signarama":"Professional Services","simple simon pizza":"Food & Beverage","sir speedy":"Professional Services","sit means sit dog training":"Pet Services","sky zone":"Health & Fitness","sleep inn":"Lodging & Leisure","smartstyle":"Health & Fitness","smash burger":"Food & Beverage","smoothie factory":"Food & Beverage","smoothie king":"Food & Beverage","smoothies and things":"Food & Beverage","snap fitness":"Health & Fitness","snapology":"Professional Services","soccer post":"Health & Fitness","soccer shots":"Professional Services","somisomi":"Food & Beverage","sonic drive-in":"Food & Beverage","spavia":"Health & Fitness","speedee oil change":"Auto & Travel","sport clips":"Health & Fitness","spring-green":"Professional Services","springhill inn and suites":"Lodging & Leisure","st. regis":"Lodging & Leisure","stanley steemer":"Professional Services","starbucks":"Food & Beverage","state farm":"Professional Services","staybridge suites":"Lodging & Leisure","steak n shake":"Food & Beverage","style encore":"Retail","subway":"Food & Beverage","supercuts":"Health & Fitness","sweetgreen":"Food & Beverage","sweetwaters coffee":"Food & Beverage","sylvan learning":"Education & Arts","taco bell":"Food & Beverage","taco johns":"Food & Beverage","take 5 oil":"Auto & Travel","teriyaki madness":"Food & Beverage","tgi fridays":"Food & Beverage","the bar method":"Health & Fitness","the coffee bean":"Food & Beverage","the dog stop":"Professional Services","the joint chiropractic":"Health & Fitness","the tutoring center":"Professional Services","tim hortons":"Food & Beverage","togo's":"Food & Beverage","towne place":"Lodging & Leisure","travel leaders":"Auto & Travel","travelodge":"Lodging & Leisure","tropical smoothie":"Food & Beverage","tubbys sub shop":"Food & Beverage","tutti frutti":"Food & Beverage","tutu school":"Education & Arts","two men and a truck":"Professional Services","ubreakifix":"Professional Services","ups store":"Professional Services","uptown cheapskate":"Retail","urban air":"Health & Fitness","valvoline":"Auto & Travel","velvet taco":"Food & Beverage","village inn":"Food & Beverage","vision source":"Health & Fitness","visiting angel":"Health & Fitness","w hotel":"Lodging & Leisure","walmart":"Retail","waxing the city":"Health & Fitness","wayback burgers":"Food & Beverage","weed man":"Professional Services","wendy's":"Food & Beverage","wendys":"Food & Beverage","westin hotel":"Lodging & Leisure","whataburger":"Food & Beverage","which wich":"Food & Beverage","wild birds unlimited":"Professional Services","wing stop":"Food & Beverage","woodhouse day spa":"Health & Fitness","wyndham":"Lodging & Leisure","yard house":"Food & Beverage","yum-yum donuts":"Food & Beverage","zaxbys":"Food & Beverage","ziggi's":"Food & Beverage"};
+
+// Keyword fallback for brands not in our known-franchisee data
+const INDUSTRY_KEYWORDS = [
+  { kw: ["salon","spa","barber","nails","lash","brow","wax","tan","sauna","massage","hair","beauty","fitness","gym","yoga","pilates","crossfit","cycle","wellness","chiropractic","therapy","med spa","medspa"], industry: "Health & Fitness" },
+  { kw: ["coffee","cafe","caf\u00e9","pizza","burger","taco","grill","kitchen","bakery","bagel","donut","doughnut","ice cream","cream","smoothie","juice","tea","bar ","brewing","brew","deli","sandwich","sub","wings","chicken","bbq","barbecue","restaurant","eatery","diner","food","snack","candy","chocolate","yogurt","bowl","noodle","ramen","sushi","poke","cookie","pretzel"], industry: "Food & Beverage" },
+  { kw: ["hardware","store","shop","retail","resale","thrift","consignment","boutique","mart","market","outlet","furniture","mattress","goods","supply","supplies"], industry: "Retail" },
+  { kw: ["hotel","inn","suites","resort","lodge","motel","hospitality"], industry: "Lodging & Leisure" },
+  { kw: ["auto","tire","lube","oil","car wash","collision","mechanic","transmission","muffler","brake","detailing","glass"], industry: "Auto & Travel" },
+  { kw: ["pet","dog","cat","grooming","kennel","vet","veterinary","animal"], industry: "Pet Services" },
+  { kw: ["learning","tutor","tutoring","academy","education","school","kumon","math","reading","stem","coding","kids","childcare","daycare","montessori","preschool"], industry: "Education & Arts" },
+  { kw: ["cleaning","clean","painters","painting","plumbing","plumber","hvac","roofing","handyman","landscaping","lawn","pest","restoration","locksmith","junk","moving","movers"], industry: "Home Services" },
+  { kw: ["printing","print","marketing","signs","tax","accounting","insurance","staffing","ups store","mail","pack","real estate","realty","title","notary","franchise","consulting"], industry: "Professional Services" }
+];
+
+function detectIndustry(brand) {
+  const b = (brand || "").toLowerCase().trim();
+  if (!b) return null;
+  // 1) Exact match against known franchisee brands
+  if (BRAND_INDUSTRY[b]) return { industry: BRAND_INDUSTRY[b], exact: true };
+  // 2) Partial match: brand contains a known brand name or vice versa
+  for (const key in BRAND_INDUSTRY) {
+    if (b === key) return { industry: BRAND_INDUSTRY[key], exact: true };
+  }
+  for (const key in BRAND_INDUSTRY) {
+    // match on whole-word brand prefix (e.g. "ace hardware #4471" -> "ace hardware")
+    if (b.startsWith(key + " ") || b === key) return { industry: BRAND_INDUSTRY[key], exact: true };
+  }
+  // 3) Keyword fallback
+  for (const rule of INDUSTRY_KEYWORDS) {
+    for (const kw of rule.kw) {
+      if (b.includes(kw)) return { industry: rule.industry, exact: false };
+    }
+  }
+  return null;
+}
+
+let industryManuallySet = false;
+
+function onIndustryManualChange() {
+  const sel = document.getElementById("industry");
+  const hint = document.getElementById("detect-hint");
+  industryManuallySet = true;
+  sel.classList.remove("autofilled");
+  hint.textContent = "";
+}
+
+function autoDetectIndustry() {
+  const brand = document.getElementById("brand").value;
+  const sel = document.getElementById("industry");
+  const hint = document.getElementById("detect-hint");
+
+  // Don't override an industry the SDR picked themselves
+  if (industryManuallySet && sel.value) return;
+
+  const result = detectIndustry(brand);
+  if (result) {
+    sel.value = result.industry;
+    sel.classList.add("autofilled");
+    hint.innerHTML = result.exact
+      ? `<i class="ti ti-circle-check" aria-hidden="true"></i> Industry set to ${result.industry}`
+      : `<i class="ti ti-sparkles" aria-hidden="true"></i> Looks like ${result.industry} · change if needed`;
+  } else {
+    sel.classList.remove("autofilled");
+    hint.textContent = "";
+    if (!industryManuallySet) sel.value = "";
+  }
+}
+
+const SOCIAL_PROOF = {
+  "Food & Beverage":      { peers: ["Scooters Coffee","Dairy Queen","Playa Bowls","Cold Stone"], locs: 1701, payroll: 313 },
+  "Retail":               { peers: ["Platos Closet","Once Upon a Child","Hardware Hank"],        locs: 305,  payroll: 112 },
+  "Health & Fitness":     { peers: ["Crunch Fitness","Anytime Fitness","Orangetheory"],          locs: 408,  payroll: 66  },
+  "Professional Services":{ peers: ["UPS Store","Code Ninjas","Little Gym","KidStrong"],         locs: 930,  payroll: 219 },
+  "Lodging & Leisure":    { peers: ["Holiday Inn","Hampton Inn","Best Western"],                  locs: 727,  payroll: 112 },
+  "Pet Services":         { peers: ["Camp Bow Wow","EarthWise Pet Supply"],                       locs: 144,  payroll: 57  },
+  "Education & Arts":     { peers: ["Kumon","Kiddie Academy","Sylvan Learning"],                  locs: 144,  payroll: 48  },
+  "Auto & Travel":        { peers: ["Jiffy Lube","Meineke","Grease Monkey"],                     locs: 47,   payroll: 5   },
+  "Home Services":        { peers: ["Certa Pro Painters","Chem-Dry","Jan-Pro"],                   locs: 27,   payroll: 3   }
+};
+
+// Sub-categories give a peer that actually RESEMBLES the prospect's business.
+// "Health & Fitness" covers trampoline parks, gyms, salons, spas, swim schools, etc.,
+// which are not alike, so we match on the brand name and pick a like-for-like peer.
+// Keywords are checked against the typed brand name; "noun" is what to call their spots.
+const SUB_CATEGORIES = [
+  // Health & Fitness splits
+  { kw:["salon","hair","barber","cuts","blow dry","blowdry","dry bar","drybar","beauty","lash","brow","wax","nail","tan","soap"], peers:["Amazing Lash Studio","Dry Bar","Buff City Soap"], noun:"salons" },
+  { kw:["spa","massage","sauna","wellness","facial","skin"], peers:["Massage Envy","Woodhouse Day Spa","Perspire Sauna"], noun:"spas" },
+  { kw:["trampoline","jump","sky zone","squirrel","adventure park","ifly","aerial","indoor park"], peers:["Sky Zone","Flying Squirrel Sports","iFly"], noun:"parks" },
+  { kw:["gym","fitness","crossfit","barre","cycle","spin","yoga","pilates","strength","boxing","kickbox","9round","orangetheory","crunch","anytime"], peers:["Crunch Fitness","Anytime Fitness","Orangetheory"], noun:"gyms" },
+  { kw:["swim","aquatic","goldfish"], peers:["Goldfish Swim School","SafeSplash","British Swim School"], noun:"swim schools" },
+  { kw:["chiro","chiropractic","joint","ortho","physical therapy","rehab"], peers:["The Joint Chiropractic","Elements Massage"], noun:"clinics" },
+  { kw:["vision","optical","eye","pearle"], peers:["Pearle Vision","Vision Source"], noun:"vision centers" },
+  // Professional Services splits
+  { kw:["learning","tutor","tutoring","math","mathnasium","kumon","coding","code ninja","stem","reading","huntington","sylvan"], peers:["Code Ninjas","Mathnasium","Huntington Learning"], noun:"learning centers" },
+  { kw:["daycare","childcare","preschool","academy","montessori","primrose","goddard","kiddie","child development"], peers:["Primrose School","Goddard School","Kiddie Academy"], noun:"schools" },
+  { kw:["ship","pack","mail","postal","print","sign","fedex","ups store"], peers:["UPS Store","FastSigns","PostalAnnex"], noun:"stores" },
+  { kw:["insurance","tax","accounting","financial","state farm","allstate","farmers"], peers:["State Farm","Liberty Tax","Farmers Insurance"], noun:"offices" },
+  // Retail splits
+  { kw:["resale","consignment","thrift","plato","once upon","uptown","style encore","play it again","buy sell"], peers:["Platos Closet","Once Upon a Child","Uptown Cheapskate"], noun:"stores" },
+  { kw:["hardware","tools","ace","lumber","supply"], peers:["Ace Hardware","Hardware Hank"], noun:"stores" },
+  { kw:["pet supply","pet supplies","pet store","feed","petland"], peers:["Pet Supplies Plus","Petland"], noun:"stores" },
+  { kw:["convenience","gas","7-eleven","corner store"], peers:["7-Eleven"], noun:"stores" },
+  // Pet Services splits
+  { kw:["groom","kennel","boarding","daycare dog","dog daycare","camp bow","dogtopia","central bark"], peers:["Camp Bow Wow","Dogtopia","Central Bark"], noun:"locations" },
+  // Auto splits
+  { kw:["lube","oil","jiffy","grease monkey","valvoline"], peers:["Jiffy Lube","Grease Monkey","Valvoline"], noun:"shops" },
+  { kw:["tire","brake","muffler","transmission","meineke","midas","aamco"], peers:["Meineke","Midas","Aamco"], noun:"shops" },
+  { kw:["car wash","detail","wash"], peers:["Tommy's Express","Mister Car Wash"], noun:"washes" },
+  // Home Services splits
+  { kw:["paint","painter","certa","twist"], peers:["Certa Pro Painters"], noun:"crews" },
+  { kw:["clean","janitorial","maid","jan-pro","chem-dry","molly maid"], peers:["Chem-Dry","Jan-Pro","Molly Maid"], noun:"crews" },
+  // Food sub-splits (for tighter peers)
+  { kw:["coffee","cafe","café","espresso","scooters","aroma joe","biggby","dunkin"], peers:["Scooters Coffee","Aroma Joes","Biggby Coffee"], noun:"shops" },
+  { kw:["pizza","pizzeria"], peers:["Marco's Pizza","Hungry Howie's"], noun:"shops" },
+  { kw:["ice cream","cream","frozen yogurt","froyo","gelato","custard"], peers:["Cold Stone","Baskin Robbins","Ben & Jerrys"], noun:"shops" },
+  { kw:["smoothie","juice","bowl","açai","acai","playa"], peers:["Playa Bowls","Smoothie King"], noun:"shops" },
+  // Lodging
+  { kw:["hotel","inn","suites","resort","lodge","motel","hampton","holiday inn","marriott","wyndham"], peers:["Holiday Inn","Hampton Inn","Best Western"], noun:"properties" }
+];
+
+// Natural noun for a prospect's spots, by broad industry (fallback when no sub-match)
+const INDUSTRY_NOUN = {
+  "Food & Beverage":"restaurants", "Retail":"stores", "Health & Fitness":"locations",
+  "Professional Services":"locations", "Lodging & Leisure":"properties", "Pet Services":"locations",
+  "Education & Arts":"centers", "Auto & Travel":"shops", "Home Services":"crews"
+};
+
+let sqlState = {};
+function freshSql() {
+  return {
+    pain:     { label:"Pain / use case",    val:null, mandatory:false },
+    timeline: { label:"Purchase timeline",  val:null, mandatory:false },
+    size:     { label:"Company size",       val:null, mandatory:false },
+    budget:   { label:"Budget signal",      val:null, mandatory:false },
+    solution: { label:"Current solution",   val:null, mandatory:false },
+    impact:   { label:"Estimated users",    val:null, mandatory:false },
+    nextstep: { label:"Next step confirmed",val:null, mandatory:true  },
+    contact:  { label:"Contact info",       val:null, mandatory:true  }
+  };
+}
+
+let conversationHistory = [];
+let currentPhase = "opening";
+let prospectInfo = {};
+let currentScriptText = "";
+
+// Pick a peer set that resembles the prospect's actual business, not just its broad industry.
+function getProof(industry, brand) {
+  const base = SOCIAL_PROOF[industry] || { peers: ["other franchise owners","similar businesses"], locs: 200, payroll: 80 };
+  const b = (brand || "").toLowerCase().trim();
+  let peers = base.peers, noun = INDUSTRY_NOUN[industry] || "locations";
+  if (b) {
+    for (const sub of SUB_CATEGORIES) {
+      if (sub.kw.some(k => b.includes(k))) {
+        // Don't suggest the prospect's own brand as its peer; filter it out
+        const filtered = sub.peers.filter(p => p.toLowerCase() !== b && !b.includes(p.toLowerCase()));
+        peers = (filtered.length ? filtered : sub.peers);
+        noun = sub.noun || noun;
+        break;
+      }
+    }
+  }
+  return { peers, locs: base.locs, payroll: base.payroll, noun };
+}
+
+function seedSqlFromForm() {
+  if (prospectInfo.known_pain)       sqlState.pain.val     = prospectInfo.known_pain;
+  if (prospectInfo.timeline)         sqlState.timeline.val = prospectInfo.timeline;
+  if (prospectInfo.num_locs)         sqlState.size.val     = `${prospectInfo.num_locs} location(s)`;
+  if (prospectInfo.budget)           sqlState.budget.val   = prospectInfo.budget;
+  if (prospectInfo.current_solution) sqlState.solution.val = prospectInfo.current_solution;
+}
+
+function updateSql() {
+  const fields = Object.values(sqlState);
+  const done = fields.filter(f => f.val).length;
+  document.getElementById("sql-count").innerHTML = `${done} <span>/ 8</span>`;
+  document.getElementById("sql-fill").style.width = `${Math.round((done/8)*100)}%`;
+  document.getElementById("sql-rows").innerHTML = Object.entries(sqlState).map(([k,f]) => {
+    const on = !!f.val;
+    const cls = on ? "on" : (f.mandatory ? "must" : "");
+    const v = f.val ? `<span class="v">${f.val}</span>` : "";
+    return `<div class="sql-row">
+      <div class="sql-dot ${cls}"></div>
+      <div class="sql-txt"><strong>${f.label}${f.mandatory ? " ★" : ""}</strong>${v}</div>
+    </div>`;
+  }).join("");
+}
+
+function markSql(key, value, force) {
+  if (!sqlState[key]) return;
+  // Fill if empty, or upgrade a render-time "Asked..." placeholder with a real answer
+  const cur = sqlState[key].val;
+  const isPlaceholder = cur && /^Asked|^Offered|^Booking|^Price discussed|^Probed|^Quantified|^Getting/.test(cur);
+  if (!cur || (force && isPlaceholder)) { sqlState[key].val = value; updateSql(); }
+}
+
+// Refer to multiple locations the way a person would: "5 Subways" when the brand
+// pluralizes cleanly, otherwise "5 Subway locations". Keeps speech natural.
+function brandLocations(brand, n) {
+  const b = (brand || "").trim();
+  if (!b || !n) return `${n || "your"} locations`;
+  // Single-word brands that pluralize naturally (Subway -> Subways, Wendy's stays Wendy's)
+  const oneWord = !b.includes(" ");
+  const endsApostropheS = /['']s$/i.test(b);
+  const endsS = /s$/i.test(b);
+  if (oneWord && !endsS && !endsApostropheS) return `${n} ${b}s`;
+  return `${n} ${b} locations`;
+}
+
+function buildOpeningInstant(info) {
+  const { brand, industry, num_locs, prospect_role, known_pain } = info;
+  const proof = getProof(industry, brand);
+  const peer = proof.peers[0];
+  const peer2 = proof.peers[1];
+  const hasLocs = num_locs && parseInt(num_locs) >= 1;
+  const isGate = prospect_role === "gatekeeper";
+  let script = "", tip = "";
+
+  // Research-backed structure (Gong, 300M+ calls):
+  // 1) Lead with CONTEXT/peer before your name — "Heard the name tossed around" opener (11.24% success, the top performer)
+  // 2) Introduce yourself AFTER establishing you're not a stranger
+  // 3) State the REASON for calling (2.1x lift)
+  // 4) Use "we/our" not "I/my" (+35-55%), end with ONE question
+  // NOTE: never open with "is this a bad time?" — proven worst line at 0.9%.
+  const peerContext = peer2 ? `${peer} and ${peer2}` : peer;
+  const oneLiner = `the all-in-one app for running an hourly team, scheduling, time tracking, payroll, hiring, all in one place`;
+
+  if (isGate) {
+    script = `Hi there, it's [Your Name] from Homebase. We work with a bunch of ${industry} owners around here. Is the owner in by any chance?\n\n[If asked why]: We help owners run their hourly teams, scheduling, time tracking, payroll, all in one app. Just wanted to run something by them quick.`;
+    tip = `Coaching tip: Lead with the peer context, it signals you're not a random telemarketer. If they push, "It'll only take a couple minutes, when's a good time to catch them?"`;
+  } else if (known_pain) {
+    const locRef = hasLocs ? ` across your ${brandLocations(brand, num_locs)}` : "";
+    script = `Hey, we work with a few ${industry} owners like ${peerContext}. It's [Your Name] over at Homebase, heard the name tossed around?\n\n[They say no, most common]: Ha, no worries, that's on me. The reason I'm calling, a lot of owners we work with were drowning in ${known_pain.toLowerCase()}${locRef} before they found us. Mind if I ask how you're handling the team day to day right now?\n\n[They say yes]: Oh nice! Then you might already know the gist. Quick one, how are you handling the team day to day right now?`;
+    tip = `Coaching tip: Say "heard the name tossed around?" casually, like they should know you. It scrambles the "not interested" reflex. Then give your reason and ask one open question.`;
+  } else {
+    const locRef = hasLocs ? ` across your ${brandLocations(brand, num_locs)}` : ` over at ${brand}`;
+    script = `Hey, we work with a few ${industry} owners like ${peerContext}. It's [Your Name] over at Homebase, heard the name tossed around?\n\n[They say no, most common]: Ha, all good, that's on me. The reason I'm calling, we're ${oneLiner}, and the owners we work with usually come to us because juggling it all was eating their week. Mind if I ask how you're running the team${locRef} right now?\n\n[They say yes]: Oh, nice! Then you've probably got the gist. Quick one, how are you running the team${locRef} right now?`;
+    tip = `Coaching tip: Lead with the peer context BEFORE your name, that's the highest-converting opener in the data. State your reason, then ask one broad question. Keep talk-to-listen near 50/50 and let them point you to the pain.`;
+  }
+  return `${script}\n\n[${tip}]`;
+}
+
+function getMissingFields() {
+  return Object.entries(sqlState).filter(([k,f]) => !f.val).map(([k,f]) => k);
+}
+
+function buildSystemPrompt(info) {
+  const proof = getProof(info.industry, info.brand);
+  const missing = getMissingFields();
+  const desc = {
+    pain:"what their specific pain or problem is", timeline:"when they want to make a change (0-30 days, 1-3 months, 3+ months)",
+    size:"how many employees / locations they have", budget:"whether budget exists for a solution",
+    solution:"what they currently use (competitor, spreadsheets, nothing)", impact:"how many people would use the platform (1-10, 11-20, 21-50, 50+)",
+    nextstep:"a confirmed next step (demo, follow-up call, or meeting)", contact:"their full name, phone, and company name"
+  };
+  const missingList = missing.map(k => `- ${desc[k]}`).join("\n");
+  const locExample = info.num_locs ? `"how are you managing the team across your ${info.num_locs} ${info.brand}s right now?" (or "${info.num_locs} ${info.brand} locations" if pluralizing the name sounds awkward)` : `"how are you managing the team over at ${info.brand} right now?"`;
+
+  return `You are a cold call script assistant for Homebase SDRs calling franchise owners. Homebase is the ALL-IN-ONE app for running an hourly team: scheduling, time tracking, payroll, hiring, team messaging, and HR, all in one place.
+
+POSITIONING (critical):
+- Homebase is NOT a payroll company. It is the all-in-one app for running an hourly team. Payroll is ONE part of it, alongside scheduling, time tracking, hiring, and team messaging.
+- Do not lead with payroll as if it's all we do. Open broad about how they run their team, then discover which areas hurt (could be scheduling, time tracking, hiring, payroll, or several).
+- Once you find a pain area, go deep there. Payroll is absolutely worth probing for fit, but it is one of several hooks, not the headline.
+- A great pitch is "everything to run your hourly team, in one app", not "we do payroll".
+
+BRAND VOICE (follow exactly):
+- Neighborly: write like a person, not a platform. Warm, relatable, plain language. Be a neighbor they can lean on.
+- Clear: straightforward, direct, lead with what matters, keep it short.
+- Proactive: confident and reassuring, show don't tell, bring energy without over-hyping. Use exclamation points sparingly.
+- Avoid technical jargon and corporate-speak. Don't overdo wit.
+
+SPEAK LIKE A REAL PERSON:
+- NEVER use the words "multi-unit", "operator", "franchisee", or "location-level" in the spoken script. These sound robotic. Say "owner", "you", "your team", "your ${proof.noun}" instead.
+- Refer to the prospect's locations by their BRAND NAME, not the generic word "locations". Example: ${locExample}
+- When you need a general noun for their spots, use "${proof.noun}" (this fits ${info.brand}'s type of business).
+- The peer brands listed below (${proof.peers.join(", ")}) are businesses LIKE ${info.brand}. Only name-drop a peer that genuinely resembles them (e.g. don't compare a salon to a trampoline park). If unsure a peer fits, just say "businesses like yours" instead.
+- Contractions always. Short sentences. Sound like a friendly human on the phone.
+
+PROSPECT:
+- Brand: ${info.brand}
+- Industry: ${info.industry}
+- Locations: ${info.num_locs || "unknown - ask"}
+- Role: ${info.prospect_role || "unknown"}
+- Current solution: ${info.current_solution || "unknown - ask"}
+- Known pain: ${info.known_pain || "none yet - discover"}
+- Timeline: ${info.timeline || "unknown - ask"}
+- Budget: ${info.budget || "unknown - ask"}
+
+SOCIAL PROOF:
+- Homebase has ${proof.locs}+ paying ${info.industry} franchise locations
+- Peer brands: ${proof.peers[0]} and ${proof.peers[1] || proof.peers[0]}
+- ${proof.payroll} of those use Homebase Payroll
+
+THE GOAL OF EVERY CALL (aim for the best outcome the prospect's interest allows):
+1. BEST: book a 30-minute discovery + demo.
+2. GOOD: book a 15-minute call with a product specialist to answer questions and find the best fit.
+3. AT MINIMUM: capture next-step info, confirm they're the decision maker, get a direct phone number, email, or a specific time they'll be reachable.
+Always push toward one of these three while handling objections and respecting their time. Never end a call without securing at least outcome #3.
+
+SQL FIELDS STILL MISSING (weave a natural question to uncover one, don't interrogate):
+${missingList || "All fields collected - lock in the meeting or next step."}
+
+PROVEN COLD-CALL PRINCIPLES (from Gong's analysis of 300M+ calls, apply these):
+- State a clear REASON for the call early ("the reason I'm calling is..."). This alone lifts success ~2.1x.
+- Use "we" and "our", not "I" and "my" (lifts conversion 35-55%). It signals a team and social proof.
+- Open turns with a question, not a statement, to keep them talking.
+- Propose ONE clear next step, never two or three (a single ask converts ~40% better).
+- NEVER say "did I catch you at a bad time" or "is now a bad time" (proven WORST line, 0.9% success). Don't give them an easy exit.
+- Aim for a roughly even talk-to-listen balance; let the prospect talk. Earn the next 30 seconds rather than monologuing.
+
+RULES:
+- This is what the SDR says OUT LOUD. Conversational, neighborly, never corporate.
+- NEVER re-ask something the prospect already answered earlier in this conversation. Read the full history first. If a question in your instructions was already answered, skip it and move the conversation forward instead.
+- 2-3 sentences max per follow-up, never more than 4.
+- Ask exactly ONE question per turn. NEVER ask two things at once (no "how many locations, and when are you looking to switch?"). Compound questions are banned because the prospect can only answer one. If you're tempted to ask two, pick the single most important one and save the rest for later turns.
+- End with exactly ONE open question, never two.
+- Reference the brand name (${info.brand}) naturally where it fits to make it feel personal.
+- When collecting an email or phone number, ALWAYS read it back to confirm ("Perfect, so that's j-o-e at gmail, did I get that right?").
+- No em-dashes in the spoken script. They're fine in the coaching tip.
+- Sandler method: surface pain, expand it, link to impact, THEN bridge to one of the three goals above.
+- After the script add ONE coaching tip wrapped in square brackets, starting with "Coaching tip:". One sentence.
+- Return only the script then the bracketed tip. No headers, no bullets, no markdown.`;
+}
+
+async function callClaude(systemPrompt, messages) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 450, system: systemPrompt, messages })
+  });
+  const data = await res.json();
+  if (data.error) return `Error: ${data.error.message}`;
+  return data.content?.[0]?.text || "Error generating script.";
+}
+
+function phaseLabel(p) {
+  const m = {
+    opening:"Opening · cold intro", interested:"Prospect engaged", give_more:"Pitch delivered",
+    too_busy:"Time objection", not_interested:"Brush-off", no_value:"No value seen",
+    who_are_you:"Awareness stage", happy_with_current:"Has existing tools",
+    gatekeeper_blocks:"Gatekeeper navigation", gatekeeper_voicemail:"Left voicemail",
+    pain_payroll:"Pain · payroll", pain_scheduling:"Pain · scheduling", pain_compliance:"Pain · compliance",
+    pain_hiring:"Pain · hiring", pain_comms:"Pain · team comms",
+    want_demo:"Demo request", price_question:"Price objection", book_meeting:"Meeting close",
+    not_now:"Timing objection", callback_yes:"Callback booked", callback_no:"Email follow-up",
+    softens:"Prospect re-engages", curious_why:"Objection · managing fine",
+    franchise_hq:"Objection · HQ handles it", tried_before:"Prior bad experience",
+    what_system:"Competitor identified", named_tool:"Tool named · check payroll", not_sure:"Payroll status unclear", no_payroll:"Gap · payroll separate",
+    after_pitch_yes:"Post-pitch · engaged", after_pitch_meh:"Wrong contact",
+    gate_name:"Gatekeeper · getting name", gate_connects:"Gatekeeper · connecting",
+    quantify_time:"Quantifying · time", quantify_cost:"Quantifying · cost",
+    errors_confirmed:"Errors confirmed", multi_loc_pain:"Multi-location pain",
+    value_first:"Establishing value", decision_maker_yes:"Decision maker", decision_maker_no:"Not the DM",
+    size_small:"Team · small", size_medium:"Team · medium", size_large:"Team · large",
+    timeline_now:"Timeline · immediate", timeline_soon:"Timeline · 1-3mo", timeline_later:"Timeline · later",
+    budget_yes:"Budget confirmed", budget_maybe:"Budget likely", budget_no:"No budget",
+    wants_info:"Wants info first", willing_to_meet:"Time confirmed",
+    gives_email:"Confirming email", gives_phone:"Confirming number",
+    email_confirmed:"Booked · locked in", email_correction:"Correcting contact"
+  };
+  return m[p] || "Continuing the call";
+}
+
+const RESP = {
+  opening: [
+    { id:"interested", icon:"ti-thumb-up", label:"Yeah, what does it do?", sub:"Prospect engages" },
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is a mess for us", sub:"Volunteers pain" },
+    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is the headache", sub:"Volunteers pain" },
+    { id:"too_busy", icon:"ti-clock", label:"I'm really busy right now", sub:"Time objection" },
+    { id:"not_interested", icon:"ti-x", label:"We're not interested", sub:"Brush-off" },
+    { id:"who_are_you", icon:"ti-help", label:"What is Homebase?", sub:"Needs context" },
+    { id:"happy_with_current", icon:"ti-circle-check", label:"We already use something", sub:"Has tools" },
+    { id:"gatekeeper_blocks", icon:"ti-user-off", label:"Let me take a message", sub:"Gatekeeper blocks" },
+    { id:"decision_maker_no", icon:"ti-user-question", label:"I'm not the right person", sub:"Wrong contact" }
+  ],
+  interested: [
+    { id:"give_more", icon:"ti-arrow-right", label:"Sure, tell me more", sub:"Open to pitch" },
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is the problem", sub:"Pain surfaces" },
+    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is our headache", sub:"Pain surfaces" },
+    { id:"who_are_you", icon:"ti-help", label:"Wait, what is Homebase?", sub:"Needs context" },
+    { id:"price_question", icon:"ti-coin", label:"How much does it cost?", sub:"Price question" },
+    { id:"not_interested", icon:"ti-x", label:"Actually, we're good", sub:"Drops off" }
+  ],
+  give_more: [
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is a pain point", sub:"Pain confirmed" },
+    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is more our issue", sub:"Pain confirmed" },
+    { id:"happy_with_current", icon:"ti-circle-check", label:"We have a system already", sub:"Has tools" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Sounds useful, can I see it?", sub:"Demo request" },
+    { id:"price_question", icon:"ti-coin", label:"What's the pricing?", sub:"Price question" },
+    { id:"not_interested", icon:"ti-x", label:"Not relevant for us", sub:"Drops off" }
+  ],
+  too_busy: [
+    { id:"callback_yes", icon:"ti-calendar-plus", label:"Tomorrow morning's better", sub:"Gives a callback time" },
+    { id:"callback_no", icon:"ti-mail", label:"Just email me something", sub:"Deflects to email" },
+    { id:"softens", icon:"ti-arrow-right", label:"Well, what's it about?", sub:"Gives you a sliver" },
+    { id:"not_interested", icon:"ti-x", label:"Don't call here again", sub:"Hard brush-off" }
+  ],
+  not_interested: [
+    { id:"curious_why", icon:"ti-search", label:"We do it manually, it works", sub:"Manual process" },
+    { id:"franchise_hq", icon:"ti-building", label:"Corporate handles all that", sub:"HQ objection" },
+    { id:"tried_before", icon:"ti-refresh", label:"Tried something like this before", sub:"Prior experience" },
+    { id:"no_value", icon:"ti-minus", label:"Not relevant to our business", sub:"No perceived fit" },
+    { id:"not_now", icon:"ti-clock", label:"Maybe later, not now", sub:"Timing objection" }
+  ],
+  no_value: [
+    { id:"curious_why", icon:"ti-search", label:"We're small, don't need it", sub:"Size objection" },
+    { id:"franchise_hq", icon:"ti-building", label:"Corporate manages our HR", sub:"HQ objection" },
+    { id:"not_now", icon:"ti-clock", label:"Not the right time", sub:"Timing" }
+  ],
+  who_are_you: [
+    { id:"after_pitch_yes", icon:"ti-thumb-up", label:"That sounds relevant", sub:"Now engaged" },
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is actually tough", sub:"Pain surfaces" },
+    { id:"happy_with_current", icon:"ti-circle-check", label:"We have tools for that", sub:"Has tools" },
+    { id:"after_pitch_meh", icon:"ti-minus", label:"I'm not the decision-maker", sub:"Wrong contact" },
+    { id:"not_interested", icon:"ti-x", label:"Not something we need", sub:"No interest" }
+  ],
+  happy_with_current: [
+    { id:"named_tool", icon:"ti-tool", label:"We use [tool / Excel]", sub:"Names their tool" },
+    { id:"franchise_hq", icon:"ti-building", label:"Our franchisor provides it", sub:"HQ provides tools" },
+    { id:"not_interested", icon:"ti-x", label:"We're covered, thanks", sub:"Hard close-out" }
+  ],
+  named_tool: [
+    { id:"no_payroll", icon:"ti-x", label:"No, payroll's separate", sub:"Payroll gap" },
+    { id:"what_system", icon:"ti-check", label:"Yeah, it does payroll too", sub:"Has payroll" },
+    { id:"not_sure", icon:"ti-help", label:"Not really sure honestly", sub:"Owner unsure" }
+  ],
+  not_sure: [
+    { id:"want_demo", icon:"ti-screen-share", label:"Yeah, worth a look", sub:"Opens to specialist call" },
+    { id:"no_payroll", icon:"ti-x", label:"Now that you say it, probably not", sub:"Realizes the gap" },
+    { id:"not_now", icon:"ti-clock", label:"Maybe another time", sub:"Timing objection" }
+  ],
+  gatekeeper_blocks: [
+    { id:"gate_name", icon:"ti-user", label:"I can give the owner's name", sub:"Helpful gatekeeper" },
+    { id:"gatekeeper_voicemail", icon:"ti-voicemail", label:"Want their voicemail?", sub:"Voicemail option" },
+    { id:"callback_yes", icon:"ti-calendar-plus", label:"They're in tomorrow AM", sub:"Callback time" },
+    { id:"not_interested", icon:"ti-x", label:"Please don't call here", sub:"Hard block" }
+  ],
+  gatekeeper_voicemail: [
+    { id:"not_now", icon:"ti-clock", label:"Left voicemail, follow up later", sub:"Log and exit" }
+  ],
+  pain_payroll: [
+    { id:"quantify_time", icon:"ti-clock", label:"Hours, honestly", sub:"Big time sink" },
+    { id:"quantify_time", icon:"ti-clock", label:"A solid afternoon", sub:"Time pain" },
+    { id:"quantify_cost", icon:"ti-receipt", label:"Too long, and we still make mistakes", sub:"Time + error pain" },
+    { id:"curious_why", icon:"ti-check", label:"Not bad, we've got a system", sub:"Minimizes pain" }
+  ],
+  pain_scheduling: [
+    { id:"size_small", icon:"ti-users", label:"Under 10 people", sub:"Small team" },
+    { id:"size_medium", icon:"ti-users", label:"Around 15-30 people", sub:"Medium team" },
+    { id:"size_large", icon:"ti-users", label:"50 or more", sub:"Large team" },
+    { id:"multi_loc_pain", icon:"ti-building-store", label:"A lot, spread across spots", sub:"Cross-location pain" }
+  ],
+  pain_compliance: [
+    { id:"quantify_cost", icon:"ti-coin", label:"We've had fines / issues", sub:"Real cost" },
+    { id:"want_demo", icon:"ti-screen-share", label:"I'd want to see that work", sub:"Opens to solution" },
+    { id:"not_now", icon:"ti-clock", label:"Worth a look, not now", sub:"Timing objection" }
+  ],
+  pain_hiring: [
+    { id:"want_demo", icon:"ti-screen-share", label:"I'd like to see how it helps", sub:"Opens to solution" },
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll's a nightmare too", sub:"Additional pain" },
+    { id:"not_now", icon:"ti-clock", label:"Real but not my focus now", sub:"Not priority" }
+  ],
+  pain_comms: [
+    { id:"want_demo", icon:"ti-screen-share", label:"I'd like to see how it works", sub:"Opens to solution" },
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll's more of a problem", sub:"Bigger pain" },
+    { id:"not_now", icon:"ti-clock", label:"Not top priority", sub:"Not urgent" }
+  ],
+  want_demo: [
+    { id:"book_meeting", icon:"ti-calendar-event", label:"When can we do it?", sub:"Ready to book" },
+    { id:"wants_info", icon:"ti-file-text", label:"Send me something first", sub:"Wants info" },
+    { id:"price_question", icon:"ti-coin", label:"What's it cost first?", sub:"Price gate" },
+    { id:"not_now", icon:"ti-clock", label:"Let me think about it", sub:"Non-committal" }
+  ],
+  price_question: [
+    { id:"value_first", icon:"ti-arrow-right", label:"Walk me through what's included", sub:"Hears value" },
+    { id:"budget_no", icon:"ti-x", label:"Out of our budget range", sub:"Budget objection" },
+    { id:"budget_yes", icon:"ti-check", label:"That's reasonable, tell me more", sub:"Budget cleared" },
+    { id:"not_now", icon:"ti-clock", label:"Not in the budget now", sub:"Timing/budget" }
+  ],
+  book_meeting: [
+    { id:"willing_to_meet", icon:"ti-calendar-event", label:"Tuesday at 2pm works", sub:"Time confirmed" },
+    { id:"gives_email", icon:"ti-mail", label:"Gives you their email", sub:"Reads it back to confirm" },
+    { id:"wants_info", icon:"ti-file-text", label:"Send something first", sub:"Wants info first" },
+    { id:"not_now", icon:"ti-clock", label:"Let me check and get back", sub:"Non-committal" }
+  ],
+  willing_to_meet: [
+    { id:"gives_email", icon:"ti-mail", label:"Gives you their email", sub:"Reads it back to confirm" },
+    { id:"gives_phone", icon:"ti-phone", label:"Gives a direct number", sub:"Reads it back to confirm" }
+  ],
+  gives_email: [
+    { id:"email_confirmed", icon:"ti-circle-check", label:"Yep, that's right", sub:"Email confirmed, lock it" },
+    { id:"email_correction", icon:"ti-edit", label:"No, it's actually...", sub:"Correct and re-confirm" }
+  ],
+  gives_phone: [
+    { id:"email_confirmed", icon:"ti-circle-check", label:"Yep, that's the number", sub:"Confirmed, lock it" }
+  ],
+  email_confirmed: [],
+  email_correction: [
+    { id:"email_confirmed", icon:"ti-circle-check", label:"Yep, that's it now", sub:"Confirmed, lock it" }
+  ],
+  not_now: [
+    { id:"timeline_soon", icon:"ti-calendar", label:"Maybe next month or two", sub:"Near-term" },
+    { id:"timeline_later", icon:"ti-calendar-off", label:"End of year probably", sub:"Long-term" },
+    { id:"not_interested", icon:"ti-x", label:"It's just not a priority", sub:"Drops off" }
+  ],
+  callback_yes: [],
+  callback_no: [
+    { id:"not_now", icon:"ti-clock", label:"I'll look for it, maybe later", sub:"Leaves door open" },
+    { id:"not_interested", icon:"ti-x", label:"Don't bother", sub:"Hard no" }
+  ],
+  softens: [
+    { id:"give_more", icon:"ti-arrow-right", label:"Ok fine, what is it?", sub:"Re-engaged" },
+    { id:"too_busy", icon:"ti-clock", label:"No, I really can't now", sub:"Still too busy" }
+  ],
+  curious_why: [
+    { id:"quantify_time", icon:"ti-clock", label:"Payroll takes a while but we cope", sub:"Minimizing pain" },
+    { id:"pain_payroll", icon:"ti-receipt", label:"Honestly it is a pain", sub:"Admits pain" },
+    { id:"not_interested", icon:"ti-x", label:"We really don't need this", sub:"Confirmed no" }
+  ],
+  franchise_hq: [
+    { id:"no_payroll", icon:"ti-x", label:"We run payroll ourselves", sub:"Gap confirmed" },
+    { id:"happy_with_current", icon:"ti-circle-check", label:"Corporate provides software too", sub:"Full coverage" },
+    { id:"curious_why", icon:"ti-search", label:"Most of it, some we handle", sub:"Partial coverage" }
+  ],
+  tried_before: [
+    { id:"pain_payroll", icon:"ti-receipt", label:"It was clunky, no payroll", sub:"Prior tool bad" },
+    { id:"not_interested", icon:"ti-x", label:"Not going through that again", sub:"Hard no" },
+    { id:"want_demo", icon:"ti-screen-share", label:"What makes Homebase different?", sub:"Opens up" }
+  ],
+  what_system: [
+    { id:"value_first", icon:"ti-arrow-right", label:"What makes you different?", sub:"Wants the differentiator" },
+    { id:"pain_payroll", icon:"ti-receipt", label:"Honestly the payroll side is clunky", sub:"Cracks despite having it" },
+    { id:"not_interested", icon:"ti-x", label:"We're happy with it", sub:"Satisfied, hard to move" }
+  ],
+  no_payroll: [
+    { id:"quantify_time", icon:"ti-clock", label:"Payroll takes a few hours", sub:"Time quantified" },
+    { id:"errors_confirmed", icon:"ti-alert-triangle", label:"We've had errors, frustrating", sub:"Error pain" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Interested to see how it works", sub:"Opens to demo" }
+  ],
+  after_pitch_yes: [
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll's our biggest headache", sub:"Pain surfaces" },
+    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling across locations", sub:"Pain surfaces" },
+    { id:"want_demo", icon:"ti-screen-share", label:"I'd like to see it", sub:"Demo request" },
+    { id:"price_question", icon:"ti-coin", label:"What's it cost?", sub:"Price question" }
+  ],
+  after_pitch_meh: [
+    { id:"gate_name", icon:"ti-user", label:"Talk to [owner's name]", sub:"Gives contact" },
+    { id:"decision_maker_no", icon:"ti-user-question", label:"Not sure who handles this", sub:"Unclear DM" }
+  ],
+  gate_name: [
+    { id:"gate_connects", icon:"ti-phone-forwarded", label:"Let me put you through", sub:"Warm transfer" },
+    { id:"callback_yes", icon:"ti-calendar-plus", label:"Best to reach them tomorrow", sub:"Callback booked" }
+  ],
+  gate_connects: [
+    { id:"opening", icon:"ti-phone", label:"Owner picks up, use opening", sub:"Restart with owner" }
+  ],
+  quantify_time: [
+    { id:"errors_confirmed", icon:"ti-alert-triangle", label:"And we've had errors too", sub:"More pain" },
+    { id:"size_medium", icon:"ti-users", label:"Running it for ~15-30 people", sub:"Size revealed" },
+    { id:"size_large", icon:"ti-users", label:"50+ across locations", sub:"Large team" },
+    { id:"want_demo", icon:"ti-screen-share", label:"5 minutes? I'd want to see that", sub:"Opens to demo" }
+  ],
+  quantify_cost: [
+    { id:"errors_confirmed", icon:"ti-alert-triangle", label:"We've had to redo runs", sub:"Confirms rework" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Want to see how this gets fixed", sub:"Opens to demo" }
+  ],
+  errors_confirmed: [
+    { id:"want_demo", icon:"ti-screen-share", label:"Let's find time to look", sub:"Meeting ready" },
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Show me how it prevents that", sub:"Meeting ready" }
+  ],
+  multi_loc_pain: [
+    { id:"size_large", icon:"ti-users", label:"Running 50+ staff total", sub:"Size revealed" },
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll's just as complicated", sub:"Dual pain" },
+    { id:"want_demo", icon:"ti-screen-share", label:"See it across locations?", sub:"All-locations demo" }
+  ],
+  value_first: [
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll's the main friction", sub:"Pain confirmed" },
+    { id:"budget_yes", icon:"ti-check", label:"That ROI makes sense", sub:"Budget + value" },
+    { id:"not_now", icon:"ti-clock", label:"Interesting, bad timing", sub:"Value seen, timing off" }
+  ],
+  decision_maker_yes: [
+    { id:"interested", icon:"ti-thumb-up", label:"Yes, I decide. What is it?", sub:"DM confirmed" }
+  ],
+  decision_maker_no: [
+    { id:"after_pitch_meh", icon:"ti-user-question", label:"Not sure who handles it", sub:"Unclear DM" },
+    { id:"gate_name", icon:"ti-user", label:"The owner does, let me get them", sub:"Warm transfer" }
+  ],
+  size_small: [
+    { id:"interested", icon:"ti-thumb-up", label:"Under 10 employees", sub:"Small team" }
+  ],
+  size_medium: [
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll for that is a lot", sub:"Pain surfaces" },
+    { id:"want_demo", icon:"ti-screen-share", label:"See how it handles that", sub:"Opens to demo" }
+  ],
+  size_large: [
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll for that is brutal", sub:"Pain surfaces" },
+    { id:"multi_loc_pain", icon:"ti-building-store", label:"Across locations is the hard part", sub:"Cross-location pain" },
+    { id:"want_demo", icon:"ti-screen-share", label:"See how it handles that", sub:"Opens to demo" }
+  ],
+  timeline_now: [
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's get on the calendar", sub:"Immediate, book it" }
+  ],
+  timeline_soon: [
+    { id:"wants_info", icon:"ti-file-text", label:"Send me something to review", sub:"Nurture path" },
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's schedule a demo", sub:"Books ahead" }
+  ],
+  timeline_later: [
+    { id:"not_now", icon:"ti-clock", label:"Follow up in a few months", sub:"Long-term nurture" }
+  ],
+  budget_yes: [
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's get a demo booked", sub:"Meeting ready" }
+  ],
+  budget_maybe: [
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Worth 20 minutes to look", sub:"Meeting despite budget" }
+  ],
+  budget_no: [
+    { id:"not_now", icon:"ti-clock", label:"Maybe when budget opens", sub:"Future nurture" },
+    { id:"not_interested", icon:"ti-x", label:"Not going to happen", sub:"Dead end" }
+  ],
+  wants_info: [
+    { id:"callback_yes", icon:"ti-calendar-plus", label:"I'll follow up next week", sub:"Nurture + callback" },
+    { id:"not_interested", icon:"ti-x", label:"We're not interested", sub:"Hard no" }
+  ]
+};
+
+const SQL_SIGNAL_MAP = {
+  pain_payroll:{key:"pain",val:"Payroll pain confirmed"}, pain_scheduling:{key:"pain",val:"Scheduling pain confirmed"},
+  pain_compliance:{key:"pain",val:"Compliance concern"}, pain_hiring:{key:"pain",val:"Hiring / turnover pain"},
+  pain_comms:{key:"pain",val:"Team comms pain"}, errors_confirmed:{key:"pain",val:"Payroll errors confirmed"},
+  quantify_time:{key:"pain",val:"Payroll time pain quantified"}, quantify_cost:{key:"pain",val:"Payroll cost pain"},
+  no_payroll:{key:"solution",val:"Has tool, payroll separate"}, what_system:{key:"solution",val:"Uses one tool incl. payroll"},
+  happy_with_current:{key:"solution",val:"Has existing tools"}, curious_why:{key:"solution",val:"Manual / spreadsheets"},
+  size_small:{key:"size",val:"1-10 employees"}, size_medium:{key:"size",val:"11-50 employees"}, size_large:{key:"size",val:"50+ employees"},
+  timeline_now:{key:"timeline",val:"Immediate (0-30 days)"}, timeline_soon:{key:"timeline",val:"Near-term (1-3 months)"}, timeline_later:{key:"timeline",val:"Mid-term (3+ months)"},
+  budget_yes:{key:"budget",val:"Budget confirmed"}, budget_maybe:{key:"budget",val:"Budget likely"}, budget_no:{key:"budget",val:"No budget identified"},
+  willing_to_meet:{key:"nextstep",val:"Demo scheduled"}, callback_yes:{key:"nextstep",val:"Follow-up call scheduled"}, book_meeting:{key:"nextstep",val:"Demo requested"},
+  decision_maker_yes:{key:"contact",val:"Decision maker on the line"}
+};
+
+function buildNextPrompt(responseId, responseLabel) {
+  const { brand, industry } = prospectInfo;
+  const proof = getProof(industry, brand);
+  const peer = proof.peers[0];
+  const missing = getMissingFields();
+  const hint = missing.length ? `If natural, weave in a question to uncover one of these missing SQL fields: ${missing.slice(0,3).map(k => ({
+    pain:"their specific pain", timeline:"when they want to change", size:"how many employees",
+    budget:"whether budget exists", solution:"what they currently use", impact:"how many users",
+    nextstep:"a confirmed next step", contact:"their name and contact info"
+  }[k])).join(", ")}.` : "All SQL fields covered. Focus on closing the meeting.";
+
+  // The prospect will answer by tapping one of these buttons. The script's closing
+  // question MUST be answerable by these options, so the rep never asks something the
+  // responses can't address. This is the guardrail against compound/mismatched questions.
+  const nextOpts = (RESP[responseId] || []).map(o => `"${o.label}"`).join(", ");
+  const answerable = nextOpts
+    ? `\nCRITICAL: End with exactly ONE question. The prospect's possible replies are: ${nextOpts}. Your closing question must be a single question that ALL of those replies could naturally answer. Do NOT ask two things, do NOT ask a question the replies don't fit.`
+    : `\nThis is a closing/terminal step, so a warm statement is fine; no question needed.`;
+
+  const map = {
+    interested:`Prospect said "tell me more." One-line all-in-one pitch (everything to run an hourly team in one app), then ONE broad discovery question about how they run the team at ${brand} day to day. Don't list features, don't lead with payroll, let them point to the pain. ${hint}`,
+    give_more:`Prospect is open. Two-sentence pitch: Homebase is everything to run an hourly team in one app, scheduling, time tracking, payroll, and hiring, built for businesses like ${brand}. Drop that ${peer} uses it. End with ONE broad question about how they run the team today. ${hint}`,
+    too_busy:`Prospect is busy. Respect their time completely. Do NOT dig into pain. Acknowledge it warmly, then ask for a specific better time to call back ("Totally get it, when's a better time to catch you, later today or tomorrow morning?"). Try to lock a day and time and get a direct number or email so you can follow up. ${hint}`,
+    not_interested:`Pattern interrupt: "Totally fair, before I let you go, can I ask one quick thing?" then surface one relatable pain for a ${industry} owner running an hourly team at ${brand}. Under 3 sentences.`,
+    no_value:`Prospect doesn't see fit. Curious, low-pressure question about their biggest day-to-day headache running the team at ${brand}, whether that's scheduling, covering shifts, time tracking, payroll, or hiring. Don't pitch, just ask. ${hint}`,
+    who_are_you:`They asked what Homebase is, so they're curious, that's good. Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: Homebase is the all-in-one app to run an hourly team, scheduling, time tracking, payroll, and hiring all in one place. Mention ${peer} uses it. End with ONE broad question about how they run the team at ${brand} today. Keep it conversational, not a feature dump. ${hint}`,
+    happy_with_current:`Ask ONE question, what they're using to run the team today. Just the tool, don't also ask about payroll in the same breath. ${hint}`,
+    named_tool:`They just named their current tool. Acknowledge it warmly, then ask ONE simple follow-up: does that tool also handle their payroll, or is payroll separate? Just that one question. ${hint}`,
+    not_sure:`They're not sure whether their tool runs payroll. No problem, that's common. Gently note that a lot of owners are surprised their scheduling tool doesn't actually run payroll, and offer that the quickest way to sort it out is a short look together. Ask ONE question to move toward a 15-minute specialist call. ${hint}`,
+    gatekeeper_blocks:`Neighborly, warm, brief. Ask ONE thing, the best time to catch the owner directly. Don't also ask their name in the same line. ${hint}`,
+    gatekeeper_voicemail:`SDR leaving a voicemail for the owner at ${brand}. 20 seconds: name, Homebase, peer proof (${peer}), one reason to call back, direct number. ${hint}`,
+    pain_payroll:`Payroll pain confirmed. Expand with Sandler by asking ONE specific question, how long payroll takes them each pay period. Just that one. Don't pitch yet. ${hint}`,
+    pain_scheduling:`Scheduling pain confirmed. Briefly empathize, then ask ONE question about how big their team is. Don't bundle in other questions. ${hint}`,
+    pain_compliance:`Compliance concern. Ask if they worry about overtime or break rules. Mention Homebase has compliance tools built for owners like them. ${hint}`,
+    pain_hiring:`Hiring/turnover pain. Empathize, mention Homebase has hiring tools for hourly teams. One follow-up question. ${hint}`,
+    pain_comms:`Team comms pain. Mention Homebase team messaging. Ask how they reach their staff at ${brand} today. ${hint}`,
+    want_demo:`Prospect wants to see it. Go for the best outcome: offer a 30-minute discovery and demo, give two specific time slots, and confirm their email (read it back). ${hint}`,
+    price_question:`Price before value. Defer warmly: "Pricing's pretty simple, but quick question first so I point you to the right setup." ONE discovery question. ${hint}`,
+    book_meeting:`Ready to meet. Lock a 30-minute discovery + demo: offer two specific time options, then ask for and read back their email to send the invite. Mention the specialist walks through the exact ${brand} setup.`,
+    not_now:`Graceful: ask when things ease up, offer to send a quick one-pager on how ${peer} owners use Homebase, and pin down a specific time to follow up. Get an email (read it back) at minimum. ${hint}`,
+    callback_yes:`Lock it in: confirm the exact day and time you'll call back, then ask ONE thing, the best direct number or email to reach them. (You'll read it back next turn.)`,
+    callback_no:`Agree graciously, ask for the best email and READ IT BACK to confirm, mention you'll send a short note on how ${peer} owners use Homebase. Then try to pin a time to reconnect.`,
+    softens:`Quick two-sentence pitch then offer a low-commitment 15-minute call with a product specialist to find the best fit. Suggest a specific time. ${hint}`,
+    curious_why:`Ask what their payroll routine actually looks like at ${brand}: how long, any manual re-keying? Don't pitch, uncover the hidden pain. ${hint}`,
+    franchise_hq:`Ask "Does corporate actually run your payroll for you, or is that still on your plate?" Most owners run their own. One question.`,
+    tried_before:`Empathize one sentence. Ask what went sideways. Then set Homebase apart as built for hourly teams like ${brand}. ${hint}`,
+    what_system:`They use one tool for scheduling AND payroll already. Do NOT ask whether it handles payroll, they just told you it does. Acknowledge that, then differentiate on a specific angle (built for hourly teams, hours flow straight to payroll with no re-keying, or simpler pricing) and ask what they like or wish was better about their current setup. One question. ${hint}`,
+    no_payroll:`Bridge: "That's exactly what most ${industry} owners come to us for. Homebase pulls the hours straight into payroll, so a run takes about five minutes." Then offer a 30-minute demo. ${hint}`,
+    after_pitch_yes:`Engaged. ONE broad discovery question into how they run the team at ${brand} today, let them surface the pain area (scheduling, time tracking, payroll, or hiring). ${hint}`,
+    after_pitch_meh:`Ask who handles payroll and scheduling and the best way to reach them. One ask.`,
+    gate_name:`Got a name. Ask for the direct number or best time to reach them. Warm, non-pushy.`,
+    gate_connects:`Exact opening line when the owner picks up, warm, reference you just spoke with someone at ${brand}. ${hint}`,
+    quantify_time:`Expand the time pain with ONE question, how big their team is. Then a one-line bridge to the five-minute payroll run. ${hint}`,
+    quantify_cost:`Expand the cost pain with ONE question, whether mistakes have ever cost them money or rework. Brief bridge to Homebase. ${hint}`,
+    errors_confirmed:`Empathize one sentence: "That's exactly why owners come to us." Hours flow straight into payroll, no re-keying. Then offer a 30-minute demo. ${hint}`,
+    multi_loc_pain:`Expand the cross-location pain with ONE question, how they keep an eye on all their ${brand}s at once today. One-line mention of the all-locations dashboard. ${hint}`,
+    value_first:`Frame that most owners make the cost back in month one on time saved, then ask ONE question about where the biggest friction is for them today. ${hint}`,
+    decision_maker_yes:`Decision maker confirmed. Brief pain question to open discovery. ${hint}`,
+    decision_maker_no:`Ask who does handle payroll and scheduling, and the best way to reach them. Warm, one ask.`,
+    size_small:`Small team. Pivot to value for smaller shops: quick setup, free scheduling tier, payroll add-on. One pain question. ${hint}`,
+    size_medium:`A team that size is a real payroll lift. Ask how long it takes them. ${hint}`,
+    size_large:`A team that big across ${brand}s is a lot to manage. Bridge to how Homebase handles payroll and scheduling across all of them. ${hint}`,
+    timeline_now:`Immediate need. Go straight for the 30-minute discovery + demo. Offer two slots today or this week and confirm email (read it back).`,
+    timeline_soon:`Near-term. Offer a one-pager and get a 30-minute demo on the calendar for next week. Confirm email, read it back. ${hint}`,
+    timeline_later:`A few months out. Graceful: offer a one-pager, pin a specific follow-up time, get email (read it back).`,
+    budget_yes:`Budget confirmed. Lock a 30-minute demo: two time options, confirm email and read it back.`,
+    budget_maybe:`Budget likely. Frame it low-commitment: a quick 15-minute call with a specialist to see if it's even a fit. Offer a time.`,
+    budget_no:`No budget now. Graceful: offer a one-pager, pin a follow-up a couple months out, get email and read it back.`,
+    wants_info:`Wants info first. Ask for the best email and READ IT BACK to confirm, mention you'll send a one-pager on how ${peer} owners use Homebase. Then offer a 15-minute call with a specialist to walk through it. ${hint}`,
+    willing_to_meet:`Time confirmed, great! Now ask for the best email to send the calendar invite. End with the question asking for their email.`,
+    gives_email:`Prospect just gave their email. READ IT BACK letter by letter to confirm you got it right ("Perfect, so that's j-o-e-s-m-i-t-h at gmail dot com, did I get that right?"). End on that confirmation question.`,
+    gives_phone:`Prospect gave a direct number. READ IT BACK to confirm ("Got it, so that's 5-5-5, 1-2-3, 4-5-6-7, right?"). Then confirm you'll send a calendar invite or follow up at the agreed time.`,
+    email_confirmed:`Email/number confirmed. Warmly lock everything in: restate the day and time, say the invite is on its way, and that the specialist will walk through the exact ${brand} setup. Friendly one-line sign-off. No question needed.`,
+    email_correction:`Prospect corrected their contact info. Read the corrected version back once more to confirm, then lock in the meeting with a warm one-line close.`
+  };
+  const instruction = map[responseId] || `Sandler mode, surface or expand pain, then work toward a 30-minute demo, a 15-minute specialist call, or at minimum their contact info and a follow-up time. Under 3 sentences. ${hint}`;
+  // Always tell the model exactly what the prospect just said, and to react to it
+  // naturally before delivering the script, so the line never starts abruptly.
+  const context = `The prospect just said: "${responseLabel}". Acknowledge or react to that briefly and naturally (a few words is fine) so your reply flows right out of their words, then: ${instruction}`;
+  return context + answerable;
+}
+
+function fmtScript(text) {
+  return text.replace(/\[([^\]]*Coaching tip:[^\]]*)\]/gi, '<span class="script-coach">[$1]</span>');
+}
+
+// Which SQL field each phase's SCRIPT asks about. When the talk track for a phase
+// is shown, the SDR is asking that question, so we check the box (the prospect's
+// answer will fill it in live). Distinct from SQL_SIGNAL_MAP, which reads the answer.
+const PHASE_ASKS = {
+  opening:        [{ key:"pain", val:"Asked about payroll/scheduling" }],
+  interested:     [{ key:"pain", val:"Asked about their process" }],
+  give_more:      [{ key:"pain", val:"Asked about their process" }],
+  no_value:       [{ key:"solution", val:"Asked what they use today" }],
+  who_are_you:    [{ key:"pain", val:"Asked about their process" }],
+  happy_with_current: [{ key:"solution", val:"Asked what they use" }],
+  named_tool:     [{ key:"solution", val:"Named their tool" }],
+  not_sure:       [{ key:"solution", val:"Unsure if tool does payroll" }],
+  pain_payroll:   [{ key:"pain", val:"Payroll pain" }],
+  pain_scheduling:[{ key:"pain", val:"Scheduling pain" }, { key:"size", val:"Asked team size" }],
+  pain_compliance:[{ key:"pain", val:"Compliance pain" }],
+  pain_hiring:    [{ key:"pain", val:"Hiring/turnover pain" }],
+  pain_comms:     [{ key:"pain", val:"Team comms pain" }],
+  curious_why:    [{ key:"pain", val:"Probed their routine" }, { key:"solution", val:"Manual / in-house" }],
+  what_system:    [{ key:"solution", val:"Uses one tool incl. payroll" }],
+  franchise_hq:   [{ key:"solution", val:"Asked who runs payroll" }],
+  quantify_time:  [{ key:"pain", val:"Quantified time pain" }, { key:"size", val:"Asked team size" }],
+  quantify_cost:  [{ key:"pain", val:"Quantified cost pain" }],
+  price_question: [{ key:"budget", val:"Price discussed" }],
+  value_first:    [{ key:"budget", val:"Value/ROI framed" }, { key:"solution", val:"Asked about current tools" }],
+  size_small:     [{ key:"size", val:"1-10 employees" }, { key:"impact", val:"1-10 users" }],
+  size_medium:    [{ key:"size", val:"11-50 employees" }, { key:"impact", val:"11-50 users" }],
+  size_large:     [{ key:"size", val:"50+ employees" }, { key:"impact", val:"50+ users" }],
+  multi_loc_pain: [{ key:"size", val:"Multiple locations" }],
+  want_demo:      [{ key:"nextstep", val:"Offered a demo" }],
+  book_meeting:   [{ key:"nextstep", val:"Booking a demo" }],
+  willing_to_meet:[{ key:"nextstep", val:"Demo time set" }, { key:"contact", val:"Asked for email" }],
+  gives_email:    [{ key:"contact", val:"Email captured" }],
+  gives_phone:    [{ key:"contact", val:"Phone captured" }],
+  email_confirmed:[{ key:"nextstep", val:"Next step locked" }, { key:"contact", val:"Contact confirmed" }],
+  email_correction:[{ key:"contact", val:"Contact confirmed" }],
+  callback_yes:   [{ key:"nextstep", val:"Callback scheduled" }, { key:"contact", val:"Contact captured" }],
+  callback_no:    [{ key:"contact", val:"Email captured" }],
+  not_now:        [{ key:"timeline", val:"Timeline discussed" }],
+  timeline_now:   [{ key:"timeline", val:"Immediate (0-30 days)" }],
+  timeline_soon:  [{ key:"timeline", val:"Near-term (1-3 months)" }],
+  timeline_later: [{ key:"timeline", val:"Mid-term (3+ months)" }],
+  budget_yes:     [{ key:"budget", val:"Budget confirmed" }],
+  budget_maybe:   [{ key:"budget", val:"Budget likely" }],
+  budget_no:      [{ key:"budget", val:"No budget" }],
+  wants_info:     [{ key:"contact", val:"Asked for email" }],
+  gate_name:      [{ key:"contact", val:"Getting owner name" }],
+  decision_maker_yes: [{ key:"contact", val:"Decision maker confirmed" }],
+  gatekeeper_voicemail: [{ key:"contact", val:"Left callback number" }]
+};
+
+function markAskedForPhase(phase) {
+  const asks = PHASE_ASKS[phase];
+  if (!asks) return;
+  asks.forEach(a => markSql(a.key, a.val));
+  updateSql();
+}
+
+function renderCurrent(scriptText, phase) {
+  currentScriptText = scriptText;
+  markAskedForPhase(phase);
+  const options = RESP[phase] || [];
+  const end = options.length === 0;
+  const win = phase === "email_confirmed" || phase === "callback_yes" || phase === "willing_to_meet" || phase === "email_correction";
+  const btns = options.map(o =>
+    `<button class="resp" onclick="handleResponse('${o.id}','${o.label.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')">
+      <i class="ti ${o.icon}" aria-hidden="true"></i>
+      <span class="rl">${o.label}</span><span class="rs">${o.sub}</span>
+    </button>`).join("");
+
+  document.getElementById("current-block").innerHTML = `
+    <div class="track">
+      <span class="badge ${win ? "win" : ""}">${phaseLabel(phase)}</span>
+      <p class="lbl"><i class="ti ti-quote" aria-hidden="true" style="font-size:14px;"></i> Your script</p>
+      <div class="script">${fmtScript(scriptText)}</div>
+      ${!end ? `<div class="responses">
+        <p class="lbl" style="margin-top:1.35rem;"><i class="ti ti-arrow-back-up" aria-hidden="true" style="font-size:14px;"></i> How do they respond?</p>
+        <div class="resp-grid" id="resp-grid">${btns}</div>
+      </div>` : ""}
+      ${end ? `<div class="tip"><strong>After the call:</strong> Log in Salesforce within 5 minutes, send the calendar invite, and ping the AE on Slack to prep. Fields 7 (next step) and 8 (contact info) are mandatory before marking SQL.</div>` : ""}
+    </div>
+    <button class="restart" onclick="resetAll()"><i class="ti ti-refresh" aria-hidden="true" style="font-size:13px;"></i> Start a new call</button>`;
+}
+
+function archive(scriptText, phase, label) {
+  const h = document.getElementById("history");
+  const d = document.createElement("div");
+  d.className = "past";
+  d.innerHTML = `<div class="track">
+      <span class="badge">${phaseLabel(phase)}</span>
+      <div class="script">${fmtScript(scriptText)}</div>
+      <p class="past-resp"><i class="ti ti-arrow-right" aria-hidden="true" style="font-size:12px;vertical-align:-1px;"></i> Prospect: <em>${label}</em></p>
+    </div><hr class="divider2" />`;
+  h.appendChild(d);
+}
+
+function disableResp(v) { document.querySelectorAll("#resp-grid .resp").forEach(b => b.disabled = v); }
+function respLoading() {
+  const s = document.querySelector(".responses");
+  if (s) { const d = document.createElement("div"); d.className = "loading"; d.innerHTML = `<div class="spin"></div>Writing your next line...`; s.appendChild(d); }
+}
+
+function populateRecap() {
+  document.getElementById("recap-brand").textContent = prospectInfo.brand;
+  const chips = [];
+  chips.push(`<span class="recap-chip"><i class="ti ti-briefcase" aria-hidden="true"></i>${prospectInfo.industry}</span>`);
+  if (prospectInfo.num_locs) chips.push(`<span class="recap-chip"><i class="ti ti-map-pin" aria-hidden="true"></i>${prospectInfo.num_locs} locations</span>`);
+  if (prospectInfo.prospect_role) chips.push(`<span class="recap-chip"><i class="ti ti-user" aria-hidden="true"></i>${prospectInfo.prospect_role}</span>`);
+  document.getElementById("recap-meta").innerHTML = chips.join("");
+}
+
+async function startCall() {
+  const brand = document.getElementById("brand").value.trim();
+  const industry = document.getElementById("industry").value;
+  if (!brand || !industry) { alert("Please enter a franchise brand and select an industry."); return; }
+
+  sqlState = freshSql();
+  prospectInfo = {
+    brand, industry,
+    num_locs: document.getElementById("num_locs").value.trim(),
+    prospect_role: document.getElementById("prospect_role").value,
+    current_solution: document.getElementById("current_solution").value,
+    timeline: document.getElementById("timeline").value,
+    budget: document.getElementById("budget").value,
+    known_pain: document.getElementById("known_pain").value.trim()
+  };
+  seedSqlFromForm();
+  conversationHistory = [];
+  currentPhase = "opening";
+
+  document.getElementById("gen-btn").disabled = true;
+  document.getElementById("history").innerHTML = "";
+  document.getElementById("callview").classList.add("on");
+  document.getElementById("sql-sidebar").style.display = "block";
+  document.body.classList.add("calling");
+  populateRecap();
+  updateSql();
+
+  const opening = buildOpeningInstant(prospectInfo);
+  conversationHistory.push({ role:"user", content:`Generate a cold call opening for an SDR calling a ${prospectInfo.prospect_role || "franchise owner"} at ${brand}, a ${industry} franchise${prospectInfo.num_locs ? ` with ${prospectInfo.num_locs} locations` : ""}.` });
+  conversationHistory.push({ role:"assistant", content: opening });
+
+  renderCurrent(opening, "opening");
+  document.getElementById("gen-btn").disabled = false;
+  document.getElementById("callview").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+async function handleResponse(responseId, label) {
+  archive(currentScriptText, currentPhase, label);
+  currentPhase = responseId;
+  if (SQL_SIGNAL_MAP[responseId]) { const s = SQL_SIGNAL_MAP[responseId]; markSql(s.key, s.val, true); }
+  if (responseId === "willing_to_meet" || responseId === "callback_yes") markSql("nextstep","Next step confirmed", true);
+  if (responseId === "curious_why") markSql("solution","Manual / spreadsheets", true);
+  if (responseId === "tried_before") markSql("solution","Had prior tool", true);
+  // Team size answers both Company Size AND Estimated Users: the whole hourly team uses the app
+  if (responseId === "size_small")  { markSql("size","1-10 employees", true);  markSql("impact","1-10 users", true); }
+  if (responseId === "size_medium") { markSql("size","11-50 employees", true); markSql("impact","11-50 users", true); }
+  if (responseId === "size_large")  { markSql("size","50+ employees", true);  markSql("impact","50+ users", true); }
+  updateSql();
+
+  disableResp(true);
+  respLoading();
+  conversationHistory.push({ role:"user", content: buildNextPrompt(responseId, label) });
+  const next = await callClaude(buildSystemPrompt(prospectInfo), conversationHistory);
+  conversationHistory.push({ role:"assistant", content: next });
+  renderCurrent(next, responseId);
+}
+
+function resetAll() {
+  conversationHistory = []; currentPhase = "opening"; prospectInfo = {}; currentScriptText = "";
+  document.getElementById("history").innerHTML = "";
+  document.getElementById("current-block").innerHTML = "";
+  document.getElementById("callview").classList.remove("on");
+  document.getElementById("sql-sidebar").style.display = "none";
+  document.body.classList.remove("calling");
+  ["brand","num_locs","known_pain"].forEach(id => document.getElementById(id).value = "");
+  ["industry","prospect_role","current_solution","timeline","budget"].forEach(id => document.getElementById(id).value = "");
+  industryManuallySet = false;
+  document.getElementById("industry").classList.remove("autofilled");
+  document.getElementById("detect-hint").textContent = "";
+  document.getElementById("gen-btn").disabled = false;
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+</script>
+</body>
+</html>
