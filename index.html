@@ -69,6 +69,36 @@ body {
   color: var(--deep-purple); background: var(--yellowcard);
   padding: 5px 12px; border-radius: var(--r-pill);
 }
+.topbar-id {
+  font-size: 12px; font-weight: 600; color: #fff;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.12); padding: 5px 12px; border-radius: var(--r-pill);
+  cursor: pointer; transition: background 0.15s;
+}
+.topbar-id:hover { background: rgba(255,255,255,0.2); }
+.topbar-id i { font-size: 14px; color: var(--purple-rain); }
+
+/* ============ SIGN-IN GATE ============ */
+.signin-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--deep-purple);
+  display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+}
+.signin-overlay.hidden { display: none; }
+.signin-card {
+  background: #fff; border-radius: var(--r-xl); padding: 2.5rem 2.25rem;
+  max-width: 440px; width: 100%; text-align: center;
+  box-shadow: 0 30px 80px -20px rgba(0,0,0,0.5);
+}
+.signin-title { font-size: 22px; font-weight: 800; color: var(--ink); margin: 1.25rem 0 0.5rem; letter-spacing: -0.02em; }
+.signin-sub { font-size: 14px; color: var(--ink-soft); line-height: 1.55; margin-bottom: 1.5rem; }
+.signin-label { display: block; text-align: left; font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 7px; }
+.signin-input {
+  width: 100%; font-family: inherit; font-size: 16px; font-weight: 500;
+  padding: 12px 14px; border: 1.5px solid var(--line); border-radius: var(--r-sm);
+  background: #fff; color: var(--ink); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.signin-input:focus { border-color: var(--purple-haze); box-shadow: 0 0 0 3px var(--haze-tint-2); }
 
 /* ============ HERO ============ */
 .hero {
@@ -149,7 +179,7 @@ body.calling .shell { margin-top: 1.25rem; }
 .rule { border: none; border-top: 1px solid var(--line); margin: 1.25rem 0; }
 
 /* Quick-start row: brand + industry + button on one line on desktop */
-.quickstart { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: start; }
+.quickstart { display: grid; grid-template-columns: 0.7fr 1fr 1fr auto; gap: 12px; align-items: start; }
 .quickstart .field { align-self: start; }
 .quickstart .btn-primary { width: auto; padding: 11px 22px; white-space: nowrap; margin-top: 22px; }
 @media (max-width: 620px) { .quickstart { grid-template-columns: 1fr; } .quickstart .btn-primary { width: 100%; } }
@@ -224,9 +254,13 @@ body.calling .recap { display: flex; }
 .sql-dot.on { background: var(--yellowcard); border-color: var(--yellowcard); }
 .sql-dot.on::after { content: ""; width: 5px; height: 8px; border-right: 2px solid var(--deep-purple); border-bottom: 2px solid var(--deep-purple); transform: rotate(40deg) translateY(-1px); }
 .sql-dot.must { border-color: var(--yellowcard); }
+/* "Asked" = in progress: hollow ring with a small hollow center dot, clearly not a checkmark */
+.sql-dot.asked { border-color: var(--purple-rain); border-style: dashed; }
+.sql-dot.asked::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--purple-rain); opacity: 0.7; }
 .sql-txt { font-size: 12.5px; color: rgba(255,255,255,0.65); line-height: 1.4; }
 .sql-txt strong { display: block; color: #fff; font-weight: 600; font-size: 12.5px; }
 .sql-txt .v { display: block; color: var(--yellowcard); font-weight: 600; font-size: 11px; margin-top: 1px; }
+.sql-txt .v.pending { color: var(--purple-rain); font-weight: 500; font-style: italic; opacity: 0.85; }
 .sql-note { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.12); position: relative; z-index: 1; }
 .sql-note span { color: var(--yellowcard); font-weight: 700; }
 
@@ -251,7 +285,38 @@ body.calling .recap { display: flex; }
 }
 .script-coach { color: var(--ink-soft); font-weight: 500; font-style: italic; font-size: 15px; }
 
-.responses { margin-top: 1.35rem; }
+/* Inline pause marker: shown mid-script right after a question the rep asks */
+.inline-pause {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--deep-purple); color: #fff;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.01em;
+  padding: 5px 13px; border-radius: var(--r-pill);
+  margin: 2px 0;
+}
+/* Conditional stage direction, e.g. "Once they give you the go-ahead" */
+.stage-dir {
+  display: inline-block; font-weight: 700; font-size: 13px;
+  color: var(--purple-haze); text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+/* Pause-for-response cue: signals the rep to stop talking and listen */
+.pause-cue {
+  display: flex; align-items: center; gap: 9px;
+  margin-top: 1rem; padding: 9px 14px;
+  background: var(--deep-purple); color: #fff;
+  border-radius: var(--r-pill); font-size: 13px; font-weight: 600;
+  width: fit-content; max-width: 100%;
+}
+.pause-dots { display: inline-flex; gap: 3px; }
+.pause-dots span {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--yellowcard);
+  display: inline-block; animation: pulse 1.2s infinite ease-in-out;
+}
+.pause-dots span:nth-child(2) { animation-delay: 0.2s; }
+.pause-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse { 0%,100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
+
+.responses { margin-top: 1rem; }
 .resp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 9px; }
 .resp {
   padding: 12px 14px; font-family: inherit; font-size: 13px; text-align: left;
@@ -281,6 +346,18 @@ body.calling .recap { display: flex; }
 }
 .tip strong { color: var(--ink); font-weight: 700; }
 
+/* Handoff-readiness verdict at the end of a call */
+.verdict { border-radius: var(--r-md); padding: 1rem 1.2rem; margin-top: 1rem; }
+.verdict p { font-size: 13px; line-height: 1.6; font-weight: 500; margin-top: 6px; }
+.verdict-head { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; letter-spacing: -0.01em; }
+.verdict-head i { font-size: 18px; }
+.verdict.ready { background: var(--success-bg); border-left: 4px solid #16a34a; }
+.verdict.ready .verdict-head { color: var(--success-text); }
+.verdict.ready p { color: #14633f; }
+.verdict.caution { background: #FFF6E6; border-left: 4px solid #E0A100; }
+.verdict.caution .verdict-head { color: #8A5A00; }
+.verdict.caution p { color: #7A5510; }
+
 .restart {
   display: inline-flex; align-items: center; gap: 7px; font-family: inherit;
   font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer;
@@ -299,10 +376,27 @@ body.calling .recap { display: flex; }
 </head>
 <body>
 
+<!-- SDR sign-in gate: shown once per browser session, name persists across calls -->
+<div class="signin-overlay" id="signin-overlay">
+  <div class="signin-card">
+    <span class="logo" style="font-size:26px;">homebase</span>
+    <h2 class="signin-title">Welcome! Let's get you set up.</h2>
+    <p class="signin-sub">Enter your first name once. We'll drop it into every script so you never see "[Your Name]" again today.</p>
+    <label class="signin-label">Your first name</label>
+    <input type="text" id="sdr-name" class="signin-input" placeholder="e.g. Alex" autocomplete="off" onkeydown="if(event.key==='Enter')saveSdrName()" />
+    <button class="btn-primary" style="margin-top:14px;" onclick="saveSdrName()">
+      <i class="ti ti-arrow-right" aria-hidden="true"></i>Start calling
+    </button>
+  </div>
+</div>
+
 <header class="topbar">
   <div class="topbar-glow"></div>
   <span class="logo">homebase</span>
-  <span class="topbar-tag">SDR Tool · FF Motion</span>
+  <div style="display:flex; align-items:center; gap:12px; z-index:1;">
+    <span class="topbar-id" id="topbar-id" style="display:none;"></span>
+    <span class="topbar-tag">SDR Tool · FF Motion</span>
+  </div>
 </header>
 
 <section class="hero">
@@ -321,6 +415,10 @@ body.calling .recap { display: flex; }
       <span class="pill-req">Brand + industry required</span>
     </div>
     <div class="quickstart">
+      <div class="field">
+        <label>Lead first name</label>
+        <input type="text" id="lead_name" placeholder="e.g. Maria" autocomplete="off" />
+      </div>
       <div class="field">
         <label>Franchise brand</label>
         <input type="text" id="brand" class="req" placeholder="e.g. Ace Hardware" oninput="autoDetectIndustry()" autocomplete="off" />
@@ -422,7 +520,7 @@ body.calling .recap { display: flex; }
           <div class="sql-track"><div class="sql-fill" id="sql-fill" style="width:0%"></div></div>
         </div>
         <div id="sql-rows"></div>
-        <div class="sql-note">Fields <span>7</span> &amp; <span>8</span> are mandatory to pass to the AE</div>
+        <div class="sql-note">Only confirmed answers count. A dashed dot means asked, not yet answered. Real handoff needs uncovered pain <span>+</span> a booked demo or specialist call.</div>
       </div>
     </div>
   </div>
@@ -560,15 +658,17 @@ const INDUSTRY_NOUN = {
 
 let sqlState = {};
 function freshSql() {
+  // status: null = untouched, "asked" = question raised but not answered (does NOT count),
+  // "done" = prospect actually provided it (counts toward qualification)
   return {
-    pain:     { label:"Pain / use case",    val:null, mandatory:false },
-    timeline: { label:"Purchase timeline",  val:null, mandatory:false },
-    size:     { label:"Company size",       val:null, mandatory:false },
-    budget:   { label:"Budget signal",      val:null, mandatory:false },
-    solution: { label:"Current solution",   val:null, mandatory:false },
-    impact:   { label:"Estimated users",    val:null, mandatory:false },
-    nextstep: { label:"Next step confirmed",val:null, mandatory:true  },
-    contact:  { label:"Contact info",       val:null, mandatory:true  }
+    pain:     { label:"Pain / use case",    val:null, status:null, mandatory:false },
+    timeline: { label:"Purchase timeline",  val:null, status:null, mandatory:false },
+    size:     { label:"Company size",       val:null, status:null, mandatory:false },
+    budget:   { label:"Budget signal",      val:null, status:null, mandatory:false },
+    solution: { label:"Current solution",   val:null, status:null, mandatory:false },
+    impact:   { label:"Estimated users",    val:null, status:null, mandatory:false },
+    nextstep: { label:"Next step confirmed",val:null, status:null, mandatory:true  },
+    contact:  { label:"Contact info",       val:null, status:null, mandatory:true  }
   };
 }
 
@@ -576,6 +676,51 @@ let conversationHistory = [];
 let currentPhase = "opening";
 let prospectInfo = {};
 let currentScriptText = "";
+let sdrName = "";
+
+// ===== SDR sign-in: capture the rep's first name once per browser session =====
+function initSdr() {
+  let stored = "";
+  try { stored = sessionStorage.getItem("hb_sdr_name") || ""; } catch (e) {}
+  if (stored) {
+    sdrName = stored;
+    document.getElementById("signin-overlay").classList.add("hidden");
+    showSdrChip();
+  } else {
+    document.getElementById("signin-overlay").classList.remove("hidden");
+    setTimeout(() => document.getElementById("sdr-name").focus(), 100);
+  }
+}
+
+function saveSdrName() {
+  const v = document.getElementById("sdr-name").value.trim();
+  if (!v) { document.getElementById("sdr-name").focus(); return; }
+  sdrName = v;
+  try { sessionStorage.setItem("hb_sdr_name", v); } catch (e) {}
+  document.getElementById("signin-overlay").classList.add("hidden");
+  showSdrChip();
+}
+
+function showSdrChip() {
+  const chip = document.getElementById("topbar-id");
+  chip.style.display = "inline-flex";
+  chip.innerHTML = `<i class="ti ti-user-circle" aria-hidden="true"></i> ${sdrName}`;
+  chip.title = "Click to change your name";
+  chip.onclick = changeSdrName;
+}
+
+function changeSdrName() {
+  const input = document.getElementById("sdr-name");
+  input.value = sdrName;
+  document.getElementById("signin-overlay").classList.remove("hidden");
+  setTimeout(() => { input.focus(); input.select(); }, 100);
+}
+
+// Replace the [Your Name] placeholder with the signed-in rep's name everywhere it appears.
+function withSdrName(text) {
+  if (!sdrName) return text;
+  return text.replace(/\[Your Name\]/g, sdrName);
+}
 
 // Pick a peer set that resembles the prospect's actual business, not just its broad industry.
 function getProof(industry, brand) {
@@ -606,13 +751,15 @@ function seedSqlFromForm() {
 
 function updateSql() {
   const fields = Object.values(sqlState);
-  const done = fields.filter(f => f.val).length;
+  // Only CONFIRMED ("done") fields count. "Asked" fields are in-progress, not qualified.
+  const done = fields.filter(f => f.status === "done").length;
   document.getElementById("sql-count").innerHTML = `${done} <span>/ 8</span>`;
   document.getElementById("sql-fill").style.width = `${Math.round((done/8)*100)}%`;
   document.getElementById("sql-rows").innerHTML = Object.entries(sqlState).map(([k,f]) => {
-    const on = !!f.val;
-    const cls = on ? "on" : (f.mandatory ? "must" : "");
-    const v = f.val ? `<span class="v">${f.val}</span>` : "";
+    const cls = f.status === "done" ? "on" : (f.status === "asked" ? "asked" : (f.mandatory ? "must" : ""));
+    let v = "";
+    if (f.status === "done" && f.val) v = `<span class="v">${f.val}</span>`;
+    else if (f.status === "asked") v = `<span class="v pending">${f.val || "asked, awaiting answer"}</span>`;
     return `<div class="sql-row">
       <div class="sql-dot ${cls}"></div>
       <div class="sql-txt"><strong>${f.label}${f.mandatory ? " ★" : ""}</strong>${v}</div>
@@ -620,12 +767,23 @@ function updateSql() {
   }).join("");
 }
 
+// Mark a field as ASKED (in progress). Does NOT count toward qualification and never
+// overrides a field that's already confirmed.
+function markAsked(key, value) {
+  if (!sqlState[key]) return;
+  if (sqlState[key].status === "done") return;
+  sqlState[key].status = "asked";
+  if (value) sqlState[key].val = value;
+  updateSql();
+}
+
+// Mark a field as DONE (the prospect actually provided it). This counts.
 function markSql(key, value, force) {
   if (!sqlState[key]) return;
-  // Fill if empty, or upgrade a render-time "Asked..." placeholder with a real answer
-  const cur = sqlState[key].val;
-  const isPlaceholder = cur && /^Asked|^Offered|^Booking|^Price discussed|^Probed|^Quantified|^Getting/.test(cur);
-  if (!cur || (force && isPlaceholder)) { sqlState[key].val = value; updateSql(); }
+  // Always allowed to confirm; force just makes intent explicit at call sites.
+  sqlState[key].status = "done";
+  sqlState[key].val = value;
+  updateSql();
 }
 
 // Refer to multiple locations the way a person would: "5 Subways" when the brand
@@ -651,25 +809,31 @@ function buildOpeningInstant(info) {
   let script = "", tip = "";
 
   // Research-backed structure (Gong, 300M+ calls):
-  // 1) Lead with CONTEXT/peer before your name — "Heard the name tossed around" opener (11.24% success, the top performer)
+  // 1) Lead with CONTEXT/peer before your name — the "heard of us?" / familiarity opener
+  //    (Gong's top performer at 11.24% success; we phrase it as "have you heard of us before?")
   // 2) Introduce yourself AFTER establishing you're not a stranger
   // 3) State the REASON for calling (2.1x lift)
   // 4) Use "we/our" not "I/my" (+35-55%), end with ONE question
   // NOTE: never open with "is this a bad time?" — proven worst line at 0.9%.
   const peerContext = peer2 ? `${peer} and ${peer2}` : peer;
   const oneLiner = `the all-in-one app for running an hourly team, scheduling, time tracking, payroll, hiring, all in one place`;
+  // Use the lead's first name if the SDR entered it, otherwise a clear placeholder.
+  const name = (info.lead_name && info.lead_name.trim()) ? info.lead_name.trim() : "[First Name]";
+  // Time-qualifier placed AFTER the hook (not "is this a bad time?", the proven-worst line).
+  // Asking for a small, specific slice of time respects them without inviting a hang-up.
+  const timeAsk = `do you have 30 seconds and I'll tell you why I'm calling, then you can tell me to buzz off?`;
 
   if (isGate) {
-    script = `Hi there, it's [Your Name] from Homebase. We work with a bunch of ${industry} owners around here. Is the owner in by any chance?\n\n[If asked why]: We help owners run their hourly teams, scheduling, time tracking, payroll, all in one app. Just wanted to run something by them quick.`;
+    script = `Hi there, it's [Your Name] from Homebase. We work with a bunch of ${industry} owners around here. Is ${name} in by any chance?\n\n[If asked why]: We help owners run their hourly teams, scheduling, time tracking, payroll, all in one app. Just wanted to run something by them quick.`;
     tip = `Coaching tip: Lead with the peer context, it signals you're not a random telemarketer. If they push, "It'll only take a couple minutes, when's a good time to catch them?"`;
   } else if (known_pain) {
     const locRef = hasLocs ? ` across your ${brandLocations(brand, num_locs)}` : "";
-    script = `Hey, we work with a few ${industry} owners like ${peerContext}. It's [Your Name] over at Homebase, heard the name tossed around?\n\n[They say no, most common]: Ha, no worries, that's on me. The reason I'm calling, a lot of owners we work with were drowning in ${known_pain.toLowerCase()}${locRef} before they found us. Mind if I ask how you're handling the team day to day right now?\n\n[They say yes]: Oh nice! Then you might already know the gist. Quick one, how are you handling the team day to day right now?`;
-    tip = `Coaching tip: Say "heard the name tossed around?" casually, like they should know you. It scrambles the "not interested" reflex. Then give your reason and ask one open question.`;
+    script = `Hey ${name}, we work with a few ${industry} owners like ${peerContext}. It's [Your Name] over at Homebase, have you heard of us before?\n\n[⏸ Pause, let them answer]\n\nHonestly ${name}, ${timeAsk}\n\n[⏸ Pause, let them answer]\n\n[Once they give you the go-ahead]: Appreciate it. The reason I'm calling, a lot of owners we work with were drowning in ${known_pain.toLowerCase()}${locRef} before they found us. Mind if I ask how you're handling the team day to day right now?`;
+    tip = `Coaching tip: Say "have you heard of us before?" casually, then ask for 30 seconds, it earns permission without giving them the easy "bad time" exit. Then give your reason and one open question.`;
   } else {
     const locRef = hasLocs ? ` across your ${brandLocations(brand, num_locs)}` : ` over at ${brand}`;
-    script = `Hey, we work with a few ${industry} owners like ${peerContext}. It's [Your Name] over at Homebase, heard the name tossed around?\n\n[They say no, most common]: Ha, all good, that's on me. The reason I'm calling, we're ${oneLiner}, and the owners we work with usually come to us because juggling it all was eating their week. Mind if I ask how you're running the team${locRef} right now?\n\n[They say yes]: Oh, nice! Then you've probably got the gist. Quick one, how are you running the team${locRef} right now?`;
-    tip = `Coaching tip: Lead with the peer context BEFORE your name, that's the highest-converting opener in the data. State your reason, then ask one broad question. Keep talk-to-listen near 50/50 and let them point you to the pain.`;
+    script = `Hey ${name}, we work with a few ${industry} owners like ${peerContext}. It's [Your Name] over at Homebase, have you heard of us before?\n\n[⏸ Pause, let them answer]\n\nHonestly ${name}, ${timeAsk}\n\n[⏸ Pause, let them answer]\n\n[Once they give you the go-ahead]: Appreciate it. The reason I'm calling, we're ${oneLiner}, and the owners we work with usually come to us because juggling it all was eating their week. Mind if I ask how you're running the team${locRef} right now?`;
+    tip = `Coaching tip: Lead with peer context BEFORE your name, then ask for 30 seconds to earn permission. State your reason, then one broad question. Keep talk-to-listen near 50/50 and let them point you to the pain.`;
   }
   return `${script}\n\n[${tip}]`;
 }
@@ -705,13 +869,15 @@ BRAND VOICE (follow exactly):
 - Avoid technical jargon and corporate-speak. Don't overdo wit.
 
 SPEAK LIKE A REAL PERSON:
-- NEVER use the words "multi-unit", "operator", "franchisee", or "location-level" in the spoken script. These sound robotic. Say "owner", "you", "your team", "your ${proof.noun}" instead.
+- NEVER use the words "multi-unit", "operator", or "location-level" in the spoken script. These sound robotic. "Franchisee" and "owner" are both fine and natural (that's who you're selling to). You can also say "you", "your team", or "your ${proof.noun}".
 - Refer to the prospect's locations by their BRAND NAME, not the generic word "locations". Example: ${locExample}
 - When you need a general noun for their spots, use "${proof.noun}" (this fits ${info.brand}'s type of business).
 - The peer brands listed below (${proof.peers.join(", ")}) are businesses LIKE ${info.brand}. Only name-drop a peer that genuinely resembles them (e.g. don't compare a salon to a trampoline park). If unsure a peer fits, just say "businesses like yours" instead.
 - Contractions always. Short sentences. Sound like a friendly human on the phone.
 
 PROSPECT:
+- The SDR (rep) making the call is named: ${sdrName || "[Your Name]"}. When the script needs the rep to say their own name, use "${sdrName || "[Your Name]"}".
+- Lead's first name: ${info.lead_name || "[First Name] (unknown, use the placeholder [First Name])"}
 - Brand: ${info.brand}
 - Industry: ${info.industry}
 - Locations: ${info.num_locs || "unknown - ask"}
@@ -720,6 +886,7 @@ PROSPECT:
 - Known pain: ${info.known_pain || "none yet - discover"}
 - Timeline: ${info.timeline || "unknown - ask"}
 - Budget: ${info.budget || "unknown - ask"}
+- Use the lead's first name naturally once or twice (not in every sentence). If it's the placeholder, keep "[First Name]" so the SDR fills it in.
 
 SOCIAL PROOF:
 - Homebase has ${proof.locs}+ paying ${info.industry} franchise locations
@@ -754,6 +921,7 @@ RULES:
 - No em-dashes in the spoken script. They're fine in the coaching tip.
 - Sandler method: surface pain, expand it, link to impact, THEN bridge to one of the three goals above.
 - After the script add ONE coaching tip wrapped in square brackets, starting with "Coaching tip:". One sentence.
+- If your script asks the prospect something in the MIDDLE (not just the final question), put the marker "[⏸ Pause, let them answer]" on its own line right after that question, so the rep knows to stop and listen before continuing. The final question doesn't need it (the UI already shows a pause cue there).
 - Return only the script then the bracketed tip. No headers, no bullets, no markdown.`;
 }
 
@@ -800,6 +968,7 @@ const RESP = {
     { id:"interested", icon:"ti-thumb-up", label:"Yeah, what does it do?", sub:"Prospect engages" },
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is a mess for us", sub:"Volunteers pain" },
     { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is the headache", sub:"Volunteers pain" },
+    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring and turnover", sub:"Volunteers pain" },
     { id:"too_busy", icon:"ti-clock", label:"I'm really busy right now", sub:"Time objection" },
     { id:"not_interested", icon:"ti-x", label:"We're not interested", sub:"Brush-off" },
     { id:"who_are_you", icon:"ti-help", label:"What is Homebase?", sub:"Needs context" },
@@ -811,6 +980,7 @@ const RESP = {
     { id:"give_more", icon:"ti-arrow-right", label:"Sure, tell me more", sub:"Open to pitch" },
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is the problem", sub:"Pain surfaces" },
     { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is our headache", sub:"Pain surfaces" },
+    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring is tough right now", sub:"Pain surfaces" },
     { id:"who_are_you", icon:"ti-help", label:"Wait, what is Homebase?", sub:"Needs context" },
     { id:"price_question", icon:"ti-coin", label:"How much does it cost?", sub:"Price question" },
     { id:"not_interested", icon:"ti-x", label:"Actually, we're good", sub:"Drops off" }
@@ -818,6 +988,7 @@ const RESP = {
   give_more: [
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is a pain point", sub:"Pain confirmed" },
     { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is more our issue", sub:"Pain confirmed" },
+    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring's the real struggle", sub:"Pain confirmed" },
     { id:"happy_with_current", icon:"ti-circle-check", label:"We have a system already", sub:"Has tools" },
     { id:"want_demo", icon:"ti-screen-share", label:"Sounds useful, can I see it?", sub:"Demo request" },
     { id:"price_question", icon:"ti-coin", label:"What's the pricing?", sub:"Price question" },
@@ -844,6 +1015,7 @@ const RESP = {
   who_are_you: [
     { id:"after_pitch_yes", icon:"ti-thumb-up", label:"That sounds relevant", sub:"Now engaged" },
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is actually tough", sub:"Pain surfaces" },
+    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring's been rough", sub:"Pain surfaces" },
     { id:"happy_with_current", icon:"ti-circle-check", label:"We have tools for that", sub:"Has tools" },
     { id:"after_pitch_meh", icon:"ti-minus", label:"I'm not the decision-maker", sub:"Wrong contact" },
     { id:"not_interested", icon:"ti-x", label:"Not something we need", sub:"No interest" }
@@ -906,10 +1078,10 @@ const RESP = {
     { id:"not_now", icon:"ti-clock", label:"Let me think about it", sub:"Non-committal" }
   ],
   price_question: [
-    { id:"value_first", icon:"ti-arrow-right", label:"Walk me through what's included", sub:"Hears value" },
-    { id:"budget_no", icon:"ti-x", label:"Out of our budget range", sub:"Budget objection" },
-    { id:"budget_yes", icon:"ti-check", label:"That's reasonable, tell me more", sub:"Budget cleared" },
-    { id:"not_now", icon:"ti-clock", label:"Not in the budget now", sub:"Timing/budget" }
+    { id:"size_small", icon:"ti-users", label:"Just under 10 of us", sub:"Small team" },
+    { id:"size_medium", icon:"ti-users", label:"Around 15-30 people", sub:"Medium team" },
+    { id:"size_large", icon:"ti-users", label:"50 or more", sub:"Large team" },
+    { id:"value_first", icon:"ti-arrow-right", label:"Just tell me the price", sub:"Presses on price" }
   ],
   book_meeting: [
     { id:"willing_to_meet", icon:"ti-calendar-event", label:"Tuesday at 2pm works", sub:"Time confirmed" },
@@ -933,6 +1105,7 @@ const RESP = {
     { id:"email_confirmed", icon:"ti-circle-check", label:"Yep, that's it now", sub:"Confirmed, lock it" }
   ],
   not_now: [
+    { id:"timeline_now", icon:"ti-calendar-bolt", label:"Honestly, in a few days or next week", sub:"Near-immediate" },
     { id:"timeline_soon", icon:"ti-calendar", label:"Maybe next month or two", sub:"Near-term" },
     { id:"timeline_later", icon:"ti-calendar-off", label:"End of year probably", sub:"Long-term" },
     { id:"not_interested", icon:"ti-x", label:"It's just not a priority", sub:"Drops off" }
@@ -953,7 +1126,7 @@ const RESP = {
   ],
   franchise_hq: [
     { id:"no_payroll", icon:"ti-x", label:"We run payroll ourselves", sub:"Gap confirmed" },
-    { id:"happy_with_current", icon:"ti-circle-check", label:"Corporate provides software too", sub:"Full coverage" },
+    { id:"what_system", icon:"ti-circle-check", label:"Corporate covers payroll too", sub:"Fully covered" },
     { id:"curious_why", icon:"ti-search", label:"Most of it, some we handle", sub:"Partial coverage" }
   ],
   tried_before: [
@@ -974,6 +1147,7 @@ const RESP = {
   after_pitch_yes: [
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll's our biggest headache", sub:"Pain surfaces" },
     { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling across locations", sub:"Pain surfaces" },
+    { id:"pain_hiring", icon:"ti-user-plus", label:"Finding good people", sub:"Pain surfaces" },
     { id:"want_demo", icon:"ti-screen-share", label:"I'd like to see it", sub:"Demo request" },
     { id:"price_question", icon:"ti-coin", label:"What's it cost?", sub:"Price question" }
   ],
@@ -989,10 +1163,10 @@ const RESP = {
     { id:"opening", icon:"ti-phone", label:"Owner picks up, use opening", sub:"Restart with owner" }
   ],
   quantify_time: [
-    { id:"errors_confirmed", icon:"ti-alert-triangle", label:"And we've had errors too", sub:"More pain" },
-    { id:"size_medium", icon:"ti-users", label:"Running it for ~15-30 people", sub:"Size revealed" },
-    { id:"size_large", icon:"ti-users", label:"50+ across locations", sub:"Large team" },
-    { id:"want_demo", icon:"ti-screen-share", label:"5 minutes? I'd want to see that", sub:"Opens to demo" }
+    { id:"size_small", icon:"ti-users", label:"Just under 10 of us", sub:"Small team" },
+    { id:"size_medium", icon:"ti-users", label:"Around 15-30 people", sub:"Medium team" },
+    { id:"size_large", icon:"ti-users", label:"50 or more", sub:"Large team" },
+    { id:"multi_loc_pain", icon:"ti-building-store", label:"Depends, spread across stores", sub:"Cross-location" }
   ],
   quantify_cost: [
     { id:"errors_confirmed", icon:"ti-alert-triangle", label:"We've had to redo runs", sub:"Confirms rework" },
@@ -1009,8 +1183,9 @@ const RESP = {
   ],
   value_first: [
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll's the main friction", sub:"Pain confirmed" },
-    { id:"budget_yes", icon:"ti-check", label:"That ROI makes sense", sub:"Budget + value" },
-    { id:"not_now", icon:"ti-clock", label:"Interesting, bad timing", sub:"Value seen, timing off" }
+    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling, honestly", sub:"Pain confirmed" },
+    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring and turnover", sub:"Pain confirmed" },
+    { id:"want_demo", icon:"ti-screen-share", label:"All of it, show me", sub:"Opens to demo" }
   ],
   decision_maker_yes: [
     { id:"interested", icon:"ti-thumb-up", label:"Yes, I decide. What is it?", sub:"DM confirmed" }
@@ -1020,7 +1195,10 @@ const RESP = {
     { id:"gate_name", icon:"ti-user", label:"The owner does, let me get them", sub:"Warm transfer" }
   ],
   size_small: [
-    { id:"interested", icon:"ti-thumb-up", label:"Under 10 employees", sub:"Small team" }
+    { id:"want_demo", icon:"ti-screen-share", label:"That'd actually help", sub:"Opens to demo" },
+    { id:"pain_payroll", icon:"ti-receipt", label:"Even for a few it's a pain", sub:"Pain confirmed" },
+    { id:"price_question", icon:"ti-coin", label:"What's it run for a small shop?", sub:"Price question" },
+    { id:"not_now", icon:"ti-clock", label:"We manage okay for now", sub:"Low urgency" }
   ],
   size_medium: [
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll for that is a lot", sub:"Pain surfaces" },
@@ -1098,7 +1276,7 @@ function buildNextPrompt(responseId, responseLabel) {
     no_value:`Prospect doesn't see fit. Curious, low-pressure question about their biggest day-to-day headache running the team at ${brand}, whether that's scheduling, covering shifts, time tracking, payroll, or hiring. Don't pitch, just ask. ${hint}`,
     who_are_you:`They asked what Homebase is, so they're curious, that's good. Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: Homebase is the all-in-one app to run an hourly team, scheduling, time tracking, payroll, and hiring all in one place. Mention ${peer} uses it. End with ONE broad question about how they run the team at ${brand} today. Keep it conversational, not a feature dump. ${hint}`,
     happy_with_current:`Ask ONE question, what they're using to run the team today. Just the tool, don't also ask about payroll in the same breath. ${hint}`,
-    named_tool:`They just named their current tool. Acknowledge it warmly, then ask ONE simple follow-up: does that tool also handle their payroll, or is payroll separate? Just that one question. ${hint}`,
+    named_tool:`They just named their current tool. Acknowledge it warmly. IF payroll ownership hasn't already come up earlier in the conversation, ask ONE simple follow-up: does that tool also handle their payroll, or is payroll separate? But if they've ALREADY told you who runs payroll (for example they said they run it themselves, or corporate covers it), do NOT ask again, instead acknowledge what you know and ask a different one-question follow-up that moves toward a demo. ${hint}`,
     not_sure:`They're not sure whether their tool runs payroll. No problem, that's common. Gently note that a lot of owners are surprised their scheduling tool doesn't actually run payroll, and offer that the quickest way to sort it out is a short look together. Ask ONE question to move toward a 15-minute specialist call. ${hint}`,
     gatekeeper_blocks:`Neighborly, warm, brief. Ask ONE thing, the best time to catch the owner directly. Don't also ask their name in the same line. ${hint}`,
     gatekeeper_voicemail:`SDR leaving a voicemail for the owner at ${brand}. 20 seconds: name, Homebase, peer proof (${peer}), one reason to call back, direct number. ${hint}`,
@@ -1127,7 +1305,7 @@ function buildNextPrompt(responseId, responseLabel) {
     quantify_cost:`Expand the cost pain with ONE question, whether mistakes have ever cost them money or rework. Brief bridge to Homebase. ${hint}`,
     errors_confirmed:`Empathize one sentence: "That's exactly why owners come to us." Hours flow straight into payroll, no re-keying. Then offer a 30-minute demo. ${hint}`,
     multi_loc_pain:`Expand the cross-location pain with ONE question, how they keep an eye on all their ${brand}s at once today. One-line mention of the all-locations dashboard. ${hint}`,
-    value_first:`Frame that most owners make the cost back in month one on time saved, then ask ONE question about where the biggest friction is for them today. ${hint}`,
+    value_first:`Give them the straight answer first: pricing is simple, it scales with team size and the plan they need, and most owners make the cost back in month one on time saved. Then ask ONE question about where the biggest friction is for them today, so you can point them to the right plan. ${hint}`,
     decision_maker_yes:`Decision maker confirmed. Brief pain question to open discovery. ${hint}`,
     decision_maker_no:`Ask who does handle payroll and scheduling, and the best way to reach them. Warm, one ask.`,
     size_small:`Small team. Pivot to value for smaller shops: quick setup, free scheduling tier, payroll add-on. One pain question. ${hint}`,
@@ -1154,63 +1332,45 @@ function buildNextPrompt(responseId, responseLabel) {
 }
 
 function fmtScript(text) {
-  return text.replace(/\[([^\]]*Coaching tip:[^\]]*)\]/gi, '<span class="script-coach">[$1]</span>');
+  let out = withSdrName(text);
+  // 1) Inline pause markers: prominent so the rep clearly stops and listens
+  out = out.replace(/\[⏸([^\]]*)\]/g, '<span class="inline-pause"><span class="pause-dots"><span></span><span></span><span></span></span>$1</span>');
+  // 2) Coaching tip: italic muted (must run before generic stage-direction match)
+  out = out.replace(/\[([^\]]*Coaching tip:[^\]]*)\]/gi, '<span class="script-coach">[$1]</span>');
+  // 3) Conditional stage directions like "[Once they give you the go-ahead]:" or "[If asked why]:"
+  out = out.replace(/\[([^\]]+)\]:/g, '<span class="stage-dir">$1</span>');
+  return out;
 }
 
-// Which SQL field each phase's SCRIPT asks about. When the talk track for a phase
-// is shown, the SDR is asking that question, so we check the box (the prospect's
-// answer will fill it in live). Distinct from SQL_SIGNAL_MAP, which reads the answer.
+// Which SQL field each phase's SCRIPT is ASKING about (question raised, not yet answered).
+// These set an "asked"/pending state that does NOT count toward qualification. The field
+// only becomes "done" when the prospect's actual answer comes through SQL_SIGNAL_MAP or the
+// explicit handlers in handleResponse. Phases where the prospect has ALREADY revealed the
+// info (pain_payroll, size_*, budget_*, etc.) are intentionally NOT here, they confirm as done.
 const PHASE_ASKS = {
-  opening:        [{ key:"pain", val:"Asked about payroll/scheduling" }],
-  interested:     [{ key:"pain", val:"Asked about their process" }],
-  give_more:      [{ key:"pain", val:"Asked about their process" }],
-  no_value:       [{ key:"solution", val:"Asked what they use today" }],
-  who_are_you:    [{ key:"pain", val:"Asked about their process" }],
-  happy_with_current: [{ key:"solution", val:"Asked what they use" }],
-  named_tool:     [{ key:"solution", val:"Named their tool" }],
-  not_sure:       [{ key:"solution", val:"Unsure if tool does payroll" }],
-  pain_payroll:   [{ key:"pain", val:"Payroll pain" }],
-  pain_scheduling:[{ key:"pain", val:"Scheduling pain" }, { key:"size", val:"Asked team size" }],
-  pain_compliance:[{ key:"pain", val:"Compliance pain" }],
-  pain_hiring:    [{ key:"pain", val:"Hiring/turnover pain" }],
-  pain_comms:     [{ key:"pain", val:"Team comms pain" }],
-  curious_why:    [{ key:"pain", val:"Probed their routine" }, { key:"solution", val:"Manual / in-house" }],
-  what_system:    [{ key:"solution", val:"Uses one tool incl. payroll" }],
-  franchise_hq:   [{ key:"solution", val:"Asked who runs payroll" }],
-  quantify_time:  [{ key:"pain", val:"Quantified time pain" }, { key:"size", val:"Asked team size" }],
-  quantify_cost:  [{ key:"pain", val:"Quantified cost pain" }],
-  price_question: [{ key:"budget", val:"Price discussed" }],
-  value_first:    [{ key:"budget", val:"Value/ROI framed" }, { key:"solution", val:"Asked about current tools" }],
-  size_small:     [{ key:"size", val:"1-10 employees" }, { key:"impact", val:"1-10 users" }],
-  size_medium:    [{ key:"size", val:"11-50 employees" }, { key:"impact", val:"11-50 users" }],
-  size_large:     [{ key:"size", val:"50+ employees" }, { key:"impact", val:"50+ users" }],
-  multi_loc_pain: [{ key:"size", val:"Multiple locations" }],
-  want_demo:      [{ key:"nextstep", val:"Offered a demo" }],
-  book_meeting:   [{ key:"nextstep", val:"Booking a demo" }],
-  willing_to_meet:[{ key:"nextstep", val:"Demo time set" }, { key:"contact", val:"Asked for email" }],
-  gives_email:    [{ key:"contact", val:"Email captured" }],
-  gives_phone:    [{ key:"contact", val:"Phone captured" }],
-  email_confirmed:[{ key:"nextstep", val:"Next step locked" }, { key:"contact", val:"Contact confirmed" }],
-  email_correction:[{ key:"contact", val:"Contact confirmed" }],
-  callback_yes:   [{ key:"nextstep", val:"Callback scheduled" }, { key:"contact", val:"Contact captured" }],
-  callback_no:    [{ key:"contact", val:"Email captured" }],
-  not_now:        [{ key:"timeline", val:"Timeline discussed" }],
-  timeline_now:   [{ key:"timeline", val:"Immediate (0-30 days)" }],
-  timeline_soon:  [{ key:"timeline", val:"Near-term (1-3 months)" }],
-  timeline_later: [{ key:"timeline", val:"Mid-term (3+ months)" }],
-  budget_yes:     [{ key:"budget", val:"Budget confirmed" }],
-  budget_maybe:   [{ key:"budget", val:"Budget likely" }],
-  budget_no:      [{ key:"budget", val:"No budget" }],
-  wants_info:     [{ key:"contact", val:"Asked for email" }],
-  gate_name:      [{ key:"contact", val:"Getting owner name" }],
-  decision_maker_yes: [{ key:"contact", val:"Decision maker confirmed" }],
-  gatekeeper_voicemail: [{ key:"contact", val:"Left callback number" }]
+  opening:        [{ key:"pain", val:"asked, awaiting answer" }],
+  interested:     [{ key:"pain", val:"asked, awaiting answer" }],
+  give_more:      [{ key:"pain", val:"asked, awaiting answer" }],
+  who_are_you:    [{ key:"pain", val:"asked, awaiting answer" }],
+  no_value:       [{ key:"solution", val:"asked, awaiting answer" }],
+  happy_with_current: [{ key:"solution", val:"asked, awaiting answer" }],
+  named_tool:     [{ key:"solution", val:"named, checking payroll" }],
+  not_sure:       [{ key:"solution", val:"unsure on payroll" }],
+  franchise_hq:   [{ key:"solution", val:"asked who runs payroll" }],
+  pain_scheduling:[{ key:"size", val:"asked team size" }],
+  quantify_time:  [{ key:"size", val:"asked team size" }],
+  price_question: [{ key:"budget", val:"price discussed" }],
+  value_first:    [{ key:"budget", val:"value/ROI framed" }],
+  want_demo:      [{ key:"nextstep", val:"demo offered, not locked" }],
+  book_meeting:   [{ key:"nextstep", val:"booking in progress" }],
+  wants_info:     [{ key:"contact", val:"asked for email" }],
+  gate_name:      [{ key:"contact", val:"getting owner name" }]
 };
 
 function markAskedForPhase(phase) {
   const asks = PHASE_ASKS[phase];
   if (!asks) return;
-  asks.forEach(a => markSql(a.key, a.val));
+  asks.forEach(a => markAsked(a.key, a.val));
   updateSql();
 }
 
@@ -1231,13 +1391,48 @@ function renderCurrent(scriptText, phase) {
       <span class="badge ${win ? "win" : ""}">${phaseLabel(phase)}</span>
       <p class="lbl"><i class="ti ti-quote" aria-hidden="true" style="font-size:14px;"></i> Your script</p>
       <div class="script">${fmtScript(scriptText)}</div>
-      ${!end ? `<div class="responses">
-        <p class="lbl" style="margin-top:1.35rem;"><i class="ti ti-arrow-back-up" aria-hidden="true" style="font-size:14px;"></i> How do they respond?</p>
+      ${!end ? `<div class="pause-cue"><span class="pause-dots"><span></span><span></span><span></span></span> Pause here, let them answer, then tap their response below</div>
+      <div class="responses">
+        <p class="lbl" style="margin-top:0.5rem;"><i class="ti ti-arrow-back-up" aria-hidden="true" style="font-size:14px;"></i> How do they respond?</p>
         <div class="resp-grid" id="resp-grid">${btns}</div>
       </div>` : ""}
-      ${end ? `<div class="tip"><strong>After the call:</strong> Log in Salesforce within 5 minutes, send the calendar invite, and ping the AE on Slack to prep. Fields 7 (next step) and 8 (contact info) are mandatory before marking SQL.</div>` : ""}
+      ${end ? endSummary(phase) : ""}
     </div>
     <button class="restart" onclick="resetAll()"><i class="ti ti-refresh" aria-hidden="true" style="font-size:13px;"></i> Start a new call</button>`;
+}
+
+// Honest read on whether this call is actually ready to hand to an AE.
+// A real SQL needs genuine interest (pain uncovered) AND a substantive booked meeting
+// (a 30-min demo or 15-min specialist call), not just any captured callback time.
+function endSummary(phase) {
+  const painDone = sqlState.pain.status === "done";
+  const contactDone = sqlState.contact.status === "done";
+  // A booked demo / specialist call counts as a real meeting; a bare callback does not.
+  const realMeeting = (phase === "email_confirmed" || phase === "email_correction" || phase === "willing_to_meet");
+  const onlyCallback = (phase === "callback_yes" || phase === "callback_no");
+
+  if (realMeeting && painDone) {
+    return `<div class="verdict ready">
+      <div class="verdict-head"><i class="ti ti-circle-check"></i> Ready for AE handoff</div>
+      <p>You uncovered real pain and booked a substantive meeting. Log it in Salesforce within 5 minutes, send the calendar invite, and ping the AE on Slack with the pain you found so they can prep.</p>
+    </div>`;
+  }
+  if (realMeeting && !painDone) {
+    return `<div class="verdict caution">
+      <div class="verdict-head"><i class="ti ti-alert-triangle"></i> Meeting booked, but pain not uncovered</div>
+      <p>You've got a time on the calendar, but you didn't surface a real reason they'd show up. Before you hang up, ask one more question to find what's actually frustrating them, so the AE meeting has a purpose and they don't no-show.</p>
+    </div>`;
+  }
+  if (onlyCallback) {
+    return `<div class="verdict caution">
+      <div class="verdict-head"><i class="ti ti-clock-pause"></i> Follow-up set, not yet an SQL</div>
+      <p>A callback is a good save, but this isn't ready for an AE yet. The goal is a confirmed 30-minute demo or 15-minute specialist call with a prospect who's genuinely interested and knows why they're showing up. Use the callback to uncover pain and book that real meeting.</p>
+    </div>`;
+  }
+  return `<div class="verdict caution">
+    <div class="verdict-head"><i class="ti ti-info-circle"></i> Not an AE handoff yet</div>
+    <p>Capture whatever you can (contact info, a follow-up time) and keep nurturing. This becomes an SQL once you've uncovered real pain and booked a 30-minute demo or 15-minute specialist call.</p>
+  </div>`;
 }
 
 function archive(scriptText, phase, label) {
@@ -1275,6 +1470,7 @@ async function startCall() {
   sqlState = freshSql();
   prospectInfo = {
     brand, industry,
+    lead_name: document.getElementById("lead_name").value.trim(),
     num_locs: document.getElementById("num_locs").value.trim(),
     prospect_role: document.getElementById("prospect_role").value,
     current_solution: document.getElementById("current_solution").value,
@@ -1331,7 +1527,7 @@ function resetAll() {
   document.getElementById("callview").classList.remove("on");
   document.getElementById("sql-sidebar").style.display = "none";
   document.body.classList.remove("calling");
-  ["brand","num_locs","known_pain"].forEach(id => document.getElementById(id).value = "");
+  ["lead_name","brand","num_locs","known_pain"].forEach(id => document.getElementById(id).value = "");
   ["industry","prospect_role","current_solution","timeline","budget"].forEach(id => document.getElementById(id).value = "");
   industryManuallySet = false;
   document.getElementById("industry").classList.remove("autofilled");
@@ -1339,6 +1535,9 @@ function resetAll() {
   document.getElementById("gen-btn").disabled = false;
   window.scrollTo({ top:0, behavior:"smooth" });
 }
+
+// Run the sign-in gate as soon as the page loads
+initSdr();
 </script>
 </body>
 </html>
