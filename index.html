@@ -940,7 +940,11 @@ async function callClaude(systemPrompt, messages, attempt) {
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
       body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 450, system: systemPrompt, messages }),
       signal: controller.signal
     });
@@ -960,7 +964,7 @@ async function callClaude(systemPrompt, messages, attempt) {
     if (attempt < 2) return callClaude(systemPrompt, messages, attempt + 1);
     return err.name === "AbortError"
       ? "That took too long. Tap the response again to retry."
-      : "Connection issue. Tap the response again to retry.";
+      : `Connection issue [${err.name}: ${err.message}]. Tap the response again to retry.`;
   }
 }
 
