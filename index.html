@@ -346,6 +346,14 @@ body.calling .recap { display: flex; }
 }
 .tip strong { color: var(--ink); font-weight: 700; }
 
+.retry-banner {
+  display: flex; align-items: center; gap: 8px;
+  background: #FFF6E6; color: #8A5A00; border: 1px solid #F0D48A;
+  border-radius: var(--r-md); padding: 10px 14px; margin-top: 1rem;
+  font-size: 13px; font-weight: 600;
+}
+.retry-banner i { font-size: 16px; }
+
 /* Handoff-readiness verdict at the end of a call */
 .verdict { border-radius: var(--r-md); padding: 1rem 1.2rem; margin-top: 1rem; }
 .verdict p { font-size: 13px; line-height: 1.6; font-weight: 500; margin-top: 6px; }
@@ -925,14 +933,35 @@ RULES:
 - Return only the script then the bracketed tip. No headers, no bullets, no markdown.`;
 }
 
-async function callClaude(systemPrompt, messages) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 450, system: systemPrompt, messages })
-  });
-  const data = await res.json();
-  if (data.error) return `Error: ${data.error.message}`;
-  return data.content?.[0]?.text || "Error generating script.";
+async function callClaude(systemPrompt, messages, attempt) {
+  attempt = attempt || 1;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000); // 30s ceiling
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 450, system: systemPrompt, messages }),
+      signal: controller.signal
+    });
+    clearTimeout(timer);
+    const data = await res.json();
+    if (data.error) return `Error: ${data.error.message}`;
+    // Collect ALL text blocks (don't assume the first block is text)
+    const text = Array.isArray(data.content)
+      ? data.content.filter(c => c.type === "text").map(c => c.text).join("\n").trim()
+      : "";
+    if (text) return text;
+    // Empty/oddly-shaped response: retry once before giving up
+    if (attempt < 2) return callClaude(systemPrompt, messages, attempt + 1);
+    return "Sorry, that didn't generate. Tap the response again to retry.";
+  } catch (err) {
+    clearTimeout(timer);
+    if (attempt < 2) return callClaude(systemPrompt, messages, attempt + 1);
+    return err.name === "AbortError"
+      ? "That took too long. Tap the response again to retry."
+      : "Connection issue. Tap the response again to retry.";
+  }
 }
 
 function phaseLabel(p) {
@@ -1327,7 +1356,7 @@ function buildNextPrompt(responseId, responseLabel) {
   const instruction = map[responseId] || `Sandler mode, surface or expand pain, then work toward a 30-minute demo, a 15-minute specialist call, or at minimum their contact info and a follow-up time. Under 3 sentences. ${hint}`;
   // Always tell the model exactly what the prospect just said, and to react to it
   // naturally before delivering the script, so the line never starts abruptly.
-  const context = `The prospect just said: "${responseLabel}". Acknowledge or react to that briefly and naturally (a few words is fine) so your reply flows right out of their words, then: ${instruction}`;
+  const context = `The prospect just said: "${responseLabel}". This is a LIVE, MOVING conversation, do NOT repeat or restate your opening line or anything you already said. Acknowledge or react to what they just said briefly and naturally (a few words), then move the conversation forward: ${instruction}`;
   return context + answerable;
 }
 
@@ -1491,8 +1520,17 @@ async function startCall() {
   updateSql();
 
   const opening = buildOpeningInstant(prospectInfo);
+  // For the model's memory, use a clean spoken version: strip pause markers, stage
+  // directions, and the coaching tip so it has tidy context to continue from (the full
+  // annotated version is what the rep sees on screen via renderCurrent).
+  const openingForHistory = opening
+    .replace(/\[⏸[^\]]*\]/g, "")
+    .replace(/\[Coaching tip:[^\]]*\]/gi, "")
+    .replace(/\[[^\]]+\]:/g, "")
+    .replace(/\n{2,}/g, " ")
+    .trim();
   conversationHistory.push({ role:"user", content:`Generate a cold call opening for an SDR calling a ${prospectInfo.prospect_role || "franchise owner"} at ${brand}, a ${industry} franchise${prospectInfo.num_locs ? ` with ${prospectInfo.num_locs} locations` : ""}.` });
-  conversationHistory.push({ role:"assistant", content: opening });
+  conversationHistory.push({ role:"assistant", content: withSdrName(openingForHistory) });
 
   renderCurrent(opening, "opening");
   document.getElementById("gen-btn").disabled = false;
@@ -1500,7 +1538,8 @@ async function startCall() {
 }
 
 async function handleResponse(responseId, label) {
-  archive(currentScriptText, currentPhase, label);
+  const prevPhase = currentPhase;
+  const prevScript = currentScriptText;
   currentPhase = responseId;
   if (SQL_SIGNAL_MAP[responseId]) { const s = SQL_SIGNAL_MAP[responseId]; markSql(s.key, s.val, true); }
   if (responseId === "willing_to_meet" || responseId === "callback_yes") markSql("nextstep","Next step confirmed", true);
@@ -1516,8 +1555,30 @@ async function handleResponse(responseId, label) {
   respLoading();
   conversationHistory.push({ role:"user", content: buildNextPrompt(responseId, label) });
   const next = await callClaude(buildSystemPrompt(prospectInfo), conversationHistory);
+  // If the call failed/timed out, don't advance the phase, let the rep retry the same tap
+  const failed = /^(Error:|Sorry, that didn't generate|That took too long|Connection issue)/.test(next);
+  if (failed) {
+    conversationHistory.pop(); // remove the user prompt we just added so a retry is clean
+    currentPhase = prevPhase;
+    renderRetry(next, prevPhase, prevScript);
+    return;
+  }
+  // Success: archive the turn the rep just completed, then advance
+  archive(prevScript, prevPhase, label);
   conversationHistory.push({ role:"assistant", content: next });
   renderCurrent(next, responseId);
+}
+
+// Re-show the previous script with an error banner and working response buttons so the rep can retry.
+function renderRetry(msg, phase, scriptText) {
+  currentScriptText = scriptText;
+  renderCurrent(scriptText, phase);
+  const block = document.getElementById("current-block");
+  const banner = document.createElement("div");
+  banner.className = "retry-banner";
+  banner.innerHTML = `<i class="ti ti-refresh" aria-hidden="true"></i> ${msg}`;
+  const track = block.querySelector(".track");
+  if (track) track.insertBefore(banner, track.querySelector(".pause-cue") || track.querySelector(".responses"));
 }
 
 function resetAll() {
