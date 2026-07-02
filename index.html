@@ -938,19 +938,17 @@ async function callClaude(systemPrompt, messages, attempt) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 30000); // 30s ceiling
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
+    // Calls our own backend proxy (same origin), which holds the API key server-side.
+    // The rep's browser never sees the key.
+    const res = await fetch("/api/talk-track", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true"
-      },
-      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 450, system: systemPrompt, messages }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ system: systemPrompt, messages }),
       signal: controller.signal
     });
     clearTimeout(timer);
     const data = await res.json();
-    if (data.error) return `Error: ${data.error.message}`;
+    if (data.error) return `Error: ${typeof data.error === "string" ? data.error : (data.error.message || "request failed")}`;
     // Collect ALL text blocks (don't assume the first block is text)
     const text = Array.isArray(data.content)
       ? data.content.filter(c => c.type === "text").map(c => c.text).join("\n").trim()
@@ -964,7 +962,7 @@ async function callClaude(systemPrompt, messages, attempt) {
     if (attempt < 2) return callClaude(systemPrompt, messages, attempt + 1);
     return err.name === "AbortError"
       ? "That took too long. Tap the response again to retry."
-      : `Connection issue [${err.name}: ${err.message}]. Tap the response again to retry.`;
+      : "Connection issue. Tap the response again to retry.";
   }
 }
 
