@@ -933,10 +933,9 @@ RULES:
 - Return only the script then the bracketed tip. No headers, no bullets, no markdown.`;
 }
 
-async function callClaude(systemPrompt, messages, attempt) {
-  attempt = attempt || 1;
+async function callAI(systemPrompt, messages) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 30000); // 30s ceiling
+  const timer = setTimeout(() => controller.abort(), 10000); // keep live calls moving
   try {
     // Calls our own backend proxy (same origin), which holds the API key server-side.
     // The rep's browser never sees the key.
@@ -971,13 +970,10 @@ async function callClaude(systemPrompt, messages, attempt) {
       ? data.content.filter(c => c.type === "text").map(c => c.text).join("\n").trim()
       : "";
     if (text) return text;
-    // Empty/oddly-shaped response: retry once before giving up
-    if (attempt < 2) return callClaude(systemPrompt, messages, attempt + 1);
     return "Sorry, that didn't generate. Tap the response again to retry.";
   } catch (err) {
     clearTimeout(timer);
     if (err.name === "AbortError") return "That took too long. Tap the response again to retry.";
-    if (attempt < 2) return callClaude(systemPrompt, messages, attempt + 1);
     return `Connection issue (${err.message}). Check that the site and its /api function are deployed.`;
   }
 }
@@ -1378,6 +1374,40 @@ function buildNextPrompt(responseId, responseLabel) {
   return context + answerable;
 }
 
+function buildFallbackTalkTrack(responseId, responseLabel) {
+  const info = prospectInfo || {};
+  const brand = info.brand || "your team";
+  const industry = info.industry || "franchise";
+  const proof = getProof(industry, brand);
+  const peer = proof.peers[0] || "similar owners";
+  const lead = info.lead_name ? `${info.lead_name}, ` : "";
+  const baseTip = "[Coaching tip: Keep it calm, ask one question, and move toward pain or a booked next step.]";
+
+  const lines = {
+    interested: `${lead}great question. Homebase helps ${industry} owners run scheduling, time tracking, payroll, hiring, and team messages in one place, and teams like ${peer} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
+    give_more: `${lead}totally. The simplest way to think about Homebase is one app for the hourly team, from schedules and clock-ins through payroll and hiring, so owners are not piecing five tools together. What is the most manual part of running the team at ${brand} right now?\n${baseTip}`,
+    too_busy: `${lead}completely get it, I caught you in the middle of the day. I do think this could be useful for ${brand}, so when is a better time to catch you, later today or tomorrow morning?\n[Coaching tip: Respect the interruption, then trade for a specific callback time.]`,
+    not_interested: `${lead}totally fair, before I let you go, can I ask one quick thing? For a lot of ${industry} owners, the headache is not the software, it is the time lost fixing schedules, time cards, and payroll after the fact. Which of those is most annoying for you right now?\n${baseTip}`,
+    who_are_you: `${lead}yeah, of course. We are Homebase, the all-in-one app for hourly teams, scheduling, time tracking, payroll, hiring, and team communication, and owners like ${peer} use us to simplify the week. How are you running those pieces at ${brand} today?\n${baseTip}`,
+    happy_with_current: `${lead}that makes sense, most owners we talk to have something in place already. What are you using today to handle scheduling, time tracking, and payroll?\n${baseTip}`,
+    named_tool: `${lead}got it, that is helpful context. A lot of owners still look at Homebase when they want hours to flow cleanly into payroll without extra re-keying. What do you wish worked better in your current setup?\n${baseTip}`,
+    pain_payroll: `${lead}that is exactly the kind of thing we help with. When payroll is messy, it usually means hours are being checked, copied, or corrected by hand before payday. How long does payroll usually take you each pay period?\n[Coaching tip: Expand the pain before you pitch the fix.]`,
+    pain_scheduling: `${lead}yeah, scheduling can eat the week fast, especially when swaps and callouts start stacking up. About how many hourly employees are you scheduling at ${brand}?\n[Coaching tip: Quantify the team size so the pain feels concrete.]`,
+    pain_hiring: `${lead}that makes sense, turnover creates a lot of hidden work. Homebase helps owners post jobs, track applicants, and get new hires into the team flow faster. How are you handling hiring right now?\n${baseTip}`,
+    want_demo: `${lead}perfect, that is probably the fastest way to see if it fits. We can do a 30-minute discovery and demo around the exact ${brand} setup. Would today afternoon or tomorrow morning be better?\n[Coaching tip: When they ask to see it, stop discovering and book the meeting.]`,
+    price_question: `${lead}pricing is pretty straightforward, and it depends on the setup and team size, so I do not want to guess wrong. Quick question first, about how many hourly employees would need to use it at ${brand}?\n[Coaching tip: Earn the right to talk price by getting one sizing detail.]`,
+    book_meeting: `${lead}great, let's get something real on the calendar. We can set up a 30-minute discovery and demo with a specialist who can walk through the exact ${brand} workflow. What is the best email for the invite?\n[Coaching tip: Move from interest to calendar details immediately.]`,
+    callback_yes: `${lead}perfect, I will make a note to call you back then. What is the best direct number or email to reach you?\n[Coaching tip: A callback only counts if you capture a reliable way back in.]`,
+    wants_info: `${lead}happy to send something over. I will keep it short and focused on how ${industry} owners use Homebase for scheduling, time tracking, and payroll. What is the best email for you?\n[Coaching tip: Use the info request to capture contact and tee up a next step.]`,
+    gives_email: `Perfect, let me read that back to make sure I got it right. That is the email you want the invite sent to, right?\n[Coaching tip: Always confirm contact info out loud before you hang up.]`,
+    gives_phone: `Got it, let me read that back so I do not fat-finger it. That is the best number to reach you at, right?\n[Coaching tip: Confirm the number, then restate the next step.]`,
+    email_confirmed: `Perfect, you are all set. I will send the invite over, and the specialist will walk through the exact ${brand} setup with you. Talk soon.\n[Coaching tip: End cleanly once the meeting and contact info are confirmed.]`,
+    email_correction: `Perfect, thanks for catching that. I have the corrected contact now, and I will send the invite there. Talk soon.\n[Coaching tip: Confirm the correction once, then close confidently.]`
+  };
+
+  return lines[responseId] || `${lead}that makes sense. The reason I am asking is that owners like ${peer} usually come to Homebase when running the hourly team starts taking too much time across scheduling, time tracking, payroll, or hiring. What part of that is most painful for ${brand} right now?\n${baseTip}`;
+}
+
 function fmtScript(text) {
   let out = withSdrName(text);
   // 1) Inline pause markers: prominent so the rep clearly stops and listens
@@ -1572,13 +1602,14 @@ async function handleResponse(responseId, label) {
   disableResp(true);
   respLoading();
   conversationHistory.push({ role:"user", content: buildNextPrompt(responseId, label) });
-  const next = await callClaude(buildSystemPrompt(prospectInfo), conversationHistory);
-  // If the call failed/timed out, don't advance the phase, let the rep retry the same tap
-  const failed = /^(Error:|Sorry, that didn't generate|That took too long|Connection issue)/.test(next);
+  const next = await callAI(buildSystemPrompt(prospectInfo), conversationHistory);
+  // If the API fails/times out, use a built-in backup line so the rep keeps moving.
+  const failed = /^(Error\b|Sorry, that didn't generate|That took too long|Connection issue)/.test(next);
   if (failed) {
-    conversationHistory.pop(); // remove the user prompt we just added so a retry is clean
-    currentPhase = prevPhase;
-    renderRetry(next, prevPhase, prevScript);
+    const fallback = buildFallbackTalkTrack(responseId, label);
+    archive(prevScript, prevPhase, label);
+    conversationHistory.push({ role:"assistant", content: fallback });
+    renderCurrent(fallback, responseId);
     return;
   }
   // Success: archive the turn the rep just completed, then advance

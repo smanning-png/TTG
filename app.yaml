@@ -1,0 +1,8 @@
+command: ["npm", "run", "start"]
+env:
+  - name: "OPENAI_API_KEY"
+    valueFrom: "openai_api_key"
+  - name: "OPENAI_MODEL"
+    value: "gpt-5.4-mini"
+  - name: "OPENAI_MAX_OUTPUT_TOKENS"
+    value: "500"
