@@ -1440,10 +1440,10 @@ const RESP = {
     { id:"not_now", icon:"ti-clock", label:"Not top priority", sub:"Not urgent" }
   ],
   want_demo: [
-    { id:"book_meeting", icon:"ti-calendar-event", label:"When can we do it?", sub:"Ready to book" },
-    { id:"wants_info", icon:"ti-file-text", label:"Send me something first", sub:"Wants info" },
-    { id:"price_question", icon:"ti-coin", label:"What's it cost first?", sub:"Price gate" },
-    { id:"not_now", icon:"ti-clock", label:"Let me think about it", sub:"Non-committal" }
+    { id:"willing_to_meet", icon:"ti-calendar-event", label:"Tomorrow at 10am works", sub:"Time confirmed" },
+    { id:"willing_to_meet", icon:"ti-calendar-event", label:"Following day at 2pm works", sub:"Time confirmed" },
+    { id:"book_meeting", icon:"ti-calendar-plus", label:"Neither, what else is open?", sub:"Still scheduling" },
+    { id:"not_now", icon:"ti-clock", label:"I need to check my calendar", sub:"Calendar stall" }
   ],
   price_question: [
     { id:"size_small", icon:"ti-users", label:"Just under 10 of us", sub:"Small team" },
@@ -1452,10 +1452,10 @@ const RESP = {
     { id:"value_first", icon:"ti-arrow-right", label:"Just tell me the price", sub:"Presses on price" }
   ],
   book_meeting: [
-    { id:"willing_to_meet", icon:"ti-calendar-event", label:"Tuesday at 2pm works", sub:"Time confirmed" },
+    { id:"willing_to_meet", icon:"ti-calendar-event", label:"Tomorrow at 10am works", sub:"Time confirmed" },
+    { id:"willing_to_meet", icon:"ti-calendar-event", label:"Following day at 2pm works", sub:"Time confirmed" },
+    { id:"willing_to_meet", icon:"ti-calendar-plus", label:"I can do another time", sub:"Alternate time" },
     { id:"gives_email", icon:"ti-mail", label:"Gives you their email", sub:"Reads it back to confirm" },
-    { id:"wants_info", icon:"ti-file-text", label:"Send something first", sub:"Wants info first" },
-    { id:"not_now", icon:"ti-clock", label:"Let me check and get back", sub:"Non-committal" }
   ],
   willing_to_meet: [
     { id:"gives_email", icon:"ti-mail", label:"Gives you their email", sub:"Reads it back to confirm" },
@@ -1641,9 +1641,9 @@ const FINAL_QUESTION_GUIDANCE = {
   pain_compliance: "End by asking whether compliance has created real cost, is worth seeing, or should wait.",
   pain_hiring: "End by asking whether they want to see the hiring flow, whether payroll is also a problem, or whether hiring is not urgent.",
   pain_comms: "End by asking whether they want to see team messaging, whether payroll is bigger, or whether communication is not urgent.",
-  want_demo: "End by asking whether they want to lock in a time now, get info first, talk price first, or think it over.",
+  want_demo: "End by asking them to pick between two specific 30-minute demo times, such as tomorrow at 10am or the following day at 2pm. Keep the close focused on scheduling unless the prospect raises a new objection.",
   price_question: "End by asking how many people would use it, with small, medium, large, or price-only as natural replies.",
-  book_meeting: "End by asking for the single next booking detail: a time, an email, info first, or permission to follow up.",
+  book_meeting: "End by asking them to pick between two specific demo times or offer another time that works for them.",
   willing_to_meet: "End by asking for the best email or direct phone number for the invite.",
   gives_email: "End by reading the email back and asking if it is correct.",
   gives_phone: "End by reading the phone number back and asking if it is correct.",
@@ -1739,9 +1739,9 @@ function buildNextPrompt(responseId, responseLabel) {
     pain_compliance:`Compliance concern. Ask if they worry about overtime or break rules. Mention Homebase has compliance tools built for owners like them. ${hint}`,
     pain_hiring:`Hiring/turnover pain. Empathize, mention Homebase has hiring tools for hourly teams. One follow-up question. ${hint}`,
     pain_comms:`Team comms pain. Mention Homebase team messaging. Ask how they reach their staff at ${brand} today. ${hint}`,
-    want_demo:`Prospect wants to see it. Go for the best outcome: offer a 30-minute discovery and demo, then ask one next-step question that fits their choices: lock in a time now, get info first, talk price first, or think it over. ${hint}`,
+    want_demo:`Prospect wants to see it. Advance directly to scheduling. Offer a 30-minute discovery and demo, then give two specific time options, such as tomorrow at 10am or the following day at 2pm, and ask which works better. Keep the close focused on booking unless the prospect raises a new objection. ${hint}`,
     price_question:`Price before value. Defer warmly: "Pricing's pretty simple, but quick question first so I point you to the right setup." ONE discovery question. ${hint}`,
-    book_meeting:`Ready to meet. Lock a 30-minute discovery + demo. Ask for the single next booking detail that fits the reply buttons: a time, an email, info first, or permission to follow up. Mention the specialist walks through the exact ${brand} setup.`,
+    book_meeting:`Ready to meet. Lock a 30-minute discovery + demo. Offer two specific meeting times, such as tomorrow at 10am or the following day at 2pm, and ask which one works better or what other time they prefer. Mention the specialist walks through the exact ${brand} setup.`,
     not_now:`Graceful: ask when timing would actually be better: next week, next month or two, end of year, or not a priority. Do not ask for email in the same turn. ${hint}`,
     callback_yes:`Lock it in: confirm the exact day and time you'll call back, then ask ONE thing, the best direct number or email to reach them. (You'll read it back next turn.)`,
     callback_no:`Agree graciously, mention you can send a short note on how ${credibilityPoint}, then ask whether they will review it later or whether they do not want the follow-up. Do not ask for a meeting in the same turn.`,
@@ -1821,9 +1821,9 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     pain_payroll: `${lead}that is exactly the kind of thing we help with. When payroll is messy, it usually means hours are being checked, copied, or corrected by hand before payday. How long does payroll usually take you each pay period?\n[Coaching tip: Expand the pain before you pitch the fix.]`,
     pain_scheduling: `${lead}yeah, scheduling can eat the week fast, especially when swaps and callouts start stacking up. About how many hourly employees are you scheduling at ${brand}?\n[Coaching tip: Quantify the team size so the pain feels concrete.]`,
     pain_hiring: `${lead}that makes sense, turnover creates a lot of hidden work. Homebase helps owners post jobs, track applicants, and get new hires into the team flow faster. How are you handling hiring right now?\n${baseTip}`,
-    want_demo: `${lead}perfect, that is probably the fastest way to see if it fits. We can do a 30-minute discovery and demo around the exact ${brand} setup, or I can send the short version first if that is easier. Do you want to lock in a time now, see info first, talk price first, or think it over?\n[Coaching tip: When they ask to see it, move toward a clear next step.]`,
+    want_demo: `${lead}perfect, that is probably the fastest way to see if it fits. Let's do a 30-minute discovery and demo around the exact ${brand} setup. I have tomorrow at 10am or the following day at 2pm open, which works better?\n[Coaching tip: When they ask to see it, move straight to calendar options.]`,
     price_question: `${lead}pricing is pretty straightforward, and it depends on the setup and team size, so I do not want to guess wrong. Quick question first, about how many hourly employees would need to use it at ${brand}?\n[Coaching tip: Earn the right to talk price by getting one sizing detail.]`,
-    book_meeting: `${lead}great, let's get something real on the calendar. We can set up a 30-minute discovery and demo with a specialist who can walk through the exact ${brand} workflow. What should we lock down next: a time, your email for the invite, or a short note first?\n[Coaching tip: Move from interest to one concrete booking detail.]`,
+    book_meeting: `${lead}great, let's get something real on the calendar. We can set up a 30-minute discovery and demo with a specialist who can walk through the exact ${brand} workflow. I have tomorrow at 10am or the following day at 2pm open, which one works better?\n[Coaching tip: Move from interest to two concrete calendar options.]`,
     callback_yes: `${lead}perfect, I will make a note to call you back then. What is the best direct number or email to reach you?\n[Coaching tip: A callback only counts if you capture a reliable way back in.]`,
     not_now: `${lead}totally fair, timing matters. If this is not for today, when would it make sense to revisit: next week, the next month or two, end of year, or not a priority?\n[Coaching tip: Turn vague timing into a clear follow-up window.]`,
     callback_no: `${lead}I can keep it to a short note on how ${proofRef} use Homebase, no big pitch. Should I follow up after you have a chance to review it, or would you rather I leave it there?\n[Coaching tip: Respect the deflection, but clarify whether the door is open.]`,
@@ -1891,7 +1891,7 @@ const PHASE_ASKS = {
   quantify_time:  [{ key:"size", val:"asked team size" }],
   price_question: [{ key:"budget", val:"price discussed" }],
   value_first:    [{ key:"budget", val:"value/ROI framed" }],
-  want_demo:      [{ key:"nextstep", val:"demo offered, not locked" }],
+  want_demo:      [{ key:"nextstep", val:"demo time offered" }],
   book_meeting:   [{ key:"nextstep", val:"booking in progress" }],
   wants_info:     [{ key:"contact", val:"asked for email" }],
   gate_name:      [{ key:"contact", val:"getting owner name" }]

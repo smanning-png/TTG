@@ -129,6 +129,19 @@ if (!competitorFallback.includes("Connecteam") || !competitorFallback.includes("
   throw new Error("Connecteam fallback did not include expected competitor guidance.");
 }
 
+const demoPrompt = sandbox.buildNextPrompt("want_demo", "I'd like to see it");
+const demoFallback = sandbox.buildFallbackTalkTrack("want_demo", "I'd like to see it");
+const weakDemoClose = /(get info first|talk price first|think it over|send the short version|short note first)/i;
+if (weakDemoClose.test(demoPrompt) || weakDemoClose.test(demoFallback)) {
+  throw new Error("Demo-interest path offered a weak next step instead of calendar options.");
+}
+if (!/tomorrow at 10am/i.test(demoFallback) || !/following day at 2pm/i.test(demoFallback)) {
+  throw new Error("Demo-interest fallback did not offer two concrete calendar options.");
+}
+if (resp.want_demo.some(option => ["wants_info", "price_question"].includes(option.id))) {
+  throw new Error("Demo-interest response options should move toward scheduling, not info or pricing gates.");
+}
+
 console.log(JSON.stringify({
   ok: true,
   phases: phases.size,
