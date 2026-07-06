@@ -780,6 +780,13 @@ const COMPETITOR_RESPONSE_OPTIONS = [
   { id:"not_interested", icon:"ti-x", label:"We're happy with it", sub:"Satisfied today" }
 ];
 
+const SCHEDULING_RESPONSE_OPTIONS = [
+  { id:"schedule_build_time", icon:"ti-calendar-plus", label:"Building the schedule takes forever", sub:"Time drain" },
+  { id:"schedule_changes", icon:"ti-arrows-exchange", label:"Callouts and swaps blow it up", sub:"Coverage chaos" },
+  { id:"schedule_availability", icon:"ti-calendar-user", label:"Availability and time off are messy", sub:"Availability / PTO" },
+  { id:"schedule_labor", icon:"ti-chart-line", label:"Overtime or coverage surprises us", sub:"Labor visibility" }
+];
+
 const COMPETITOR_INTEL = {
   competitor_gusto: {
     name:"Gusto",
@@ -1258,6 +1265,11 @@ function phaseLabel(p) {
     errors_confirmed:"Errors confirmed", multi_loc_pain:"Multi-location pain",
     value_first:"Establishing value", decision_maker_yes:"Decision maker", decision_maker_no:"Not the DM",
     size_small:"Team · small", size_medium:"Team · medium", size_large:"Team · large",
+    sched_size_small:"Scheduling · small team", sched_size_medium:"Scheduling · medium team", sched_size_large:"Scheduling · large team",
+    schedule_build_time:"Scheduling · build time", schedule_changes:"Scheduling · changes",
+    schedule_availability:"Scheduling · availability", schedule_labor:"Scheduling · labor visibility",
+    schedule_impact_hours:"Impact · scheduling time", schedule_impact_changes:"Impact · schedule churn",
+    schedule_impact_coverage:"Impact · coverage gaps", schedule_impact_cost:"Impact · labor cost",
     timeline_now:"Timeline · immediate", timeline_soon:"Timeline · 1-3mo", timeline_later:"Timeline · later",
     budget_yes:"Budget confirmed", budget_maybe:"Budget likely", budget_no:"No budget",
     wants_info:"Wants info first", willing_to_meet:"Time confirmed",
@@ -1419,9 +1431,9 @@ const RESP = {
     { id:"curious_why", icon:"ti-check", label:"Not bad, we've got a system", sub:"Minimizes pain" }
   ],
   pain_scheduling: [
-    { id:"size_small", icon:"ti-users", label:"Under 10 people", sub:"Small team" },
-    { id:"size_medium", icon:"ti-users", label:"Around 15-30 people", sub:"Medium team" },
-    { id:"size_large", icon:"ti-users", label:"50 or more", sub:"Large team" },
+    { id:"sched_size_small", icon:"ti-users", label:"Under 10 people", sub:"Small team" },
+    { id:"sched_size_medium", icon:"ti-users", label:"Around 15-30 people", sub:"Medium team" },
+    { id:"sched_size_large", icon:"ti-users", label:"50 or more", sub:"Large team" },
     { id:"multi_loc_pain", icon:"ti-building-store", label:"A lot, spread across spots", sub:"Cross-location pain" }
   ],
   pain_compliance: [
@@ -1569,13 +1581,58 @@ const RESP = {
     { id:"not_now", icon:"ti-clock", label:"We manage okay for now", sub:"Low urgency" }
   ],
   size_medium: [
+    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is still the issue", sub:"Stay with scheduling" },
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll for that is a lot", sub:"Pain surfaces" },
     { id:"want_demo", icon:"ti-screen-share", label:"See how it handles that", sub:"Opens to demo" }
   ],
   size_large: [
+    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling across that team", sub:"Stay with scheduling" },
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll for that is brutal", sub:"Pain surfaces" },
     { id:"multi_loc_pain", icon:"ti-building-store", label:"Across locations is the hard part", sub:"Cross-location pain" },
     { id:"want_demo", icon:"ti-screen-share", label:"See how it handles that", sub:"Opens to demo" }
+  ],
+  sched_size_small: SCHEDULING_RESPONSE_OPTIONS,
+  sched_size_medium: SCHEDULING_RESPONSE_OPTIONS,
+  sched_size_large: SCHEDULING_RESPONSE_OPTIONS,
+  schedule_build_time: [
+    { id:"schedule_impact_hours", icon:"ti-hourglass", label:"It eats hours every week", sub:"Time impact" },
+    { id:"schedule_impact_changes", icon:"ti-refresh", label:"Changes after posting are the killer", sub:"Schedule churn" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me a faster builder", sub:"Solution interest" }
+  ],
+  schedule_changes: [
+    { id:"schedule_impact_changes", icon:"ti-refresh", label:"Last-minute changes are constant", sub:"Churn impact" },
+    { id:"schedule_impact_coverage", icon:"ti-alert-triangle", label:"Coverage gaps cause stress", sub:"Coverage impact" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me shift swaps", sub:"Solution interest" }
+  ],
+  schedule_availability: [
+    { id:"schedule_impact_hours", icon:"ti-hourglass", label:"We chase availability manually", sub:"Time impact" },
+    { id:"schedule_impact_coverage", icon:"ti-alert-triangle", label:"Wrong availability creates gaps", sub:"Coverage impact" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me availability approvals", sub:"Solution interest" }
+  ],
+  schedule_labor: [
+    { id:"schedule_impact_cost", icon:"ti-coin", label:"Overtime surprises us", sub:"Cost impact" },
+    { id:"schedule_impact_coverage", icon:"ti-alert-triangle", label:"We overstaff or understaff", sub:"Coverage impact" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me labor visibility", sub:"Solution interest" }
+  ],
+  schedule_impact_hours: [
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me the faster workflow", sub:"Solution demo" },
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's schedule a demo", sub:"Ready to book" },
+    { id:"not_now", icon:"ti-clock", label:"Not worth changing yet", sub:"Low urgency" }
+  ],
+  schedule_impact_changes: [
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me how swaps work", sub:"Solution demo" },
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's schedule a demo", sub:"Ready to book" },
+    { id:"not_now", icon:"ti-clock", label:"Not worth changing yet", sub:"Low urgency" }
+  ],
+  schedule_impact_coverage: [
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me coverage controls", sub:"Solution demo" },
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's schedule a demo", sub:"Ready to book" },
+    { id:"not_now", icon:"ti-clock", label:"Not worth changing yet", sub:"Low urgency" }
+  ],
+  schedule_impact_cost: [
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me overtime alerts", sub:"Solution demo" },
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's schedule a demo", sub:"Ready to book" },
+    { id:"not_now", icon:"ti-clock", label:"Not worth changing yet", sub:"Low urgency" }
   ],
   timeline_now: [
     { id:"book_meeting", icon:"ti-calendar-event", label:"Let's get on the calendar", sub:"Immediate, book it" }
@@ -1611,6 +1668,11 @@ const SQL_SIGNAL_MAP = {
   no_payroll:{key:"solution",val:"Has tool, payroll separate"}, what_system:{key:"solution",val:"Uses one tool incl. payroll"},
   happy_with_current:{key:"solution",val:"Has existing tools"}, curious_why:{key:"solution",val:"Manual / spreadsheets"},
   size_small:{key:"size",val:"1-10 employees"}, size_medium:{key:"size",val:"11-50 employees"}, size_large:{key:"size",val:"50+ employees"},
+  sched_size_small:{key:"size",val:"1-10 employees"}, sched_size_medium:{key:"size",val:"11-50 employees"}, sched_size_large:{key:"size",val:"50+ employees"},
+  schedule_build_time:{key:"pain",val:"Scheduling takes too long to build"}, schedule_changes:{key:"pain",val:"Shift swaps / callouts create schedule churn"},
+  schedule_availability:{key:"pain",val:"Availability / time-off tracking is messy"}, schedule_labor:{key:"pain",val:"Overtime / coverage visibility concern"},
+  schedule_impact_hours:{key:"impact",val:"Scheduling consumes hours weekly"}, schedule_impact_changes:{key:"impact",val:"Frequent last-minute schedule changes"},
+  schedule_impact_coverage:{key:"impact",val:"Coverage gaps / overstaffing impact"}, schedule_impact_cost:{key:"impact",val:"Overtime / labor cost surprises"},
   timeline_now:{key:"timeline",val:"Immediate (0-30 days)"}, timeline_soon:{key:"timeline",val:"Near-term (1-3 months)"}, timeline_later:{key:"timeline",val:"Mid-term (3+ months)"},
   budget_yes:{key:"budget",val:"Budget confirmed"}, budget_maybe:{key:"budget",val:"Budget likely"}, budget_no:{key:"budget",val:"No budget identified"},
   willing_to_meet:{key:"nextstep",val:"Demo scheduled"}, callback_yes:{key:"nextstep",val:"Follow-up call scheduled"}, book_meeting:{key:"nextstep",val:"Demo requested"},
@@ -1670,6 +1732,17 @@ const FINAL_QUESTION_GUIDANCE = {
   size_small: "End by asking whether it would help, payroll is still painful, pricing for a small shop matters, or they are fine for now.",
   size_medium: "End by asking whether payroll is the issue or whether they want to see how Homebase handles a team that size.",
   size_large: "End by asking whether payroll, cross-location management, or seeing the setup is the next priority.",
+  sched_size_small: "End by asking which scheduling issue is the biggest headache: building the schedule, swaps/callouts, availability/time off, or overtime/coverage surprises.",
+  sched_size_medium: "End by asking which scheduling issue is the biggest headache: building the schedule, swaps/callouts, availability/time off, or overtime/coverage surprises.",
+  sched_size_large: "End by asking which scheduling issue is the biggest headache: building the schedule, swaps/callouts, availability/time off, or overtime/coverage surprises.",
+  schedule_build_time: "End by asking what the impact is: hours every week, changes after posting, or seeing the faster builder.",
+  schedule_changes: "End by asking what the impact is: constant last-minute changes, coverage gaps, or seeing shift swaps.",
+  schedule_availability: "End by asking what the impact is: chasing availability manually, coverage gaps from wrong availability, or seeing availability approvals.",
+  schedule_labor: "End by asking what the impact is: overtime surprises, overstaffing/understaffing, or seeing labor visibility.",
+  schedule_impact_hours: "End by asking whether they want to see the faster scheduling workflow, schedule a demo, or stay put for now.",
+  schedule_impact_changes: "End by asking whether they want to see shift swaps, schedule a demo, or stay put for now.",
+  schedule_impact_coverage: "End by asking whether they want to see coverage controls, schedule a demo, or stay put for now.",
+  schedule_impact_cost: "End by asking whether they want to see overtime alerts, schedule a demo, or stay put for now.",
   timeline_now: "End by asking if they want to get a demo on the calendar now.",
   timeline_soon: "End by asking whether they want info first or to schedule a demo for next week.",
   timeline_later: "End by asking if a follow-up in a few months is the right next step.",
@@ -1736,6 +1809,17 @@ function buildNextPrompt(responseId, responseLabel) {
     gatekeeper_voicemail:`SDR leaving a voicemail for the owner at ${brand}. 20 seconds: name, Homebase, peer proof (${peer}), one reason to call back, direct number. ${hint}`,
     pain_payroll:`Payroll pain confirmed. Expand with Sandler by asking ONE specific question, how long payroll takes them each pay period. Just that one. Don't pitch yet. ${hint}`,
     pain_scheduling:`Scheduling pain confirmed. Briefly empathize, then ask ONE question about how big their team is. Don't bundle in other questions. ${hint}`,
+    sched_size_small:`They just quantified scheduling pain as a small team. Stay in the scheduling lane and avoid changing topics. Acknowledge that even small teams lose time when schedules change, then ask which scheduling issue is the biggest headache: building the schedule, callouts/swaps, availability/time off, or overtime/coverage surprises. ${hint}`,
+    sched_size_medium:`They just quantified scheduling pain as around 15-30 people. Stay in the scheduling lane and avoid changing topics. Acknowledge that this is enough staff for schedules to change all week, then ask which scheduling issue creates the most impact: building the schedule, callouts/swaps, availability/time off, or overtime/coverage surprises. ${hint}`,
+    sched_size_large:`They just quantified scheduling pain as 50+ people or a spread-out team. Stay in the scheduling lane and avoid changing topics. Acknowledge the coverage complexity, then ask which scheduling issue is hardest to control: building schedules, callouts/swaps, availability/time off, or overtime/coverage surprises. ${hint}`,
+    schedule_build_time:`Scheduling build-time pain. Dig deeper before solving: ask how many hours a week they spend building, revising, and posting the schedule. Mention Homebase only lightly as templates, AI-assisted scheduling, and drag-and-drop scheduling after the impact is clear. ${hint}`,
+    schedule_changes:`Schedule churn pain: callouts, swaps, and last-minute changes. Dig deeper before solving: ask how often the posted schedule changes and whether that creates coverage gaps or manager text-chasing. Mention Homebase only lightly as open shifts, shift swaps, team notifications, and messaging after the impact is clear. ${hint}`,
+    schedule_availability:`Availability and time-off pain. Dig deeper before solving: ask whether managers are chasing availability manually or whether bad availability creates coverage gaps. Mention Homebase only lightly as availability approvals, PTO/time-off management, conflict detection, and mobile updates after the impact is clear. ${hint}`,
+    schedule_labor:`Scheduling labor-visibility pain. Dig deeper before solving: ask whether the problem is overtime surprises, overstaffing, understaffing, or not seeing labor cost before publishing. Mention Homebase only lightly as overtime alerts, labor cost visibility, sales/labor forecasting, and POS integration after the impact is clear. ${hint}`,
+    schedule_impact_hours:`Impact confirmed: scheduling consumes hours weekly. Now bridge to solution: Homebase helps build schedules faster with templates, AI-assisted scheduling, and drag-and-drop tools, then notifies the team automatically. Ask whether it is worth seeing the faster scheduling workflow in a demo. ${hint}`,
+    schedule_impact_changes:`Impact confirmed: schedule changes after posting are frequent. Now bridge to solution: Homebase lets teams view schedules on mobile, request swaps, post open shifts, get notified, and keep managers from playing middleman over texts. Ask whether it is worth seeing that workflow in a demo. ${hint}`,
+    schedule_impact_coverage:`Impact confirmed: coverage gaps or over/understaffing hurt operations. Now bridge to solution: Homebase helps track availability and time off, highlights conflicts, sends updates, and gives managers clearer coverage visibility before shifts fall apart. Ask whether it is worth seeing the coverage controls in a demo. ${hint}`,
+    schedule_impact_cost:`Impact confirmed: overtime or labor cost surprises matter. Now bridge to solution: Homebase gives overtime alerts, labor cost visibility, and POS-connected labor/sales forecasting so managers can catch cost issues before publishing. Ask whether it is worth seeing that in a demo. ${hint}`,
     pain_compliance:`Compliance concern. Ask if they worry about overtime or break rules. Mention Homebase has compliance tools built for owners like them. ${hint}`,
     pain_hiring:`Hiring/turnover pain. Empathize, mention Homebase has hiring tools for hourly teams. One follow-up question. ${hint}`,
     pain_comms:`Team comms pain. Mention Homebase team messaging. Ask how they reach their staff at ${brand} today. ${hint}`,
@@ -1763,8 +1847,8 @@ function buildNextPrompt(responseId, responseLabel) {
     decision_maker_yes:`Decision maker confirmed. Brief pain question to open discovery. ${hint}`,
     decision_maker_no:`Ask one thing: who handles it, whether they are unsure, or whether they can get the owner. Warm, one ask.`,
     size_small:`Small team. Pivot to value for smaller shops: quick setup, free scheduling tier, payroll add-on. One pain question. ${hint}`,
-    size_medium:`A team that size is a real payroll lift. Ask how long it takes them. ${hint}`,
-    size_large:`A team that big across ${brand}s is a lot to manage. Bridge briefly to how Homebase handles payroll and scheduling across all of them, then ask whether payroll, cross-location management, or seeing the setup is the next priority. ${hint}`,
+    size_medium:`A team that size can make any hourly-team workflow painful. Do not assume payroll is the issue. Ask whether the bigger drag is scheduling, payroll cleanup, or seeing the full setup. ${hint}`,
+    size_large:`A team that big across ${brand}s is a lot to manage. Ask whether the bigger issue is scheduling coverage, payroll complexity, cross-location visibility, or seeing the setup. ${hint}`,
     timeline_now:`Immediate need. Go straight for the 30-minute discovery + demo and ask if they want to get a demo on the calendar now.`,
     timeline_soon:`Near-term. Offer a one-pager and get a 30-minute demo on the calendar for next week. Confirm email, read it back. ${hint}`,
     timeline_later:`A few months out. Graceful: offer a one-pager, pin a specific follow-up time, get email (read it back).`,
@@ -1820,6 +1904,17 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     named_tool: `${lead}got it, that is helpful context. A lot of owners still look at Homebase when they want hours to flow cleanly into payroll without extra re-keying. What do you wish worked better in your current setup?\n${baseTip}`,
     pain_payroll: `${lead}that is exactly the kind of thing we help with. When payroll is messy, it usually means hours are being checked, copied, or corrected by hand before payday. How long does payroll usually take you each pay period?\n[Coaching tip: Expand the pain before you pitch the fix.]`,
     pain_scheduling: `${lead}yeah, scheduling can eat the week fast, especially when swaps and callouts start stacking up. About how many hourly employees are you scheduling at ${brand}?\n[Coaching tip: Quantify the team size so the pain feels concrete.]`,
+    sched_size_small: `${lead}got it. Even with a smaller team, scheduling can still create a lot of back-and-forth when availability changes. What part is most painful right now: building the schedule, covering callouts and swaps, tracking availability and time off, or avoiding overtime and coverage surprises?\n[Coaching tip: Stay in the scheduling lane and define the specific scheduling pain.]`,
+    sched_size_medium: `${lead}yeah, with 15 to 30 people, the schedule can start changing all week. What is the biggest scheduling headache right now: building it, covering callouts and swaps, tracking availability and time off, or avoiding overtime and coverage surprises?\n[Coaching tip: Stay in the scheduling lane before you show the fix.]`,
+    sched_size_large: `${lead}with a team that size, scheduling is usually a coverage and visibility problem, not just a calendar problem. Which part is hardest to control: building schedules, callouts and swaps, availability and time off, or overtime and coverage surprises?\n[Coaching tip: Keep the pain specific so the demo has a reason.]`,
+    schedule_build_time: `${lead}that makes sense, building the schedule is where a lot of managers lose hours before the week even starts. About how much time does it take each week once you include revisions and posting it to the team?\n[Coaching tip: Quantify scheduling time before talking features.]`,
+    schedule_changes: `${lead}that is usually where the real chaos is, because the schedule is never really done once callouts and swaps start. How often are you changing the posted schedule: constantly, mainly when coverage gaps pop up, or enough that it is worth seeing a better workflow?\n[Coaching tip: Tie swaps and callouts to operational impact.]`,
+    schedule_availability: `${lead}totally, availability and time off get messy fast when they live in texts or someone else's memory. Are you mostly chasing availability manually, dealing with coverage gaps from bad availability, or would it help to see how approvals work?\n[Coaching tip: Separate data collection pain from coverage impact.]`,
+    schedule_labor: `${lead}that matters, because labor surprises show up after the schedule is already posted. Is the bigger issue overtime surprises, overstaffing or understaffing, or would it help to see labor visibility before you publish?\n[Coaching tip: Connect scheduling to cost before showing the dashboard.]`,
+    schedule_impact_hours: `${lead}that is exactly the scheduling time Homebase is meant to give back. Managers can use templates, AI-assisted scheduling, and drag-and-drop tools, then notify the whole team when the schedule is published. Is it worth seeing that faster workflow?\n[Coaching tip: Now that impact is clear, connect the pain to the scheduling workflow.]`,
+    schedule_impact_changes: `${lead}that is where Homebase helps the most: the team can see schedules on mobile, request swaps, pick up open shifts, and get updates without managers chasing everyone by text. Is it worth seeing how that works?\n[Coaching tip: Show the fix for the exact churn they named.]`,
+    schedule_impact_coverage: `${lead}coverage gaps are exactly what scheduling software should prevent before the day falls apart. Homebase helps track availability and time off, flags conflicts, and keeps the team updated when things change. Want to see the coverage controls?\n[Coaching tip: Tie coverage pain to visibility and conflict prevention.]`,
+    schedule_impact_cost: `${lead}that is a real business reason to fix scheduling. Homebase can show overtime alerts and labor costs as you build the schedule, with sales and labor visibility from POS integrations. Want to see the overtime and labor view?\n[Coaching tip: Connect scheduling to dollars, then ask for the demo.]`,
     pain_hiring: `${lead}that makes sense, turnover creates a lot of hidden work. Homebase helps owners post jobs, track applicants, and get new hires into the team flow faster. How are you handling hiring right now?\n${baseTip}`,
     want_demo: `${lead}perfect, that is probably the fastest way to see if it fits. Let's do a 30-minute discovery and demo around the exact ${brand} setup. I have tomorrow at 10am or the following day at 2pm open, which works better?\n[Coaching tip: When they ask to see it, move straight to calendar options.]`,
     price_question: `${lead}pricing is pretty straightforward, and it depends on the setup and team size, so I do not want to guess wrong. Quick question first, about how many hourly employees would need to use it at ${brand}?\n[Coaching tip: Earn the right to talk price by getting one sizing detail.]`,
@@ -1837,8 +1932,8 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     quantify_cost: `${lead}that is exactly the kind of cleanup Homebase is meant to prevent. Have mistakes caused actual rework, or would it be easier to see how the fix works?\n[Coaching tip: Move from annoyance to impact, then to a useful next step.]`,
     errors_confirmed: `${lead}that is exactly why owners come to us. Hours flow straight into payroll, so there is less re-keying and less cleanup. Do you want to find time to look at it, or see how Homebase prevents that?\n[Coaching tip: Once they confirm errors, connect the pain to a demo.]`,
     decision_maker_no: `${lead}got it, thanks for pointing me in the right direction. Who usually handles this: are you unsure, or can you get the owner?\n[Coaching tip: Keep the ask simple when you need the right contact.]`,
-    size_medium: `${lead}with a team that size, even small payroll or scheduling issues can eat real time. Is payroll the bigger issue, or would it help to see how Homebase handles a team that size?\n[Coaching tip: Tie team size back to a concrete workflow.]`,
-    size_large: `${lead}with that many people, the hard part is usually keeping payroll and schedules clean across the whole team. Is payroll the biggest headache, is it the across-location view, or do you want to see how the setup works?\n[Coaching tip: Large teams need a focused next topic, not a feature dump.]`,
+    size_medium: `${lead}with a team that size, even small workflow issues can eat real time. Is the bigger drag scheduling, payroll cleanup, or would it help to see how Homebase handles a team that size?\n[Coaching tip: Do not assume payroll; let them keep you in the pain lane.]`,
+    size_large: `${lead}with that many people, the hard part is usually keeping schedules, payroll, and location visibility clean across the whole team. Is scheduling coverage the biggest headache, is it payroll, is it the across-location view, or do you want to see how the setup works?\n[Coaching tip: Large teams need a focused next topic, not a feature dump.]`,
     timeline_now: `${lead}if this is near-term, it is worth getting a real look on the calendar. Should we schedule a 30-minute discovery and demo?\n[Coaching tip: Immediate timing deserves a direct meeting ask.]`,
     timeline_soon: `${lead}that timing is perfect for getting ahead of it. Would you rather I send a short one-pager first, or should we book a demo for next week?\n[Coaching tip: Give one nurture path and one meeting path.]`,
     timeline_later: `${lead}that is fair, no need to force it today. Should I follow up in a few months when it is closer?\n[Coaching tip: Long-term interest still needs a specific follow-up.]`,
@@ -1888,6 +1983,17 @@ const PHASE_ASKS = {
   not_sure:       [{ key:"solution", val:"unsure on payroll" }],
   franchise_hq:   [{ key:"solution", val:"asked who runs payroll" }],
   pain_scheduling:[{ key:"size", val:"asked team size" }],
+  sched_size_small:[{ key:"impact", val:"asked scheduling impact" }],
+  sched_size_medium:[{ key:"impact", val:"asked scheduling impact" }],
+  sched_size_large:[{ key:"impact", val:"asked scheduling impact" }],
+  schedule_build_time:[{ key:"impact", val:"asked scheduling build-time impact" }],
+  schedule_changes:[{ key:"impact", val:"asked schedule-change impact" }],
+  schedule_availability:[{ key:"impact", val:"asked availability impact" }],
+  schedule_labor:[{ key:"impact", val:"asked labor / coverage impact" }],
+  schedule_impact_hours:[{ key:"nextstep", val:"scheduling solution shown" }],
+  schedule_impact_changes:[{ key:"nextstep", val:"scheduling solution shown" }],
+  schedule_impact_coverage:[{ key:"nextstep", val:"scheduling solution shown" }],
+  schedule_impact_cost:[{ key:"nextstep", val:"scheduling solution shown" }],
   quantify_time:  [{ key:"size", val:"asked team size" }],
   price_question: [{ key:"budget", val:"price discussed" }],
   value_first:    [{ key:"budget", val:"value/ROI framed" }],
@@ -2061,6 +2167,9 @@ async function handleResponse(responseId, label) {
   if (responseId === "size_small")  { markSql("size","1-10 employees", true);  markSql("impact","1-10 users", true); }
   if (responseId === "size_medium") { markSql("size","11-50 employees", true); markSql("impact","11-50 users", true); }
   if (responseId === "size_large")  { markSql("size","50+ employees", true);  markSql("impact","50+ users", true); }
+  if (responseId === "sched_size_small")  { markSql("size","1-10 employees", true);  markAsked("impact","scheduling impact"); }
+  if (responseId === "sched_size_medium") { markSql("size","11-50 employees", true); markAsked("impact","scheduling impact"); }
+  if (responseId === "sched_size_large")  { markSql("size","50+ employees", true);  markAsked("impact","scheduling impact"); }
   updateSql();
 
   disableResp(true);

@@ -142,6 +142,33 @@ if (resp.want_demo.some(option => ["wants_info", "price_question"].includes(opti
   throw new Error("Demo-interest response options should move toward scheduling, not info or pricing gates.");
 }
 
+readContext(`prospectInfo = {
+  brand: "Buffalo Wild Wings",
+  industry: "Food & Beverage",
+  lead_name: "Dave",
+  num_locs: "2",
+  prospect_role: "owner",
+  current_solution: "",
+  timeline: "",
+  budget: "",
+  known_pain: ""
+}; sqlState = freshSql(); markSql("pain", "Scheduling pain confirmed", true);`);
+
+if (resp.pain_scheduling.some(option => ["size_small", "size_medium", "size_large"].includes(option.id))) {
+  throw new Error("Scheduling pain should route to scheduling-specific size branches.");
+}
+const schedulingSizePrompt = sandbox.buildNextPrompt("sched_size_medium", "Around 15-30 people");
+const schedulingSizeFallback = sandbox.buildFallbackTalkTrack("sched_size_medium", "Around 15-30 people");
+if (/payroll/i.test(schedulingSizePrompt) || /payroll/i.test(schedulingSizeFallback)) {
+  throw new Error("Scheduling size path pivoted to payroll.");
+}
+if (!/building the schedule/i.test(schedulingSizePrompt) || !/callouts/i.test(schedulingSizeFallback)) {
+  throw new Error("Scheduling size path did not dig into scheduling issues.");
+}
+if (!resp.sched_size_medium.every(option => option.id.startsWith("schedule_"))) {
+  throw new Error("Scheduling size responses should stay in scheduling-specific branches.");
+}
+
 console.log(JSON.stringify({
   ok: true,
   phases: phases.size,
