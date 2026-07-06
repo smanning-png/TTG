@@ -528,7 +528,7 @@ body.calling .recap { display: flex; }
           <div class="sql-track"><div class="sql-fill" id="sql-fill" style="width:0%"></div></div>
         </div>
         <div id="sql-rows"></div>
-        <div class="sql-note">Only confirmed answers count. A dashed dot means asked, not yet answered. Real handoff needs uncovered pain <span>+</span> a booked demo or specialist call.</div>
+        <div class="sql-note">Only confirmed answers count. A dashed dot means asked, not yet answered. Real handoff needs uncovered pain <span>+</span> a booked product specialist call.</div>
       </div>
     </div>
   </div>
@@ -776,7 +776,7 @@ const COMPETITOR_RESPONSE_OPTIONS = [
   { id:"competitor_gap", icon:"ti-puzzle", label:"It doesn't cover everything", sub:"Feature / workflow gap" },
   { id:"locked_contract", icon:"ti-lock", label:"We're locked in right now", sub:"Contract timing" },
   { id:"competitor_switching", icon:"ti-switch-2", label:"Switching sounds painful", sub:"Migration concern" },
-  { id:"want_demo", icon:"ti-screen-share", label:"Show me the difference", sub:"Opens to demo" },
+  { id:"want_demo", icon:"ti-screen-share", label:"Show me the difference", sub:"Opens to specialist call" },
   { id:"not_interested", icon:"ti-x", label:"We're happy with it", sub:"Satisfied today" }
 ];
 
@@ -1119,7 +1119,7 @@ function buildSystemPrompt(info) {
     pain:"what their specific pain or problem is", timeline:"when they want to make a change (0-30 days, 1-3 months, 3+ months)",
     size:"how many locations the company has", budget:"whether budget exists for a solution",
     solution:"what they currently use (competitor, spreadsheets, nothing)", impact:"estimated users: employees plus owner/admin users",
-    nextstep:"a confirmed next step (demo, follow-up call, or meeting)", contact:"their full name, phone, and company name"
+    nextstep:"a confirmed next step (product specialist call, follow-up call, or meeting)", contact:"their full name, phone, and company name"
   };
   const missingList = missing.map(k => `- ${desc[k]}`).join("\n");
   const locExample = info.num_locs ? `"how are you managing the team across your ${info.num_locs} ${info.brand}s right now?" (or "${info.num_locs} ${info.brand} locations" if pluralizing the name sounds awkward)` : `"how are you managing the team over at ${info.brand} right now?"`;
@@ -1168,8 +1168,8 @@ COMPETITOR BATTLECARDS:
 ${competitorSummaryList()}
 
 THE GOAL OF EVERY CALL (aim for the best outcome the prospect's interest allows):
-1. BEST: book a 30-minute discovery + demo.
-2. GOOD: book a 15-minute call with a product specialist to answer questions and find the best fit.
+1. BEST: book a 30-minute call with a product specialist who can walk through the prospect's setup.
+2. GOOD: capture a specific follow-up time or contact path if they are not ready to meet yet.
 3. AT MINIMUM: capture next-step info, confirm they're the decision maker, get a direct phone number, email, or a specific time they'll be reachable.
 Always push toward one of these three while handling objections and respecting their time. Never end a call without securing at least outcome #3.
 
@@ -1266,7 +1266,7 @@ function phaseLabel(p) {
     gatekeeper_blocks:"Gatekeeper navigation", gatekeeper_voicemail:"Left voicemail",
     pain_payroll:"Pain · payroll", pain_scheduling:"Pain · scheduling", pain_compliance:"Pain · compliance",
     pain_hiring:"Pain · hiring", pain_comms:"Pain · team comms",
-    want_demo:"Demo request", price_question:"Price objection", book_meeting:"Meeting close",
+    want_demo:"Product call request", price_question:"Price objection", book_meeting:"Meeting close",
     not_now:"Timing objection", callback_yes:"Callback booked", callback_no:"Email follow-up",
     softens:"Prospect re-engages", curious_why:"Objection · managing fine",
     franchise_hq:"Objection · HQ handles it", tried_before:"Prior bad experience",
@@ -1321,7 +1321,7 @@ const RESP = {
     { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is more our issue", sub:"Pain confirmed" },
     { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring's the real struggle", sub:"Pain confirmed" },
     { id:"happy_with_current", icon:"ti-circle-check", label:"We have a system already", sub:"Has tools" },
-    { id:"want_demo", icon:"ti-screen-share", label:"Sounds useful, can I see it?", sub:"Demo request" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Sounds useful, can I see it?", sub:"Specialist call request" },
     { id:"price_question", icon:"ti-coin", label:"What's the pricing?", sub:"Price question" },
     { id:"not_interested", icon:"ti-x", label:"Not relevant for us", sub:"Drops off" }
   ],
@@ -1390,10 +1390,10 @@ const RESP = {
     { id:"size_medium", icon:"ti-users", label:"Around 15-30 employees", sub:"Estimated users" },
     { id:"size_large", icon:"ti-users", label:"50 or more employees", sub:"Estimated users" },
     { id:"value_first", icon:"ti-arrow-right", label:"Compare the real total", sub:"Value / ROI" },
-    { id:"want_demo", icon:"ti-screen-share", label:"Show me if it's worth it", sub:"Demo request" }
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me if it's worth it", sub:"Specialist call request" }
   ],
   competitor_support: [
-    { id:"want_demo", icon:"ti-screen-share", label:"I'd look if support is better", sub:"Opens to demo" },
+    { id:"want_demo", icon:"ti-screen-share", label:"I'd look if support is better", sub:"Opens to specialist call" },
     { id:"competitor_gap", icon:"ti-puzzle", label:"Support is one of a few issues", sub:"Broader gap" },
     { id:"not_now", icon:"ti-clock", label:"Annoying, but not urgent", sub:"Low urgency" },
     { id:"not_interested", icon:"ti-x", label:"It's fine overall", sub:"Backs off" }
@@ -1403,7 +1403,7 @@ const RESP = {
     { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling still takes work", sub:"Scheduling gap" },
     { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring/onboarding is separate", sub:"Hiring gap" },
     { id:"pain_comms", icon:"ti-message", label:"Team communication is separate", sub:"Comms gap" },
-    { id:"want_demo", icon:"ti-screen-share", label:"Show me the all-in-one flow", sub:"Demo request" }
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me the all-in-one flow", sub:"Specialist call request" }
   ],
   competitor_switching: [
     { id:"wants_info", icon:"ti-file-text", label:"Send migration info first", sub:"Needs reassurance" },
@@ -1534,13 +1534,13 @@ const RESP = {
   no_payroll: [
     { id:"quantify_time", icon:"ti-clock", label:"Payroll takes a few hours", sub:"Time quantified" },
     { id:"errors_confirmed", icon:"ti-alert-triangle", label:"We've had errors, frustrating", sub:"Error pain" },
-    { id:"want_demo", icon:"ti-screen-share", label:"Interested to see how it works", sub:"Opens to demo" }
+    { id:"want_demo", icon:"ti-screen-share", label:"Interested to see how it works", sub:"Opens to specialist call" }
   ],
   after_pitch_yes: [
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll's our biggest headache", sub:"Pain surfaces" },
     { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling across locations", sub:"Pain surfaces" },
     { id:"pain_hiring", icon:"ti-user-plus", label:"Finding good people", sub:"Pain surfaces" },
-    { id:"want_demo", icon:"ti-screen-share", label:"I'd like to see it", sub:"Demo request" },
+    { id:"want_demo", icon:"ti-screen-share", label:"I'd like to see it", sub:"Specialist call request" },
     { id:"price_question", icon:"ti-coin", label:"What's it cost?", sub:"Price question" }
   ],
   after_pitch_meh: [
@@ -1562,7 +1562,7 @@ const RESP = {
   ],
   quantify_cost: [
     { id:"errors_confirmed", icon:"ti-alert-triangle", label:"We've had to redo runs", sub:"Confirms rework" },
-    { id:"want_demo", icon:"ti-screen-share", label:"Want to see how this gets fixed", sub:"Opens to demo" }
+    { id:"want_demo", icon:"ti-screen-share", label:"Want to see how this gets fixed", sub:"Opens to specialist call" }
   ],
   errors_confirmed: [
     { id:"want_demo", icon:"ti-screen-share", label:"Let's find time to look", sub:"Meeting ready" },
@@ -1571,13 +1571,13 @@ const RESP = {
   multi_loc_pain: [
     { id:"size_large", icon:"ti-users", label:"Running 50+ staff total", sub:"Size revealed" },
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll's just as complicated", sub:"Dual pain" },
-    { id:"want_demo", icon:"ti-screen-share", label:"See it across locations?", sub:"All-locations demo" }
+    { id:"want_demo", icon:"ti-screen-share", label:"See it across locations?", sub:"Specialist call" }
   ],
   value_first: [
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll's the main friction", sub:"Pain confirmed" },
     { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling, honestly", sub:"Pain confirmed" },
     { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring and turnover", sub:"Pain confirmed" },
-    { id:"want_demo", icon:"ti-screen-share", label:"All of it, show me", sub:"Opens to demo" }
+    { id:"want_demo", icon:"ti-screen-share", label:"All of it, show me", sub:"Opens to specialist call" }
   ],
   decision_maker_yes: [
     { id:"interested", icon:"ti-thumb-up", label:"Yes, I decide. What is it?", sub:"DM confirmed" }
@@ -1587,7 +1587,7 @@ const RESP = {
     { id:"gate_name", icon:"ti-user", label:"The owner does, let me get them", sub:"Warm transfer" }
   ],
   size_small: [
-    { id:"want_demo", icon:"ti-screen-share", label:"That'd actually help", sub:"Opens to demo" },
+    { id:"want_demo", icon:"ti-screen-share", label:"That'd actually help", sub:"Opens to specialist call" },
     { id:"pain_payroll", icon:"ti-receipt", label:"Even for a few it's a pain", sub:"Pain confirmed" },
     { id:"price_question", icon:"ti-coin", label:"What's it run for a small shop?", sub:"Price question" },
     { id:"not_now", icon:"ti-clock", label:"We manage okay for now", sub:"Low urgency" }
@@ -1595,13 +1595,13 @@ const RESP = {
   size_medium: [
     { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is still the issue", sub:"Stay with scheduling" },
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll for that is a lot", sub:"Pain surfaces" },
-    { id:"want_demo", icon:"ti-screen-share", label:"See how it handles that", sub:"Opens to demo" }
+    { id:"want_demo", icon:"ti-screen-share", label:"See how it handles that", sub:"Opens to specialist call" }
   ],
   size_large: [
     { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling across that team", sub:"Stay with scheduling" },
     { id:"pain_payroll", icon:"ti-receipt", label:"Payroll for that is brutal", sub:"Pain surfaces" },
     { id:"multi_loc_pain", icon:"ti-building-store", label:"Across locations is the hard part", sub:"Cross-location pain" },
-    { id:"want_demo", icon:"ti-screen-share", label:"See how it handles that", sub:"Opens to demo" }
+    { id:"want_demo", icon:"ti-screen-share", label:"See how it handles that", sub:"Opens to specialist call" }
   ],
   sched_size_small: SCHEDULING_RESPONSE_OPTIONS,
   sched_size_medium: SCHEDULING_RESPONSE_OPTIONS,
@@ -1627,23 +1627,23 @@ const RESP = {
     { id:"want_demo", icon:"ti-screen-share", label:"Show me labor visibility", sub:"Solution interest" }
   ],
   schedule_impact_hours: [
-    { id:"want_demo", icon:"ti-screen-share", label:"Show me the faster workflow", sub:"Solution demo" },
-    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's schedule a demo", sub:"Ready to book" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me the faster workflow", sub:"Solution view" },
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's book the specialist call", sub:"Ready to book" },
     { id:"not_now", icon:"ti-clock", label:"Not worth changing yet", sub:"Low urgency" }
   ],
   schedule_impact_changes: [
-    { id:"want_demo", icon:"ti-screen-share", label:"Show me how swaps work", sub:"Solution demo" },
-    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's schedule a demo", sub:"Ready to book" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me how swaps work", sub:"Solution view" },
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's book the specialist call", sub:"Ready to book" },
     { id:"not_now", icon:"ti-clock", label:"Not worth changing yet", sub:"Low urgency" }
   ],
   schedule_impact_coverage: [
-    { id:"want_demo", icon:"ti-screen-share", label:"Show me coverage controls", sub:"Solution demo" },
-    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's schedule a demo", sub:"Ready to book" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me coverage controls", sub:"Solution view" },
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's book the specialist call", sub:"Ready to book" },
     { id:"not_now", icon:"ti-clock", label:"Not worth changing yet", sub:"Low urgency" }
   ],
   schedule_impact_cost: [
-    { id:"want_demo", icon:"ti-screen-share", label:"Show me overtime alerts", sub:"Solution demo" },
-    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's schedule a demo", sub:"Ready to book" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me overtime alerts", sub:"Solution view" },
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's book the specialist call", sub:"Ready to book" },
     { id:"not_now", icon:"ti-clock", label:"Not worth changing yet", sub:"Low urgency" }
   ],
   timeline_now: [
@@ -1651,13 +1651,13 @@ const RESP = {
   ],
   timeline_soon: [
     { id:"wants_info", icon:"ti-file-text", label:"Send me something to review", sub:"Nurture path" },
-    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's schedule a demo", sub:"Books ahead" }
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's book the specialist call", sub:"Books ahead" }
   ],
   timeline_later: [
     { id:"not_now", icon:"ti-clock", label:"Follow up in a few months", sub:"Long-term nurture" }
   ],
   budget_yes: [
-    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's get a demo booked", sub:"Meeting ready" }
+    { id:"book_meeting", icon:"ti-calendar-event", label:"Let's book the specialist call", sub:"Meeting ready" }
   ],
   budget_maybe: [
     { id:"book_meeting", icon:"ti-calendar-event", label:"Worth 20 minutes to look", sub:"Meeting despite budget" }
@@ -1715,9 +1715,9 @@ const FINAL_QUESTION_GUIDANCE = {
   pain_compliance: "End by asking whether compliance has created real cost, is worth seeing, or should wait.",
   pain_hiring: "End by asking whether they want to see the hiring flow, whether payroll is also a problem, or whether hiring is not urgent.",
   pain_comms: "End by asking whether they want to see team messaging, whether payroll is bigger, or whether communication is not urgent.",
-  want_demo: "End by asking them to pick between two specific 30-minute demo times, such as tomorrow at 10am or the following day at 2pm. Keep the close focused on scheduling unless the prospect raises a new objection.",
+  want_demo: "End by asking them to pick between two specific times for a 30-minute call with a product specialist, such as tomorrow at 10am or the following day at 2pm. Keep the close focused on scheduling unless the prospect raises a new objection.",
   price_question: "End by asking how many people would use it, with small, medium, large, or price-only as natural replies.",
-  book_meeting: "End by asking them to pick between two specific demo times or offer another time that works for them.",
+  book_meeting: "End by asking them to pick between two specific times for a product specialist call or offer another time that works for them.",
   willing_to_meet: "End by asking for the best email or direct phone number for the invite.",
   gives_email: "End by reading the email back and asking if it is correct.",
   gives_phone: "End by reading the phone number back and asking if it is correct.",
@@ -1751,15 +1751,15 @@ const FINAL_QUESTION_GUIDANCE = {
   schedule_changes: "End by asking what the impact is: constant last-minute changes, coverage gaps, or seeing shift swaps.",
   schedule_availability: "End by asking what the impact is: chasing availability manually, coverage gaps from wrong availability, or seeing availability approvals.",
   schedule_labor: "End by asking what the impact is: overtime surprises, overstaffing/understaffing, or seeing labor visibility.",
-  schedule_impact_hours: "End by asking whether they want to see the faster scheduling workflow, schedule a demo, or stay put for now.",
-  schedule_impact_changes: "End by asking whether they want to see shift swaps, schedule a demo, or stay put for now.",
-  schedule_impact_coverage: "End by asking whether they want to see coverage controls, schedule a demo, or stay put for now.",
-  schedule_impact_cost: "End by asking whether they want to see overtime alerts, schedule a demo, or stay put for now.",
-  timeline_now: "End by asking if they want to get a demo on the calendar now.",
-  timeline_soon: "End by asking whether they want info first or to schedule a demo for next week.",
+  schedule_impact_hours: "End by asking whether they want to see the faster scheduling workflow with a product specialist, book the call, or stay put for now.",
+  schedule_impact_changes: "End by asking whether they want to see shift swaps with a product specialist, book the call, or stay put for now.",
+  schedule_impact_coverage: "End by asking whether they want to see coverage controls with a product specialist, book the call, or stay put for now.",
+  schedule_impact_cost: "End by asking whether they want to see overtime alerts with a product specialist, book the call, or stay put for now.",
+  timeline_now: "End by asking if they want to get a product specialist call on the calendar now.",
+  timeline_soon: "End by asking whether they want info first or to schedule a product specialist call for next week.",
   timeline_later: "End by asking if a follow-up in a few months is the right next step.",
-  budget_yes: "End by asking if they want to book the demo.",
-  budget_maybe: "End by asking if a short specialist call is worth it.",
+  budget_yes: "End by asking if they want to book the product specialist call.",
+  budget_maybe: "End by asking if a product specialist call is worth it.",
   budget_no: "End by asking whether future budget follow-up makes sense or whether it is a no.",
   wants_info: "End by asking whether they want a follow-up next week after the email or whether they are not interested."
 };
@@ -1815,8 +1815,8 @@ function buildNextPrompt(responseId, responseLabel) {
     competitor_gap:`Competitor feature/workflow gap. Acknowledge what their current tool does well, then ask which missing workflow matters most: payroll, scheduling, hiring/onboarding, or team communication. Keep Homebase positioned as all-in-one hourly-team operations. ${hint}`,
     competitor_switching:`Switching pain objection. Be honest: switching always takes some work, but a specialist can map what imports, what is manual, and what timing makes sense. Do not overpromise direct deposit or SSN imports. Ask whether they want migration info, a specialist mapping call, renewal timing, or if it is not worth switching. ${hint}`,
     locked_contract:`Contract lock objection. Do not fight the contract. Ask when renewal comes up and what they would change if the contract were not in the way. Position this as planning ahead, not ripping out a tool today. ${hint}`,
-    named_tool:`They just named their current tool. Acknowledge it warmly. IF payroll ownership hasn't already come up earlier in the conversation, ask ONE simple follow-up: does that tool also handle their payroll, or is payroll separate? But if they've ALREADY told you who runs payroll (for example they said they run it themselves, or corporate covers it), do NOT ask again, instead acknowledge what you know and ask a different one-question follow-up that moves toward a demo. ${hint}`,
-    not_sure:`They're not sure whether their tool runs payroll. No problem, that's common. Gently note that a lot of owners are surprised their scheduling tool doesn't actually run payroll, and offer that the quickest way to sort it out is a short look together. Ask ONE question to move toward a 15-minute specialist call. ${hint}`,
+    named_tool:`They just named their current tool. Acknowledge it warmly. IF payroll ownership hasn't already come up earlier in the conversation, ask ONE simple follow-up: does that tool also handle their payroll, or is payroll separate? But if they've ALREADY told you who runs payroll (for example they said they run it themselves, or corporate covers it), do NOT ask again, instead acknowledge what you know and ask a different one-question follow-up that moves toward a product specialist call. ${hint}`,
+    not_sure:`They're not sure whether their tool runs payroll. No problem, that's common. Gently note that a lot of owners are surprised their scheduling tool doesn't actually run payroll, and offer that the quickest way to sort it out is a quick product specialist call. ${hint}`,
     gatekeeper_blocks:`Neighborly, warm, brief. Ask ONE thing, the best time to catch the owner directly. Don't also ask their name in the same line. ${hint}`,
     gatekeeper_voicemail:`SDR leaving a voicemail for the owner at ${brand}. 20 seconds: name, Homebase, peer proof (${peer}), one reason to call back, direct number. ${hint}`,
     pain_payroll:`Payroll pain confirmed. Expand with Sandler by asking ONE specific question, how long payroll takes them each pay period. Just that one. Don't pitch yet. ${hint}`,
@@ -1828,16 +1828,16 @@ function buildNextPrompt(responseId, responseLabel) {
     schedule_changes:`Schedule churn pain: callouts, swaps, and last-minute changes. Dig deeper before solving: ask how often the posted schedule changes and whether that creates coverage gaps or manager text-chasing. Mention Homebase only lightly as open shifts, shift swaps, team notifications, and messaging after the impact is clear. ${hint}`,
     schedule_availability:`Availability and time-off pain. Dig deeper before solving: ask whether managers are chasing availability manually or whether bad availability creates coverage gaps. Mention Homebase only lightly as availability approvals, PTO/time-off management, conflict detection, and mobile updates after the impact is clear. ${hint}`,
     schedule_labor:`Scheduling labor-visibility pain. Dig deeper before solving: ask whether the problem is overtime surprises, overstaffing, understaffing, or not seeing labor cost before publishing. Mention Homebase only lightly as overtime alerts, labor cost visibility, sales/labor forecasting, and POS integration after the impact is clear. ${hint}`,
-    schedule_impact_hours:`Impact confirmed: scheduling consumes hours weekly. Now bridge to solution: Homebase helps build schedules faster with templates, AI-assisted scheduling, and drag-and-drop tools, then notifies the team automatically. Ask whether it is worth seeing the faster scheduling workflow in a demo. ${hint}`,
-    schedule_impact_changes:`Impact confirmed: schedule changes after posting are frequent. Now bridge to solution: Homebase lets teams view schedules on mobile, request swaps, post open shifts, get notified, and keep managers from playing middleman over texts. Ask whether it is worth seeing that workflow in a demo. ${hint}`,
-    schedule_impact_coverage:`Impact confirmed: coverage gaps or over/understaffing hurt operations. Now bridge to solution: Homebase helps track availability and time off, highlights conflicts, sends updates, and gives managers clearer coverage visibility before shifts fall apart. Ask whether it is worth seeing the coverage controls in a demo. ${hint}`,
-    schedule_impact_cost:`Impact confirmed: overtime or labor cost surprises matter. Now bridge to solution: Homebase gives overtime alerts, labor cost visibility, and POS-connected labor/sales forecasting so managers can catch cost issues before publishing. Ask whether it is worth seeing that in a demo. ${hint}`,
+    schedule_impact_hours:`Impact confirmed: scheduling consumes hours weekly. Now bridge to solution: Homebase helps build schedules faster with templates, AI-assisted scheduling, and drag-and-drop tools, then notifies the team automatically. Ask whether it is worth seeing the faster scheduling workflow with a product specialist. ${hint}`,
+    schedule_impact_changes:`Impact confirmed: schedule changes after posting are frequent. Now bridge to solution: Homebase lets teams view schedules on mobile, request swaps, post open shifts, get notified, and keep managers from playing middleman over texts. Ask whether it is worth seeing that workflow with a product specialist. ${hint}`,
+    schedule_impact_coverage:`Impact confirmed: coverage gaps or over/understaffing hurt operations. Now bridge to solution: Homebase helps track availability and time off, highlights conflicts, sends updates, and gives managers clearer coverage visibility before shifts fall apart. Ask whether it is worth seeing the coverage controls with a product specialist. ${hint}`,
+    schedule_impact_cost:`Impact confirmed: overtime or labor cost surprises matter. Now bridge to solution: Homebase gives overtime alerts, labor cost visibility, and POS-connected labor/sales forecasting so managers can catch cost issues before publishing. Ask whether it is worth seeing that on a product specialist call. ${hint}`,
     pain_compliance:`Compliance concern. Ask if they worry about overtime or break rules. Mention Homebase has compliance tools built for owners like them. ${hint}`,
     pain_hiring:`Hiring/turnover pain. Empathize, mention Homebase has hiring tools for hourly teams. One follow-up question. ${hint}`,
     pain_comms:`Team comms pain. Mention Homebase team messaging. Ask how they reach their staff at ${brand} today. ${hint}`,
-    want_demo:`Prospect wants to see it. Advance directly to scheduling. Offer a 30-minute discovery and demo, then give two specific time options, such as tomorrow at 10am or the following day at 2pm, and ask which works better. Keep the close focused on booking unless the prospect raises a new objection. ${hint}`,
+    want_demo:`Prospect wants to see it. Advance directly to scheduling. Offer a 30-minute call with a product specialist, then give two specific time options, such as tomorrow at 10am or the following day at 2pm, and ask which works better. Make it clear the product specialist can walk through their setup. ${hint}`,
     price_question:`Price before value. Defer warmly: "Pricing's pretty simple, but quick question first so I point you to the right setup." ONE discovery question. ${hint}`,
-    book_meeting:`Ready to meet. Lock a 30-minute discovery + demo. Offer two specific meeting times, such as tomorrow at 10am or the following day at 2pm, and ask which one works better or what other time they prefer. Mention the specialist walks through the exact ${brand} setup.`,
+    book_meeting:`Ready to meet. Lock a 30-minute call with a product specialist. Offer two specific meeting times, such as tomorrow at 10am or the following day at 2pm, and ask which one works better or what other time they prefer. Mention the specialist can walk through the exact ${brand} setup.`,
     not_now:`Graceful: ask when timing would actually be better: next week, next month or two, end of year, or not a priority. Do not ask for email in the same turn. ${hint}`,
     callback_yes:`Lock it in: confirm the exact day and time you'll call back, then ask ONE thing, the best direct number or email to reach them. (You'll read it back next turn.)`,
     callback_no:`Agree graciously, mention you can send a short note on how ${credibilityPoint}, then ask whether they will review it later or whether they do not want the follow-up. Do not ask for a meeting in the same turn.`,
@@ -1846,7 +1846,7 @@ function buildNextPrompt(responseId, responseLabel) {
     franchise_hq:`Ask "Does corporate actually run your payroll for you, or is that still on your plate?" Most owners run their own. One question.`,
     tried_before:`Empathize one sentence. Ask what went sideways. Then set Homebase apart as built for hourly teams like ${brand}. ${hint}`,
     what_system:`They use one tool for scheduling AND payroll already. Do NOT ask whether it handles payroll, they just told you it does. Acknowledge that, then differentiate on a specific angle (built for hourly teams, hours flow straight to payroll with no re-keying, or simpler pricing) and ask what they like or wish was better about their current setup. One question. ${hint}`,
-    no_payroll:`Bridge: "That's exactly what most ${industry} owners come to us for. Homebase pulls the hours straight into payroll, so a run takes about five minutes." Then offer a 30-minute demo. ${hint}`,
+    no_payroll:`Bridge: "That's exactly what most ${industry} owners come to us for. Homebase pulls the hours straight into payroll, so a run takes about five minutes." Then offer a 30-minute call with a product specialist. ${hint}`,
     after_pitch_yes:`Engaged. ONE broad discovery question into how they run the team at ${brand} today, let them surface the pain area (scheduling, time tracking, payroll, or hiring). ${hint}`,
     after_pitch_meh:`Ask one thing: who the right person is, or whether they are not sure. Do not ask for contact details in the same turn.`,
     gate_name:`Got a name. Ask for the direct number or best time to reach them. Warm, non-pushy.`,
@@ -1861,11 +1861,11 @@ function buildNextPrompt(responseId, responseLabel) {
     size_small:`Small team. Pivot to value for smaller shops: quick setup, free scheduling tier, payroll add-on. One pain question. ${hint}`,
     size_medium:`A team that size can make any hourly-team workflow painful. Do not assume payroll is the issue. Ask whether the bigger drag is scheduling, payroll cleanup, or seeing the full setup. ${hint}`,
     size_large:`A team that big across ${brand}s is a lot to manage. Ask whether the bigger issue is scheduling coverage, payroll complexity, cross-location visibility, or seeing the setup. ${hint}`,
-    timeline_now:`Immediate need. Go straight for the 30-minute discovery + demo and ask if they want to get a demo on the calendar now.`,
-    timeline_soon:`Near-term. Offer a one-pager and get a 30-minute demo on the calendar for next week. Confirm email, read it back. ${hint}`,
+    timeline_now:`Immediate need. Go straight for the 30-minute product specialist call and ask if they want to get time on the calendar now.`,
+    timeline_soon:`Near-term. Offer a one-pager and get a 30-minute product specialist call on the calendar for next week. Confirm email, read it back. ${hint}`,
     timeline_later:`A few months out. Graceful: offer a one-pager, pin a specific follow-up time, get email (read it back).`,
-    budget_yes:`Budget confirmed. Lock a 30-minute demo: two time options, confirm email and read it back.`,
-    budget_maybe:`Budget likely. Frame it low-commitment: a quick 15-minute call with a specialist to see if it's even a fit. Offer a time.`,
+    budget_yes:`Budget confirmed. Lock a 30-minute product specialist call: two time options, confirm email and read it back.`,
+    budget_maybe:`Budget likely. Frame it low-commitment: a product specialist call to see if it's even a fit. Offer a time.`,
     budget_no:`No budget now. Graceful: offer a one-pager, pin a follow-up a couple months out, get email and read it back.`,
     wants_info:`Wants info first. Mention you can send a one-pager on how ${credibilityPoint}, then ask whether they want a follow-up next week after the email or whether this is not a fit. ${hint}`,
     willing_to_meet:`Time confirmed, great! Now ask for the best email to send the calendar invite. End with the question asking for their email.`,
@@ -1876,7 +1876,7 @@ function buildNextPrompt(responseId, responseLabel) {
   };
   const instruction = selectedCompetitor
     ? competitorPromptInstruction(selectedCompetitor, hint)
-    : (map[responseId] || `Sandler mode, surface or expand pain, then work toward a 30-minute demo, a 15-minute specialist call, or at minimum their contact info and a follow-up time. Under 3 sentences. ${hint}`);
+    : (map[responseId] || `Sandler mode, surface or expand pain, then work toward a product specialist call, or at minimum their contact info and a follow-up time. Under 3 sentences. ${hint}`);
   // Always tell the model exactly what the prospect just said, and to react to it
   // naturally before delivering the script, so the line never starts abruptly.
   const context = `The prospect just said: "${responseLabel}". This is a LIVE, MOVING conversation, do NOT repeat or restate your opening line or anything you already said. Acknowledge or react to what they just said briefly and naturally (a few words), then move the conversation forward: ${instruction}`;
@@ -1918,7 +1918,7 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     pain_scheduling: `${lead}yeah, scheduling can eat the week fast, especially when swaps and callouts start stacking up. About how many hourly employees are you scheduling at ${brand}?\n[Coaching tip: Quantify the team size so the pain feels concrete.]`,
     sched_size_small: `${lead}got it. Even with a smaller team, scheduling can still create a lot of back-and-forth when availability changes. What part is most painful right now: building the schedule, covering callouts and swaps, tracking availability and time off, or avoiding overtime and coverage surprises?\n[Coaching tip: Stay in the scheduling lane and define the specific scheduling pain.]`,
     sched_size_medium: `${lead}yeah, with 15 to 30 people, the schedule can start changing all week. What is the biggest scheduling headache right now: building it, covering callouts and swaps, tracking availability and time off, or avoiding overtime and coverage surprises?\n[Coaching tip: Stay in the scheduling lane before you show the fix.]`,
-    sched_size_large: `${lead}with a team that size, scheduling is usually a coverage and visibility problem, not just a calendar problem. Which part is hardest to control: building schedules, callouts and swaps, availability and time off, or overtime and coverage surprises?\n[Coaching tip: Keep the pain specific so the demo has a reason.]`,
+    sched_size_large: `${lead}with a team that size, scheduling is usually a coverage and visibility problem, not just a calendar problem. Which part is hardest to control: building schedules, callouts and swaps, availability and time off, or overtime and coverage surprises?\n[Coaching tip: Keep the pain specific so the specialist call has a reason.]`,
     schedule_build_time: `${lead}that makes sense, building the schedule is where a lot of managers lose hours before the week even starts. About how much time does it take each week once you include revisions and posting it to the team?\n[Coaching tip: Quantify scheduling time before talking features.]`,
     schedule_changes: `${lead}that is usually where the real chaos is, because the schedule is never really done once callouts and swaps start. How often are you changing the posted schedule: constantly, mainly when coverage gaps pop up, or enough that it is worth seeing a better workflow?\n[Coaching tip: Tie swaps and callouts to operational impact.]`,
     schedule_availability: `${lead}totally, availability and time off get messy fast when they live in texts or someone else's memory. Are you mostly chasing availability manually, dealing with coverage gaps from bad availability, or would it help to see how approvals work?\n[Coaching tip: Separate data collection pain from coverage impact.]`,
@@ -1926,11 +1926,11 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     schedule_impact_hours: `${lead}that is exactly the scheduling time Homebase is meant to give back. Managers can use templates, AI-assisted scheduling, and drag-and-drop tools, then notify the whole team when the schedule is published. Is it worth seeing that faster workflow?\n[Coaching tip: Now that impact is clear, connect the pain to the scheduling workflow.]`,
     schedule_impact_changes: `${lead}that is where Homebase helps the most: the team can see schedules on mobile, request swaps, pick up open shifts, and get updates without managers chasing everyone by text. Is it worth seeing how that works?\n[Coaching tip: Show the fix for the exact churn they named.]`,
     schedule_impact_coverage: `${lead}coverage gaps are exactly what scheduling software should prevent before the day falls apart. Homebase helps track availability and time off, flags conflicts, and keeps the team updated when things change. Want to see the coverage controls?\n[Coaching tip: Tie coverage pain to visibility and conflict prevention.]`,
-    schedule_impact_cost: `${lead}that is a real business reason to fix scheduling. Homebase can show overtime alerts and labor costs as you build the schedule, with sales and labor visibility from POS integrations. Want to see the overtime and labor view?\n[Coaching tip: Connect scheduling to dollars, then ask for the demo.]`,
+    schedule_impact_cost: `${lead}that is a real business reason to fix scheduling. Homebase can show overtime alerts and labor costs as you build the schedule, with sales and labor visibility from POS integrations. Want to see the overtime and labor view with a product specialist?\n[Coaching tip: Connect scheduling to dollars, then ask for the specialist call.]`,
     pain_hiring: `${lead}that makes sense, turnover creates a lot of hidden work. Homebase helps owners post jobs, track applicants, and get new hires into the team flow faster. How are you handling hiring right now?\n${baseTip}`,
-    want_demo: `${lead}perfect, that is probably the fastest way to see if it fits. Let's do a 30-minute discovery and demo around the exact ${brand} setup. I have tomorrow at 10am or the following day at 2pm open, which works better?\n[Coaching tip: When they ask to see it, move straight to calendar options.]`,
+    want_demo: `${lead}perfect, that is probably the fastest way to see if it fits. Let's set up a 30-minute call with a product specialist who can walk through the exact ${brand} setup. I have tomorrow at 10am or the following day at 2pm open, which works better?\n[Coaching tip: When they ask to see it, move straight to calendar options.]`,
     price_question: `${lead}pricing is pretty straightforward, and it depends on the setup and team size, so I do not want to guess wrong. Quick question first, about how many hourly employees would need to use it at ${brand}?\n[Coaching tip: Earn the right to talk price by getting one sizing detail.]`,
-    book_meeting: `${lead}great, let's get something real on the calendar. We can set up a 30-minute discovery and demo with a specialist who can walk through the exact ${brand} workflow. I have tomorrow at 10am or the following day at 2pm open, which one works better?\n[Coaching tip: Move from interest to two concrete calendar options.]`,
+    book_meeting: `${lead}great, let's get something real on the calendar. We can set up a 30-minute call with a product specialist who can walk through the exact ${brand} workflow. I have tomorrow at 10am or the following day at 2pm open, which one works better?\n[Coaching tip: Move from interest to two concrete calendar options.]`,
     callback_yes: `${lead}perfect, I will make a note to call you back then. What is the best direct number or email to reach you?\n[Coaching tip: A callback only counts if you capture a reliable way back in.]`,
     not_now: `${lead}totally fair, timing matters. If this is not for today, when would it make sense to revisit: next week, the next month or two, end of year, or not a priority?\n[Coaching tip: Turn vague timing into a clear follow-up window.]`,
     callback_no: `${lead}I can keep it to a short note on how ${proofRef} use Homebase, no big pitch. Should I follow up after you have a chance to review it, or would you rather I leave it there?\n[Coaching tip: Respect the deflection, but clarify whether the door is open.]`,
@@ -1942,15 +1942,15 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     gate_name: `${lead}thank you, that helps. Would it be easier to put me through now, or is there a better time to catch them?\n[Coaching tip: Convert a name into either a transfer or a callback window.]`,
     quantify_time: `${lead}yeah, hours adds up fast every pay period. About how big is the hourly team: under 10, around 15 to 30, 50 or more, or does it depend by location?\n[Coaching tip: Quantify size right after they quantify time.]`,
     quantify_cost: `${lead}that is exactly the kind of cleanup Homebase is meant to prevent. Have mistakes caused actual rework, or would it be easier to see how the fix works?\n[Coaching tip: Move from annoyance to impact, then to a useful next step.]`,
-    errors_confirmed: `${lead}that is exactly why owners come to us. Hours flow straight into payroll, so there is less re-keying and less cleanup. Do you want to find time to look at it, or see how Homebase prevents that?\n[Coaching tip: Once they confirm errors, connect the pain to a demo.]`,
+    errors_confirmed: `${lead}that is exactly why owners come to us. Hours flow straight into payroll, so there is less re-keying and less cleanup. Do you want to find time to look at it, or see how Homebase prevents that?\n[Coaching tip: Once they confirm errors, connect the pain to a specialist call.]`,
     decision_maker_no: `${lead}got it, thanks for pointing me in the right direction. Who usually handles this: are you unsure, or can you get the owner?\n[Coaching tip: Keep the ask simple when you need the right contact.]`,
     size_medium: `${lead}with a team that size, even small workflow issues can eat real time. Is the bigger drag scheduling, payroll cleanup, or would it help to see how Homebase handles a team that size?\n[Coaching tip: Do not assume payroll; let them keep you in the pain lane.]`,
     size_large: `${lead}with that many people, the hard part is usually keeping schedules, payroll, and location visibility clean across the whole team. Is scheduling coverage the biggest headache, is it payroll, is it the across-location view, or do you want to see how the setup works?\n[Coaching tip: Large teams need a focused next topic, not a feature dump.]`,
-    timeline_now: `${lead}if this is near-term, it is worth getting a real look on the calendar. Should we schedule a 30-minute discovery and demo?\n[Coaching tip: Immediate timing deserves a direct meeting ask.]`,
-    timeline_soon: `${lead}that timing is perfect for getting ahead of it. Would you rather I send a short one-pager first, or should we book a demo for next week?\n[Coaching tip: Give one nurture path and one meeting path.]`,
+    timeline_now: `${lead}if this is near-term, it is worth getting a real look on the calendar. Should we schedule a 30-minute call with a product specialist?\n[Coaching tip: Immediate timing deserves a direct meeting ask.]`,
+    timeline_soon: `${lead}that timing is perfect for getting ahead of it. Would you rather I send a short one-pager first, or should we book a product specialist call for next week?\n[Coaching tip: Give one nurture path and one meeting path.]`,
     timeline_later: `${lead}that is fair, no need to force it today. Should I follow up in a few months when it is closer?\n[Coaching tip: Long-term interest still needs a specific follow-up.]`,
-    budget_yes: `${lead}great, if budget is there, the best next step is seeing whether the workflow fits ${brand}. Should we get a demo booked?\n[Coaching tip: Budget plus interest should turn into a calendar ask.]`,
-    budget_maybe: `${lead}that is enough to take a quick look without overcommitting. Would a short specialist call be worth 15 minutes?\n[Coaching tip: Lower the ask when budget is not firm.]`,
+    budget_yes: `${lead}great, if budget is there, the best next step is having a product specialist walk through whether the workflow fits ${brand}. Should we get that call booked?\n[Coaching tip: Budget plus interest should turn into a calendar ask.]`,
+    budget_maybe: `${lead}that is enough to take a quick look without overcommitting. Would a product specialist call be worth putting on the calendar?\n[Coaching tip: Lower the ask when budget is not firm.]`,
     budget_no: `${lead}understood, timing and budget have to line up. Should I follow up when budget opens later, or is this not going to happen?\n[Coaching tip: Separate future nurture from a real no.]`,
     wants_info: `${lead}happy to send something over. I will keep it short and focused on how ${industry} owners use Homebase for scheduling, time tracking, and payroll. Should I follow up next week after you review it, or is this not a fit?\n[Coaching tip: Do not let an info request become a dead end.]`,
     gives_email: `Perfect, let me read that back to make sure I got it right. That is the email you want the invite sent to, right?\n[Coaching tip: Always confirm contact info out loud before you hang up.]`,
@@ -2010,7 +2010,7 @@ const PHASE_ASKS = {
   quantify_time:  [{ key:"impact", val:"asked employee count for estimated users" }],
   price_question: [{ key:"budget", val:"price discussed" }],
   value_first:    [{ key:"budget", val:"value/ROI framed" }],
-  want_demo:      [{ key:"nextstep", val:"demo time offered" }],
+  want_demo:      [{ key:"nextstep", val:"product specialist call time offered" }],
   book_meeting:   [{ key:"nextstep", val:"booking in progress" }],
   wants_info:     [{ key:"contact", val:"asked for email" }],
   gate_name:      [{ key:"contact", val:"getting owner name" }]
@@ -2052,11 +2052,11 @@ function renderCurrent(scriptText, phase) {
 
 // Honest read on whether this call is actually ready to hand to an AE.
 // A real SQL needs genuine interest (pain uncovered) AND a substantive booked meeting
-// (a 30-min demo or 15-min specialist call), not just any captured callback time.
+// (a product specialist call), not just any captured callback time.
 function endSummary(phase) {
   const painDone = sqlState.pain.status === "done";
   const contactDone = sqlState.contact.status === "done";
-  // A booked demo / specialist call counts as a real meeting; a bare callback does not.
+  // A booked product specialist call counts as a real meeting; a bare callback does not.
   const realMeeting = (phase === "email_confirmed" || phase === "email_correction" || phase === "willing_to_meet");
   const onlyCallback = (phase === "callback_yes" || phase === "callback_no");
 
@@ -2075,12 +2075,12 @@ function endSummary(phase) {
   if (onlyCallback) {
     return `<div class="verdict caution">
       <div class="verdict-head"><i class="ti ti-clock-pause"></i> Follow-up set, not yet an SQL</div>
-      <p>A callback is a good save, but this isn't ready for an AE yet. The goal is a confirmed 30-minute demo or 15-minute specialist call with a prospect who's genuinely interested and knows why they're showing up. Use the callback to uncover pain and book that real meeting.</p>
+      <p>A callback is a good save, but this isn't ready for an AE yet. The goal is a confirmed product specialist call with a prospect who's genuinely interested and knows why they're showing up. Use the callback to uncover pain and book that real meeting.</p>
     </div>`;
   }
   return `<div class="verdict caution">
     <div class="verdict-head"><i class="ti ti-info-circle"></i> Not an AE handoff yet</div>
-    <p>Capture whatever you can (contact info, a follow-up time) and keep nurturing. This becomes an SQL once you've uncovered real pain and booked a 30-minute demo or 15-minute specialist call.</p>
+    <p>Capture whatever you can (contact info, a follow-up time) and keep nurturing. This becomes an SQL once you've uncovered real pain and booked a product specialist call.</p>
   </div>`;
 }
 

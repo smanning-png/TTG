@@ -133,8 +133,15 @@ if (!competitorFallback.includes("Connecteam") || !competitorFallback.includes("
 const demoPrompt = sandbox.buildNextPrompt("want_demo", "I'd like to see it");
 const demoFallback = sandbox.buildFallbackTalkTrack("want_demo", "I'd like to see it");
 const weakDemoClose = /(get info first|talk price first|think it over|send the short version|short note first)/i;
+const wrongMeetingName = /(30[- ]minute discovery|discovery and demo|discovery \+ demo|30[- ]minute demo|30-min demo)/i;
 if (weakDemoClose.test(demoPrompt) || weakDemoClose.test(demoFallback)) {
   throw new Error("Demo-interest path offered a weak next step instead of calendar options.");
+}
+if (wrongMeetingName.test(demoPrompt) || wrongMeetingName.test(demoFallback)) {
+  throw new Error("Demo-interest path used discovery/demo wording instead of product specialist call.");
+}
+if (!/product specialist/i.test(demoPrompt) || !/product specialist/i.test(demoFallback)) {
+  throw new Error("Demo-interest path should position the meeting as a product specialist call.");
 }
 if (!/tomorrow at 10am/i.test(demoFallback) || !/following day at 2pm/i.test(demoFallback)) {
   throw new Error("Demo-interest fallback did not offer two concrete calendar options.");
