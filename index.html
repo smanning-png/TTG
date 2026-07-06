@@ -770,6 +770,138 @@ const INDUSTRY_NOUN = {
   "Education & Arts":"centers", "Auto & Travel":"shops", "Home Services":"crews"
 };
 
+const COMPETITOR_RESPONSE_OPTIONS = [
+  { id:"competitor_cost", icon:"ti-coin", label:"Cost or add-ons are the issue", sub:"Pricing / hidden cost" },
+  { id:"competitor_support", icon:"ti-headset", label:"Support has been frustrating", sub:"Service pain" },
+  { id:"competitor_gap", icon:"ti-puzzle", label:"It doesn't cover everything", sub:"Feature / workflow gap" },
+  { id:"locked_contract", icon:"ti-lock", label:"We're locked in right now", sub:"Contract timing" },
+  { id:"competitor_switching", icon:"ti-switch-2", label:"Switching sounds painful", sub:"Migration concern" },
+  { id:"want_demo", icon:"ti-screen-share", label:"Show me the difference", sub:"Opens to demo" },
+  { id:"not_interested", icon:"ti-x", label:"We're happy with it", sub:"Satisfied today" }
+];
+
+const COMPETITOR_INTEL = {
+  competitor_gusto: {
+    name:"Gusto",
+    aliases:["gusto"],
+    wedge:"integrated scheduling, time tracking, and payroll for hourly teams, plus a real post-promo cost comparison",
+    ask:"Which Gusto plan are you on, and how are hours getting from schedules or timesheets into payroll today?",
+    angles:["Compare post-promo total, not intro pricing", "Ask where timesheets, tips, corrections, or support still take time", "Set direct deposit migration expectations early"],
+    caution:"Do not dismiss Gusto. It has strong payroll and HR brand recognition, so win by finding the hourly-team workflow gaps."
+  },
+  competitor_adp: {
+    name:"ADP",
+    aliases:["adp", "adp run", "run powered by adp"],
+    wedge:"total cost clarity, simpler setup, and hourly-team focus instead of enterprise bloat",
+    ask:"Which ADP plan are you on, and do you pay separately for W-2s, off-cycle runs, HR, or support add-ons?",
+    angles:["Ask for the all-in invoice, not just the base quote", "Probe support speed and rep turnover", "Position Homebase as scheduling, time, and payroll in one hourly-team workflow"],
+    caution:"ADP is credible for complex payroll. Do not fight that; test whether the prospect actually needs that much complexity."
+  },
+  competitor_paychex: {
+    name:"Paychex",
+    aliases:["paychex"],
+    wedge:"monthly predictability, right-sized tools for small teams, and cleaner scheduling-to-payroll flow",
+    ask:"Are you being billed weekly, and do W-2s, reports, integrations, or corrections cost extra?",
+    angles:["Annualize weekly billing so the real cost is visible", "Ask if the full HR stack is more than they need", "If they have both SSN and direct deposit export, switching can be smoother"],
+    caution:"Paychex is strong on payroll and HR. Win on fit, simplicity, and total cost."
+  },
+  competitor_quickbooks: {
+    name:"QuickBooks Payroll",
+    aliases:["quickbooks", "quickbooks payroll", "qb", "qbo"],
+    wedge:"keep QuickBooks for accounting while Homebase owns scheduling, time, payroll prep, and hourly-team operations",
+    ask:"Are you using QuickBooks mainly for accounting, or are schedules and time cards living there too?",
+    angles:["Do not attack the accounting relationship", "Ask about manual time sync and multi-state fees", "Position Homebase alongside QBO, not as an accounting replacement"],
+    caution:"QuickBooks is familiar and sticky. Respect that familiarity and focus on hourly operations."
+  },
+  competitor_square: {
+    name:"Square Payroll",
+    aliases:["square", "square payroll"],
+    wedge:"deeper scheduling, tip pooling, and room to grow beyond a simple POS-tied payroll setup",
+    ask:"Are you mostly using Square because of POS, or because payroll and scheduling are working well too?",
+    angles:["Ask about tip pooling, scheduling horizon, and support during payroll errors", "Position Homebase as deeper hourly-team management while still fitting retail and restaurant workflows", "Use scalability as they add employees or locations"],
+    caution:"Square is price-simple and POS-sticky. Win only where scheduling, tips, compliance, or growth creates pain."
+  },
+  competitor_toast: {
+    name:"Toast",
+    aliases:["toast", "toast payroll", "sling", "sling by toast"],
+    wedge:"Homebase can layer scheduling, time, payroll, hiring, and team messaging around their existing POS instead of making the conversation only about POS hardware",
+    ask:"Are you using Toast for POS only, or are scheduling, payroll, tips, and employee communication all running there too?",
+    angles:["Homebase integrates with Toast, so the prospect does not have to rip out POS to improve hourly-team ops", "Ask whether payroll, scheduling, and tips feel simple or just connected to POS", "If hardware or processing is sensitive, keep the conversation on team management"],
+    caution:"Toast is strong in restaurants and advertises 24/7 support. Do not attack support; ask how the full team workflow feels."
+  },
+  competitor_hotschedules: {
+    name:"HotSchedules",
+    aliases:["hotschedules", "hot schedules", "fourth", "fourth hotschedules"],
+    wedge:"a simpler, more transparent hourly-team app for franchisees who do not need a large enterprise workforce suite",
+    ask:"Are you using HotSchedules mostly for scheduling, or the broader Fourth HR, payroll, compliance, and forecasting suite?",
+    angles:["Acknowledge HotSchedules is strong for enterprise restaurants", "Probe complexity, rollout effort, and whether managers actually use the whole suite", "Position Homebase as quicker to adopt for scheduling, time, payroll, and team messaging"],
+    caution:"HotSchedules has enterprise credibility and major restaurant logos. Win on right-size fit, usability, and speed."
+  },
+  competitor_7shifts: {
+    name:"7shifts",
+    aliases:["7shifts", "7 shifts", "7shift"],
+    wedge:"native payroll plus scheduling, time, hiring, messaging, and broader hourly-team workflows under one Homebase account",
+    ask:"Are you using 7shifts for payroll too, or mainly for scheduling and team communication?",
+    angles:["If it is scheduling-only, bridge to payroll and hiring", "Ask whether tips, labor compliance, onboarding, and payroll still require extra tools", "Use Homebase's franchise social proof where available"],
+    caution:"7shifts is restaurant-focused and strong on scheduling. Win by finding what still sits outside it."
+  },
+  competitor_connecteam: {
+    name:"Connecteam",
+    aliases:["connecteam", "connect team", "connecteam app"],
+    wedge:"native hourly-team scheduling, time tracking, POS/payroll flow, and payroll add-on instead of a broad operations app with payroll integrations",
+    ask:"Are you using Connecteam for time and scheduling only, or does it actually run payroll for you too?",
+    angles:["Ask whether payroll is native or still exported/integrated", "Point out Homebase is purpose-built for hourly teams with scheduling, time, team messaging, hiring, and payroll", "Compare total cost if they need multiple hubs"],
+    caution:"Connecteam is broad and flexible. Win where the prospect wants payroll and hourly operations in one purpose-built workflow."
+  },
+  competitor_cpa: {
+    name:"CPA / accountant",
+    aliases:["cpa", "accountant", "bookkeeper", "accounting firm"],
+    wedge:"let the CPA keep the books while Homebase handles hourly payroll, onboarding, scheduling, time tracking, and faster day-to-day support",
+    ask:"What does your CPA handle today: payroll taxes only, or onboarding, time cards, direct deposit, and employee questions too?",
+    angles:["Do not attack the CPA relationship", "Probe response time during tax season and manual onboarding", "Position Homebase as the payroll system that can still work alongside their trusted accountant"],
+    caution:"This is emotional because of trust. Be respectful and position alongside the CPA."
+  },
+  competitor_paylogics: {
+    name:"Paylogics / iSolved",
+    aliases:["paylogics", "isolved", "i solved"],
+    wedge:"modern usability, easier onboarding expectations, and a clearer migration plan",
+    ask:"How hard was the original setup, and can you easily export employee and direct deposit data if you need to?",
+    angles:["Lead with migration clarity", "Probe UI friction and onboarding effort", "Flag data export uncertainty instead of overpromising"],
+    caution:"Migration risk is the objection. Be honest and set expectations."
+  },
+  competitor_surepayroll: {
+    name:"SurePayroll",
+    aliases:["surepayroll", "sure payroll"],
+    wedge:"upgrade from basic payroll into scheduling, time tracking, onboarding, team communication, and payroll in one app",
+    ask:"Do you have scheduling and time tracking connected to SurePayroll, or is payroll the only piece covered?",
+    angles:["Probe direct deposit import limits and manual onboarding", "Position Homebase as full hourly-team operations, not just payroll", "Use a simple growth story"],
+    caution:"SurePayroll can be low-cost. Win on capability and time saved, not price alone."
+  }
+};
+
+function getCompetitorIntel(id) {
+  return COMPETITOR_INTEL[id] || null;
+}
+
+function getCompetitorFromText(text) {
+  const key = normalizeBrandKey(text);
+  if (!key) return null;
+  for (const intel of Object.values(COMPETITOR_INTEL)) {
+    if (intel.aliases.some(alias => key.includes(normalizeBrandKey(alias)))) return intel;
+  }
+  return null;
+}
+
+function competitorSummaryList() {
+  return Object.values(COMPETITOR_INTEL)
+    .map(c => `- ${c.name}: wedge = ${c.wedge}. Discovery = ${c.ask}. Caution = ${c.caution}`)
+    .join("\n");
+}
+
+function competitorPromptInstruction(competitor, hint) {
+  return `Prospect says they use ${competitor.name}. Use LAER: acknowledge it, explore one thing, then respond only after you understand. Do not bash ${competitor.name}. Use this Homebase wedge if relevant: ${competitor.wedge}. Ask this one discovery question or a close variant of it: ${competitor.ask} ${hint}`;
+}
+
 let sqlState = {};
 function freshSql() {
   // status: null = untouched, "asked" = question raised but not answered (does NOT count),
@@ -791,6 +923,7 @@ let currentPhase = "opening";
 let prospectInfo = {};
 let currentScriptText = "";
 let sdrName = "";
+let activeCompetitor = null;
 
 // ===== SDR sign-in: capture the rep's first name once per browser session =====
 function initSdr() {
@@ -1012,6 +1145,9 @@ SOCIAL PROOF:
 - Peer brands: ${proof.peers[0]} and ${proof.peers[1] || proof.peers[0]}
 - ${proof.payroll} of those use Homebase Payroll
 
+COMPETITOR BATTLECARDS:
+${competitorSummaryList()}
+
 THE GOAL OF EVERY CALL (aim for the best outcome the prospect's interest allows):
 1. BEST: book a 30-minute discovery + demo.
 2. GOOD: book a 15-minute call with a product specialist to answer questions and find the best fit.
@@ -1030,6 +1166,16 @@ PROVEN COLD-CALL PRINCIPLES (apply these):
 - Respect the interruption with a short, specific ask such as "Can I give you the 30-second version?"
 - Use relevant social proof early, especially brand-level proof if it exists.
 - Aim for a roughly even talk-to-listen balance; let the prospect talk. Earn the next 30 seconds rather than monologuing.
+
+OBJECTION HANDLING PRINCIPLES:
+- Use LAER on every objection: listen, acknowledge, explore, then respond. Do not jump straight into rebuttal.
+- Treat price as a value and fit question. Ask what they are comparing against, uncover the real all-in cost, then tie back to time saved, errors avoided, and payroll/scheduling/admin work removed.
+- Treat timing as priority discovery. Ask what will be different later and what happens if the problem waits.
+- Treat "send me info" as a soft brush-off unless you secure a next step. Agree to send it, then ask for a specific follow-up.
+- Treat competitor objections as useful intel. Ask what they like, what still takes time, and whether payroll, scheduling, time, hiring, tips, support, or reporting is the weak spot.
+- Treat switching pain honestly. Set expectations, do not overpromise imports, and offer a short specialist call to map the migration.
+- Treat authority objections as routing, not rejection. Ask who owns scheduling, time, payroll, or HR and what is the best way to reach them.
+- Keep every objection response short: acknowledge in one phrase, ask one clarifying question, then move toward pain or a next step.
 
 RULES:
 - This is what the SDR says OUT LOUD. Conversational, neighborly, never corporate.
@@ -1092,6 +1238,8 @@ async function callAI(systemPrompt, messages) {
 }
 
 function phaseLabel(p) {
+  const competitor = getCompetitorIntel(p);
+  if (competitor) return `Competitor · ${competitor.name}`;
   const m = {
     opening:"Opening · cold intro", interested:"Prospect engaged", give_more:"Pitch delivered",
     too_busy:"Time objection", not_interested:"Brush-off", no_value:"No value seen",
@@ -1114,7 +1262,10 @@ function phaseLabel(p) {
     budget_yes:"Budget confirmed", budget_maybe:"Budget likely", budget_no:"No budget",
     wants_info:"Wants info first", willing_to_meet:"Time confirmed",
     gives_email:"Confirming email", gives_phone:"Confirming number",
-    email_confirmed:"Booked · locked in", email_correction:"Correcting contact"
+    email_confirmed:"Booked · locked in", email_correction:"Correcting contact",
+    competitor_cost:"Objection · competitor cost", competitor_support:"Objection · competitor support",
+    competitor_gap:"Objection · competitor gap", competitor_switching:"Objection · switching pain",
+    locked_contract:"Objection · contract lock"
   };
   return m[p] || "Continuing the call";
 }
@@ -1177,9 +1328,70 @@ const RESP = {
     { id:"not_interested", icon:"ti-x", label:"Not something we need", sub:"No interest" }
   ],
   happy_with_current: [
-    { id:"named_tool", icon:"ti-tool", label:"We use [tool / Excel]", sub:"Names their tool" },
+    { id:"competitor_gusto", icon:"ti-tool", label:"We use Gusto", sub:"Payroll / HR" },
+    { id:"competitor_adp", icon:"ti-tool", label:"We use ADP", sub:"Payroll incumbent" },
+    { id:"competitor_paychex", icon:"ti-tool", label:"We use Paychex", sub:"Payroll incumbent" },
+    { id:"competitor_quickbooks", icon:"ti-tool", label:"We use QuickBooks Payroll", sub:"Accounting-led payroll" },
+    { id:"competitor_square", icon:"ti-tool", label:"We use Square Payroll", sub:"POS-tied payroll" },
+    { id:"competitor_toast", icon:"ti-tools-kitchen-2", label:"We use Toast", sub:"Restaurant POS / team tools" },
+    { id:"competitor_hotschedules", icon:"ti-calendar-stats", label:"We use HotSchedules", sub:"Scheduling / workforce" },
+    { id:"competitor_7shifts", icon:"ti-calendar-time", label:"We use 7shifts", sub:"Restaurant scheduling" },
+    { id:"competitor_connecteam", icon:"ti-apps", label:"We use Connecteam", sub:"Ops / comms app" },
+    { id:"competitor_cpa", icon:"ti-calculator", label:"Our CPA handles it", sub:"Accountant / bookkeeper" },
+    { id:"competitor_other", icon:"ti-tool", label:"We use another tool / Excel", sub:"Generic tool path" },
     { id:"franchise_hq", icon:"ti-building", label:"Our franchisor provides it", sub:"HQ provides tools" },
     { id:"not_interested", icon:"ti-x", label:"We're covered, thanks", sub:"Hard close-out" }
+  ],
+  competitor_gusto: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_adp: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_paychex: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_quickbooks: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_square: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_toast: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_hotschedules: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_7shifts: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_connecteam: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_cpa: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_paylogics: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_surepayroll: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_other: [
+    { id:"named_tool", icon:"ti-tool", label:"It's mainly scheduling/time", sub:"Tool gap" },
+    { id:"no_payroll", icon:"ti-x", label:"Payroll's separate", sub:"Payroll gap" },
+    { id:"what_system", icon:"ti-check", label:"It handles payroll too", sub:"Has payroll" },
+    { id:"competitor_switching", icon:"ti-switch-2", label:"Switching sounds painful", sub:"Migration concern" },
+    { id:"not_sure", icon:"ti-help", label:"Not really sure honestly", sub:"Owner unsure" }
+  ],
+  competitor_cost: [
+    { id:"size_small", icon:"ti-users", label:"Just under 10 of us", sub:"Small team" },
+    { id:"size_medium", icon:"ti-users", label:"Around 15-30 people", sub:"Medium team" },
+    { id:"size_large", icon:"ti-users", label:"50 or more", sub:"Large team" },
+    { id:"value_first", icon:"ti-arrow-right", label:"Compare the real total", sub:"Value / ROI" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me if it's worth it", sub:"Demo request" }
+  ],
+  competitor_support: [
+    { id:"want_demo", icon:"ti-screen-share", label:"I'd look if support is better", sub:"Opens to demo" },
+    { id:"competitor_gap", icon:"ti-puzzle", label:"Support is one of a few issues", sub:"Broader gap" },
+    { id:"not_now", icon:"ti-clock", label:"Annoying, but not urgent", sub:"Low urgency" },
+    { id:"not_interested", icon:"ti-x", label:"It's fine overall", sub:"Backs off" }
+  ],
+  competitor_gap: [
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is still clunky", sub:"Payroll gap" },
+    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling still takes work", sub:"Scheduling gap" },
+    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring/onboarding is separate", sub:"Hiring gap" },
+    { id:"pain_comms", icon:"ti-message", label:"Team communication is separate", sub:"Comms gap" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me the all-in-one flow", sub:"Demo request" }
+  ],
+  competitor_switching: [
+    { id:"wants_info", icon:"ti-file-text", label:"Send migration info first", sub:"Needs reassurance" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Map it out with me", sub:"Specialist call" },
+    { id:"not_now", icon:"ti-clock", label:"Maybe at renewal", sub:"Timing" },
+    { id:"not_interested", icon:"ti-x", label:"Not worth switching", sub:"Status quo" }
+  ],
+  locked_contract: [
+    { id:"timeline_now", icon:"ti-calendar-bolt", label:"Renewal is coming up soon", sub:"Near-term" },
+    { id:"timeline_soon", icon:"ti-calendar", label:"A few months out", sub:"Plan ahead" },
+    { id:"timeline_later", icon:"ti-calendar-off", label:"Not until end of year", sub:"Long-term" },
+    { id:"not_interested", icon:"ti-x", label:"We're not evaluating", sub:"Hard no" }
   ],
   named_tool: [
     { id:"no_payroll", icon:"ti-x", label:"No, payroll's separate", sub:"Payroll gap" },
@@ -1414,6 +1626,12 @@ const FINAL_QUESTION_GUIDANCE = {
   no_value: "End by asking what makes it feel irrelevant: team size, corporate handling HR, or timing.",
   who_are_you: "End by asking whether that sounds relevant, whether payroll or hiring is the issue, whether they already have tools, whether they are not the decision maker, or whether it is not needed.",
   happy_with_current: "End by asking what they use today and whether it is their own tool or provided by the franchisor.",
+  competitor_other: "End by asking whether the tool mainly handles scheduling/time, payroll too, payroll separately, switching pain, or uncertainty.",
+  competitor_cost: "End by asking for team size or permission to compare the real all-in total.",
+  competitor_support: "End by asking whether support pain makes them open to a look, whether there are broader gaps, whether it is not urgent, or whether the current tool is fine.",
+  competitor_gap: "End by asking which workflow still sits outside their current tool: payroll, scheduling, hiring/onboarding, communication, or the full flow.",
+  competitor_switching: "End by asking whether they want migration info, a specialist to map it, renewal timing, or whether switching is not worth it.",
+  locked_contract: "End by asking when the contract renews or whether they are not evaluating.",
   named_tool: "End by asking one payroll-ownership question: does that tool handle payroll, is payroll separate, or are they not sure?",
   not_sure: "End by asking if it is worth a quick look together, if payroll is probably separate, or if another time is better.",
   gatekeeper_blocks: "End by asking for one path to the owner: name, voicemail, a callback window, or no more calls.",
@@ -1462,6 +1680,9 @@ const FINAL_QUESTION_GUIDANCE = {
 };
 
 function getFinalQuestionGuidance(responseId, options) {
+  if (getCompetitorIntel(responseId)) {
+    return "End by asking what part of the current setup is worth discussing: cost/add-ons, support, missing workflows, contract timing, switching pain, seeing the difference, or staying put.";
+  }
   if (FINAL_QUESTION_GUIDANCE[responseId]) return FINAL_QUESTION_GUIDANCE[responseId];
   const labels = options.map(o => o.label).join(", ");
   return `End with one question that clearly invites one of these replies: ${labels}.`;
@@ -1475,6 +1696,8 @@ function buildNextPrompt(responseId, responseLabel) {
   const credibilityPoint = brandProof
     ? `${brandProof.locations} ${brandProof.brand} locations already use Homebase`
     : `${peer} owners use Homebase`;
+  const selectedCompetitor = getCompetitorIntel(responseId);
+  const currentCompetitor = selectedCompetitor || activeCompetitor || getCompetitorFromText(prospectInfo.current_solution || "");
   const missing = getMissingFields();
   const hint = missing.length ? `If natural, weave in a question to uncover one of these missing SQL fields: ${missing.slice(0,3).map(k => ({
     pain:"their specific pain", timeline:"when they want to change", size:"how many employees",
@@ -1501,6 +1724,12 @@ function buildNextPrompt(responseId, responseLabel) {
     no_value:`Prospect doesn't see fit. Curious, low-pressure question about their biggest day-to-day headache running the team at ${brand}, whether that's scheduling, covering shifts, time tracking, payroll, or hiring. Don't pitch, just ask. ${hint}`,
     who_are_you:`They asked what Homebase is, so they're curious, that's good. Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: Homebase is the all-in-one app to run an hourly team, scheduling, time tracking, payroll, and hiring all in one place. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team at ${brand} today. Keep it conversational, not a feature dump. ${hint}`,
     happy_with_current:`Ask ONE question, what they're using to run the team today. Just the tool, don't also ask about payroll in the same breath. ${hint}`,
+    competitor_other:`They use another tool or Excel. Acknowledge that most owners already have something, then ask ONE question to learn what it actually covers: scheduling/time, payroll too, payroll separate, switching pain, or uncertainty. ${hint}`,
+    competitor_cost:`Competitor cost objection. Use the pricing playbook: acknowledge, ask what total they are comparing against, and avoid discounting. If a competitor is known (${currentCompetitor ? currentCompetitor.name : "unknown"}), compare all-in cost, add-ons, year-end fees, support, and time saved. End by asking team size or permission to compare real total cost. ${hint}`,
+    competitor_support:`Competitor support objection. Acknowledge the frustration without attacking the competitor. Ask whether support is the only issue or if payroll, scheduling, onboarding, or communication is also taking time. If natural, position Homebase as real people plus an hourly-team workflow. ${hint}`,
+    competitor_gap:`Competitor feature/workflow gap. Acknowledge what their current tool does well, then ask which missing workflow matters most: payroll, scheduling, hiring/onboarding, or team communication. Keep Homebase positioned as all-in-one hourly-team operations. ${hint}`,
+    competitor_switching:`Switching pain objection. Be honest: switching always takes some work, but a specialist can map what imports, what is manual, and what timing makes sense. Do not overpromise direct deposit or SSN imports. Ask whether they want migration info, a specialist mapping call, renewal timing, or if it is not worth switching. ${hint}`,
+    locked_contract:`Contract lock objection. Do not fight the contract. Ask when renewal comes up and what they would change if the contract were not in the way. Position this as planning ahead, not ripping out a tool today. ${hint}`,
     named_tool:`They just named their current tool. Acknowledge it warmly. IF payroll ownership hasn't already come up earlier in the conversation, ask ONE simple follow-up: does that tool also handle their payroll, or is payroll separate? But if they've ALREADY told you who runs payroll (for example they said they run it themselves, or corporate covers it), do NOT ask again, instead acknowledge what you know and ask a different one-question follow-up that moves toward a demo. ${hint}`,
     not_sure:`They're not sure whether their tool runs payroll. No problem, that's common. Gently note that a lot of owners are surprised their scheduling tool doesn't actually run payroll, and offer that the quickest way to sort it out is a short look together. Ask ONE question to move toward a 15-minute specialist call. ${hint}`,
     gatekeeper_blocks:`Neighborly, warm, brief. Ask ONE thing, the best time to catch the owner directly. Don't also ask their name in the same line. ${hint}`,
@@ -1549,7 +1778,9 @@ function buildNextPrompt(responseId, responseLabel) {
     email_confirmed:`Email/number confirmed. Warmly lock everything in: restate the day and time, say the invite is on its way, and that the specialist will walk through the exact ${brand} setup. Friendly one-line sign-off. No question needed.`,
     email_correction:`Prospect corrected their contact info. Read the corrected version back once more and ask if it is right now.`
   };
-  const instruction = map[responseId] || `Sandler mode, surface or expand pain, then work toward a 30-minute demo, a 15-minute specialist call, or at minimum their contact info and a follow-up time. Under 3 sentences. ${hint}`;
+  const instruction = selectedCompetitor
+    ? competitorPromptInstruction(selectedCompetitor, hint)
+    : (map[responseId] || `Sandler mode, surface or expand pain, then work toward a 30-minute demo, a 15-minute specialist call, or at minimum their contact info and a follow-up time. Under 3 sentences. ${hint}`);
   // Always tell the model exactly what the prospect just said, and to react to it
   // naturally before delivering the script, so the line never starts abruptly.
   const context = `The prospect just said: "${responseLabel}". This is a LIVE, MOVING conversation, do NOT repeat or restate your opening line or anything you already said. Acknowledge or react to what they just said briefly and naturally (a few words), then move the conversation forward: ${instruction}`;
@@ -1566,6 +1797,12 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
   const proofRef = brandProof ? `${brandProof.locations} ${brandProof.brand} locations` : `${peer} owners`;
   const lead = info.lead_name ? `${info.lead_name}, ` : "";
   const baseTip = "[Coaching tip: Keep it calm, ask one question, and move toward pain or a booked next step.]";
+  const selectedCompetitor = getCompetitorIntel(responseId);
+  const currentCompetitor = selectedCompetitor || activeCompetitor || getCompetitorFromText(info.current_solution || "");
+
+  if (selectedCompetitor) {
+    return `${lead}that makes sense, a lot of owners already have ${selectedCompetitor.name} in place. The reason owners still compare Homebase is ${selectedCompetitor.wedge}. ${selectedCompetitor.ask}\n[Coaching tip: Do not attack ${selectedCompetitor.name}; find the one workflow they still want to improve.]`;
+  }
 
   const lines = {
     interested: `${lead}great question. Homebase helps ${industry} owners run scheduling, time tracking, payroll, hiring, and team messages in one place, and ${proofRef} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
@@ -1574,6 +1811,12 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     not_interested: `${lead}totally fair, before I let you go, can I ask one quick thing? For a lot of ${industry} owners, the headache is not the software, it is the time lost fixing schedules, time cards, and payroll after the fact. Which of those is most annoying for you right now?\n${baseTip}`,
     who_are_you: `${lead}yeah, of course. We are Homebase, the all-in-one app for hourly teams, scheduling, time tracking, payroll, hiring, and team communication, and owners like ${peer} use us to simplify the week. How are you running those pieces at ${brand} today?\n${baseTip}`,
     happy_with_current: `${lead}that makes sense, most owners we talk to have something in place already. What are you using today to handle scheduling, time tracking, and payroll?\n${baseTip}`,
+    competitor_other: `${lead}got it, most owners already have a tool somewhere in the process. Does it mainly cover scheduling and time, payroll too, or is payroll still separate?\n${baseTip}`,
+    competitor_cost: `${lead}totally fair, price only matters once we know the real total. With ${currentCompetitor ? currentCompetitor.name : "your current setup"}, the useful comparison is base price, add-ons, year-end fees, and time spent fixing payroll or schedules. How many hourly employees would we be comparing for ${brand}?\n[Coaching tip: Treat price as a value and fit question, not a discount fight.]`,
+    competitor_support: `${lead}I hear you, support frustration gets old fast when payroll or schedules are on the line. Is support the main issue, or are there workflow gaps too, like payroll, scheduling, onboarding, or team messages?\n[Coaching tip: Acknowledge the frustration, then explore whether the issue is isolated or bigger.]`,
+    competitor_gap: `${lead}that is usually where owners start looking, not because the current tool is useless, but because it leaves work outside the system. Which part is still outside it today: payroll, scheduling, hiring, or team communication?\n[Coaching tip: Name the gap, then let them choose the pain.]`,
+    competitor_switching: `${lead}that is a fair concern, switching always takes some planning. The useful next step is mapping what imports, what is manual, and what timing makes sense. Would you rather I send migration info first, or map it with a specialist?\n[Coaching tip: Reduce switching anxiety with a concrete migration map.]`,
+    locked_contract: `${lead}that makes sense, no one wants to rip something out mid-contract. If renewal is the real window, when does that come up: soon, in a few months, or closer to year-end?\n[Coaching tip: Turn contract lock into a renewal-timing conversation.]`,
     named_tool: `${lead}got it, that is helpful context. A lot of owners still look at Homebase when they want hours to flow cleanly into payroll without extra re-keying. What do you wish worked better in your current setup?\n${baseTip}`,
     pain_payroll: `${lead}that is exactly the kind of thing we help with. When payroll is messy, it usually means hours are being checked, copied, or corrected by hand before payday. How long does payroll usually take you each pay period?\n[Coaching tip: Expand the pain before you pitch the fix.]`,
     pain_scheduling: `${lead}yeah, scheduling can eat the week fast, especially when swaps and callouts start stacking up. About how many hourly employees are you scheduling at ${brand}?\n[Coaching tip: Quantify the team size so the pain feels concrete.]`,
@@ -1635,6 +1878,12 @@ const PHASE_ASKS = {
   who_are_you:    [{ key:"pain", val:"asked, awaiting answer" }],
   no_value:       [{ key:"solution", val:"asked, awaiting answer" }],
   happy_with_current: [{ key:"solution", val:"asked, awaiting answer" }],
+  competitor_other: [{ key:"solution", val:"asked, awaiting answer" }],
+  competitor_cost: [{ key:"budget", val:"asked competitor total cost" }],
+  competitor_support: [{ key:"pain", val:"asked support impact" }],
+  competitor_gap: [{ key:"pain", val:"asked current tool gap" }],
+  competitor_switching: [{ key:"timeline", val:"asked migration timing" }],
+  locked_contract: [{ key:"timeline", val:"asked contract renewal" }],
   named_tool:     [{ key:"solution", val:"named, checking payroll" }],
   not_sure:       [{ key:"solution", val:"unsure on payroll" }],
   franchise_hq:   [{ key:"solution", val:"asked who runs payroll" }],
@@ -1762,6 +2011,7 @@ async function startCall() {
   seedSqlFromForm();
   conversationHistory = [];
   currentPhase = "opening";
+  activeCompetitor = getCompetitorFromText(prospectInfo.current_solution || "");
 
   document.getElementById("gen-btn").disabled = true;
   document.getElementById("history").innerHTML = "";
@@ -1793,7 +2043,17 @@ async function handleResponse(responseId, label) {
   const prevPhase = currentPhase;
   const prevScript = currentScriptText;
   currentPhase = responseId;
+  const competitor = getCompetitorIntel(responseId);
+  if (competitor) {
+    activeCompetitor = competitor;
+    markSql("solution", `Uses ${competitor.name}`, true);
+  }
   if (SQL_SIGNAL_MAP[responseId]) { const s = SQL_SIGNAL_MAP[responseId]; markSql(s.key, s.val, true); }
+  if (responseId === "competitor_cost") { markSql("budget","Competitor cost / add-ons concern", true); markSql("pain","Competitor cost concern", true); }
+  if (responseId === "competitor_support") markSql("pain","Competitor support frustration", true);
+  if (responseId === "competitor_gap") markSql("pain","Current tool workflow gap", true);
+  if (responseId === "competitor_switching") markAsked("timeline","switching / migration timing");
+  if (responseId === "locked_contract") markAsked("timeline","contract renewal timing");
   if (responseId === "willing_to_meet" || responseId === "callback_yes") markSql("nextstep","Next step confirmed", true);
   if (responseId === "curious_why") markSql("solution","Manual / spreadsheets", true);
   if (responseId === "tried_before") markSql("solution","Had prior tool", true);
@@ -1836,6 +2096,7 @@ function renderRetry(msg, phase, scriptText) {
 
 function resetAll() {
   conversationHistory = []; currentPhase = "opening"; prospectInfo = {}; currentScriptText = "";
+  activeCompetitor = null;
   document.getElementById("history").innerHTML = "";
   document.getElementById("current-block").innerHTML = "";
   document.getElementById("callview").classList.remove("on");

@@ -43,12 +43,13 @@ function readContext(expr) {
 
 const resp = readContext("RESP");
 const guidance = readContext("FINAL_QUESTION_GUIDANCE");
+const competitorIntel = readContext("COMPETITOR_INTEL");
 const phases = new Set(Object.keys(resp));
 const missingTargets = [];
 const missingGuidance = [];
 
 for (const [phase, options] of Object.entries(resp)) {
-  if (options.length && !guidance[phase]) missingGuidance.push(phase);
+  if (options.length && !guidance[phase] && !competitorIntel[phase]) missingGuidance.push(phase);
   for (const option of options) {
     if (!phases.has(option.id)) {
       missingTargets.push(`${phase} -> ${option.id} (${option.label})`);
@@ -118,9 +119,20 @@ if (!brandProof.includes("25 Ace Hardware locations")) {
   throw new Error("Brand-level social proof did not render for Ace Hardware.");
 }
 
+const toastPrompt = sandbox.buildNextPrompt("competitor_toast", "We use Toast");
+if (!toastPrompt.includes("Toast") || !toastPrompt.includes("Homebase") || !toastPrompt.includes("cost")) {
+  throw new Error("Toast competitor prompt did not include expected competitor guidance.");
+}
+
+const competitorFallback = sandbox.buildFallbackTalkTrack("competitor_connecteam", "We use Connecteam");
+if (!competitorFallback.includes("Connecteam") || !competitorFallback.includes("payroll")) {
+  throw new Error("Connecteam fallback did not include expected competitor guidance.");
+}
+
 console.log(JSON.stringify({
   ok: true,
   phases: phases.size,
   transitions: Object.values(resp).flat().length,
+  competitors: Object.keys(competitorIntel).length,
   terminalPhases: Object.entries(resp).filter(([, options]) => !options.length).map(([phase]) => phase)
 }, null, 2));
