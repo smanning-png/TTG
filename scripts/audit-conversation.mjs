@@ -150,6 +150,33 @@ if (resp.want_demo.some(option => ["wants_info", "price_question"].includes(opti
   throw new Error("Demo-interest response options should move toward scheduling, not info or pricing gates.");
 }
 
+const broadStackPhases = ["interested", "give_more", "who_are_you", "after_pitch_yes"];
+const requiredStackOptions = [
+  "competitor_toast",
+  "competitor_gusto",
+  "competitor_adp",
+  "competitor_7shifts",
+  "competitor_hotschedules",
+  "competitor_other",
+  "curious_why",
+  "franchise_hq"
+];
+for (const phase of broadStackPhases) {
+  const ids = new Set(resp[phase].map(option => option.id));
+  for (const required of requiredStackOptions) {
+    if (!ids.has(required)) {
+      throw new Error(`${phase} is missing current-stack response option ${required}.`);
+    }
+  }
+  if (ids.has("give_more") || ids.has("price_question")) {
+    throw new Error(`${phase} should answer the current-stack question, not offer pitch/price detours.`);
+  }
+}
+const broadStackPrompt = sandbox.buildNextPrompt("interested", "Yeah, what does it do?");
+if (!broadStackPrompt.includes("Toast handles POS / some team tools") || !broadStackPrompt.includes("Gusto handles payroll")) {
+  throw new Error("Broad discovery prompt is missing competitor/current-stack response labels.");
+}
+
 readContext(`prospectInfo = {
   brand: "Buffalo Wild Wings",
   industry: "Food & Beverage",

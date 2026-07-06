@@ -787,6 +787,27 @@ const SCHEDULING_RESPONSE_OPTIONS = [
   { id:"schedule_labor", icon:"ti-chart-line", label:"Overtime or coverage surprises us", sub:"Labor visibility" }
 ];
 
+const CURRENT_STACK_RESPONSE_OPTIONS = [
+  { id:"competitor_toast", icon:"ti-tools-kitchen-2", label:"Toast handles POS / some team tools", sub:"POS / restaurant stack" },
+  { id:"competitor_gusto", icon:"ti-receipt", label:"Gusto handles payroll", sub:"Payroll / HR" },
+  { id:"competitor_adp", icon:"ti-receipt", label:"ADP handles payroll", sub:"Payroll incumbent" },
+  { id:"competitor_paychex", icon:"ti-receipt", label:"Paychex handles payroll", sub:"Payroll incumbent" },
+  { id:"competitor_quickbooks", icon:"ti-calculator", label:"QuickBooks handles payroll", sub:"Accounting-led payroll" },
+  { id:"competitor_square", icon:"ti-square", label:"Square handles POS / payroll", sub:"POS-tied payroll" },
+  { id:"competitor_7shifts", icon:"ti-calendar-time", label:"7shifts handles scheduling", sub:"Restaurant scheduling" },
+  { id:"competitor_hotschedules", icon:"ti-calendar-stats", label:"HotSchedules handles scheduling", sub:"Workforce scheduling" },
+  { id:"competitor_connecteam", icon:"ti-apps", label:"Connecteam handles team comms / ops", sub:"Ops / comms app" },
+  { id:"competitor_cpa", icon:"ti-calculator", label:"Our CPA / bookkeeper handles payroll", sub:"Accountant / bookkeeper" },
+  { id:"competitor_other", icon:"ti-layout-grid", label:"Different tools for each piece", sub:"Mixed stack" },
+  { id:"curious_why", icon:"ti-file-spreadsheet", label:"Excel, paper, texts, and manual work", sub:"Manual process" },
+  { id:"franchise_hq", icon:"ti-building", label:"Corporate / franchisor provides it", sub:"HQ-provided tools" },
+  { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is the problem", sub:"Pain surfaces" },
+  { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is our headache", sub:"Pain surfaces" },
+  { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring is tough right now", sub:"Pain surfaces" },
+  { id:"decision_maker_no", icon:"ti-user-question", label:"Someone else handles that", sub:"Wrong contact" },
+  { id:"not_interested", icon:"ti-x", label:"We're covered, thanks", sub:"Status quo" }
+];
+
 const COMPETITOR_INTEL = {
   competitor_gusto: {
     name:"Gusto",
@@ -1307,24 +1328,8 @@ const RESP = {
     { id:"gatekeeper_blocks", icon:"ti-user-off", label:"Let me take a message", sub:"Gatekeeper blocks" },
     { id:"decision_maker_no", icon:"ti-user-question", label:"I'm not the right person", sub:"Wrong contact" }
   ],
-  interested: [
-    { id:"give_more", icon:"ti-arrow-right", label:"Sure, tell me more", sub:"Open to pitch" },
-    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is the problem", sub:"Pain surfaces" },
-    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is our headache", sub:"Pain surfaces" },
-    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring is tough right now", sub:"Pain surfaces" },
-    { id:"who_are_you", icon:"ti-help", label:"Wait, what is Homebase?", sub:"Needs context" },
-    { id:"price_question", icon:"ti-coin", label:"How much does it cost?", sub:"Price question" },
-    { id:"not_interested", icon:"ti-x", label:"Actually, we're good", sub:"Drops off" }
-  ],
-  give_more: [
-    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is a pain point", sub:"Pain confirmed" },
-    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is more our issue", sub:"Pain confirmed" },
-    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring's the real struggle", sub:"Pain confirmed" },
-    { id:"happy_with_current", icon:"ti-circle-check", label:"We have a system already", sub:"Has tools" },
-    { id:"want_demo", icon:"ti-screen-share", label:"Sounds useful, can I see it?", sub:"Specialist call request" },
-    { id:"price_question", icon:"ti-coin", label:"What's the pricing?", sub:"Price question" },
-    { id:"not_interested", icon:"ti-x", label:"Not relevant for us", sub:"Drops off" }
-  ],
+  interested: CURRENT_STACK_RESPONSE_OPTIONS,
+  give_more: CURRENT_STACK_RESPONSE_OPTIONS,
   too_busy: [
     { id:"callback_yes", icon:"ti-calendar-plus", label:"Tomorrow morning's better", sub:"Gives a callback time" },
     { id:"callback_no", icon:"ti-mail", label:"Just email me something", sub:"Deflects to email" },
@@ -1343,14 +1348,7 @@ const RESP = {
     { id:"franchise_hq", icon:"ti-building", label:"Corporate manages our HR", sub:"HQ objection" },
     { id:"not_now", icon:"ti-clock", label:"Not the right time", sub:"Timing" }
   ],
-  who_are_you: [
-    { id:"after_pitch_yes", icon:"ti-thumb-up", label:"That sounds relevant", sub:"Now engaged" },
-    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is actually tough", sub:"Pain surfaces" },
-    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring's been rough", sub:"Pain surfaces" },
-    { id:"happy_with_current", icon:"ti-circle-check", label:"We have tools for that", sub:"Has tools" },
-    { id:"after_pitch_meh", icon:"ti-minus", label:"I'm not the decision-maker", sub:"Wrong contact" },
-    { id:"not_interested", icon:"ti-x", label:"Not something we need", sub:"No interest" }
-  ],
+  who_are_you: CURRENT_STACK_RESPONSE_OPTIONS,
   happy_with_current: [
     { id:"competitor_gusto", icon:"ti-tool", label:"We use Gusto", sub:"Payroll / HR" },
     { id:"competitor_adp", icon:"ti-tool", label:"We use ADP", sub:"Payroll incumbent" },
@@ -1536,13 +1534,7 @@ const RESP = {
     { id:"errors_confirmed", icon:"ti-alert-triangle", label:"We've had errors, frustrating", sub:"Error pain" },
     { id:"want_demo", icon:"ti-screen-share", label:"Interested to see how it works", sub:"Opens to specialist call" }
   ],
-  after_pitch_yes: [
-    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll's our biggest headache", sub:"Pain surfaces" },
-    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling across locations", sub:"Pain surfaces" },
-    { id:"pain_hiring", icon:"ti-user-plus", label:"Finding good people", sub:"Pain surfaces" },
-    { id:"want_demo", icon:"ti-screen-share", label:"I'd like to see it", sub:"Specialist call request" },
-    { id:"price_question", icon:"ti-coin", label:"What's it cost?", sub:"Price question" }
-  ],
+  after_pitch_yes: CURRENT_STACK_RESPONSE_OPTIONS,
   after_pitch_meh: [
     { id:"gate_name", icon:"ti-user", label:"Talk to [owner's name]", sub:"Gives contact" },
     { id:"decision_maker_no", icon:"ti-user-question", label:"Not sure who handles this", sub:"Unclear DM" }
@@ -1678,7 +1670,8 @@ const SQL_SIGNAL_MAP = {
   pain_comms:{key:"pain",val:"Team comms pain"}, errors_confirmed:{key:"pain",val:"Payroll errors confirmed"},
   quantify_time:{key:"pain",val:"Payroll time pain quantified"}, quantify_cost:{key:"pain",val:"Payroll cost pain"},
   no_payroll:{key:"solution",val:"Has tool, payroll separate"}, what_system:{key:"solution",val:"Uses one tool incl. payroll"},
-  happy_with_current:{key:"solution",val:"Has existing tools"}, curious_why:{key:"solution",val:"Manual / spreadsheets"},
+  happy_with_current:{key:"solution",val:"Has existing tools"}, competitor_other:{key:"solution",val:"Mixed tools / another tool / Excel"},
+  curious_why:{key:"solution",val:"Manual / spreadsheets"}, franchise_hq:{key:"solution",val:"Franchisor / corporate-provided tools"},
   size_small:{key:"impact",val:"Under 10 employees + owner(s)"}, size_medium:{key:"impact",val:"15-30 employees + owner(s)"}, size_large:{key:"impact",val:"50+ employees + owner(s)"},
   sched_size_small:{key:"impact",val:"Under 10 employees + owner(s)"}, sched_size_medium:{key:"impact",val:"15-30 employees + owner(s)"}, sched_size_large:{key:"impact",val:"50+ employees + owner(s)"},
   schedule_build_time:{key:"pain",val:"Scheduling takes too long to build"}, schedule_changes:{key:"pain",val:"Shift swaps / callouts create schedule churn"},
@@ -1693,12 +1686,12 @@ const SQL_SIGNAL_MAP = {
 
 const FINAL_QUESTION_GUIDANCE = {
   opening: "End by asking permission for the 30-second version after naming the reason for the call.",
-  interested: "End by asking which direction is most useful: the quick pitch, payroll, scheduling, hiring, price, current tools, or no fit.",
-  give_more: "End by asking what part of running the hourly team is most relevant right now: payroll, scheduling, hiring, current tools, seeing it, price, or no fit.",
+  interested: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
+  give_more: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
   too_busy: "End by asking what they want next: a specific callback time, a short email, a 30-second explanation now, or no more calls.",
   not_interested: "End by asking one low-pressure diagnosis question that can uncover manual work, corporate ownership, a bad past experience, no fit, or bad timing.",
   no_value: "End by asking what makes it feel irrelevant: team size, corporate handling HR, or timing.",
-  who_are_you: "End by asking whether that sounds relevant, whether payroll or hiring is the issue, whether they already have tools, whether they are not the decision maker, or whether it is not needed.",
+  who_are_you: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
   happy_with_current: "End by asking what they use today and whether it is their own tool or provided by the franchisor.",
   competitor_other: "End by asking whether the tool mainly handles scheduling/time, payroll too, payroll separately, switching pain, or uncertainty.",
   competitor_cost: "End by asking for team size or permission to compare the real all-in total.",
@@ -1730,7 +1723,7 @@ const FINAL_QUESTION_GUIDANCE = {
   tried_before: "End by asking what happened before: clunky/no payroll, bad enough to avoid, or curious what is different.",
   what_system: "End by asking what they want to compare: the differentiator, payroll friction, or whether they are fully happy.",
   no_payroll: "End by asking whether payroll takes a few hours, creates errors, or is worth seeing.",
-  after_pitch_yes: "End by asking which pain is most relevant: payroll, scheduling, hiring, seeing the product, or price.",
+  after_pitch_yes: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
   after_pitch_meh: "End by asking who the right person is or whether they are not sure.",
   gate_name: "End by asking whether they can transfer you or when the owner is best reached.",
   gate_connects: "End with the owner-opening permission question.",
@@ -1802,12 +1795,12 @@ function buildNextPrompt(responseId, responseLabel) {
 
   const map = {
     opening:`The owner just picked up after a gatekeeper transfer. Use a fresh, direct opener: name, company, one credibility point, clear reason for calling, then ask for 30 seconds. Do not mention the gatekeeper unless it helps the line feel natural.`,
-    interested:`Prospect said "tell me more." One-line all-in-one pitch (everything to run an hourly team in one app), then ONE broad discovery question about how they run the team at ${brand} day to day. Don't list features, don't lead with payroll, let them point to the pain. ${hint}`,
-    give_more:`Prospect is open. Two-sentence pitch: Homebase is everything to run an hourly team in one app, scheduling, time tracking, payroll, and hiring, built for businesses like ${brand}. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team today. ${hint}`,
+    interested:`Prospect said "tell me more." One-line all-in-one pitch (everything to run an hourly team in one app), then ONE broad discovery question about how they run the team at ${brand} day to day. Don't list features, don't lead with payroll, let them name their current stack or point to the pain. ${hint}`,
+    give_more:`Prospect is open. Two-sentence pitch: Homebase is everything to run an hourly team in one app, scheduling, time tracking, payroll, and hiring, built for businesses like ${brand}. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team today, including whether they use tools, competitors, corporate systems, spreadsheets, or manual work. ${hint}`,
     too_busy:`Prospect is busy. Respect their time completely. Do NOT dig into pain. Acknowledge it warmly, then ask for a specific better time to call back ("Totally get it, when's a better time to catch you, later today or tomorrow morning?"). Try to lock a day and time and get a direct number or email so you can follow up. ${hint}`,
     not_interested:`Pattern interrupt: "Totally fair, before I let you go, can I ask one quick thing?" then surface one relatable pain for a ${industry} owner running an hourly team at ${brand}. Under 3 sentences.`,
     no_value:`Prospect doesn't see fit. Curious, low-pressure question about their biggest day-to-day headache running the team at ${brand}, whether that's scheduling, covering shifts, time tracking, payroll, or hiring. Don't pitch, just ask. ${hint}`,
-    who_are_you:`They asked what Homebase is, so they're curious, that's good. Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: Homebase is the all-in-one app to run an hourly team, scheduling, time tracking, payroll, and hiring all in one place. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team at ${brand} today. Keep it conversational, not a feature dump. ${hint}`,
+    who_are_you:`They asked what Homebase is, so they're curious, that's good. Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: Homebase is the all-in-one app to run an hourly team, scheduling, time tracking, payroll, and hiring all in one place. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team at ${brand} today, including whether they use tools, competitors, corporate systems, spreadsheets, or manual work. Keep it conversational, not a feature dump. ${hint}`,
     happy_with_current:`Ask ONE question, what they're using to run the team today. Just the tool, don't also ask about payroll in the same breath. ${hint}`,
     competitor_other:`They use another tool or Excel. Acknowledge that most owners already have something, then ask ONE question to learn what it actually covers: scheduling/time, payroll too, payroll separate, switching pain, or uncertainty. ${hint}`,
     competitor_cost:`Competitor cost objection. Use the pricing playbook: acknowledge, ask what total they are comparing against, and avoid discounting. If a competitor is known (${currentCompetitor ? currentCompetitor.name : "unknown"}), compare all-in cost, add-ons, year-end fees, support, and time saved. End by asking team size or permission to compare real total cost. ${hint}`,
@@ -1847,7 +1840,7 @@ function buildNextPrompt(responseId, responseLabel) {
     tried_before:`Empathize one sentence. Ask what went sideways. Then set Homebase apart as built for hourly teams like ${brand}. ${hint}`,
     what_system:`They use one tool for scheduling AND payroll already. Do NOT ask whether it handles payroll, they just told you it does. Acknowledge that, then differentiate on a specific angle (built for hourly teams, hours flow straight to payroll with no re-keying, or simpler pricing) and ask what they like or wish was better about their current setup. One question. ${hint}`,
     no_payroll:`Bridge: "That's exactly what most ${industry} owners come to us for. Homebase pulls the hours straight into payroll, so a run takes about five minutes." Then offer a 30-minute call with a product specialist. ${hint}`,
-    after_pitch_yes:`Engaged. ONE broad discovery question into how they run the team at ${brand} today, let them surface the pain area (scheduling, time tracking, payroll, or hiring). ${hint}`,
+    after_pitch_yes:`Engaged. ONE broad discovery question into how they run the team at ${brand} today, let them name tools, competitors, spreadsheets/manual work, corporate systems, or a pain area. ${hint}`,
     after_pitch_meh:`Ask one thing: who the right person is, or whether they are not sure. Do not ask for contact details in the same turn.`,
     gate_name:`Got a name. Ask for the direct number or best time to reach them. Warm, non-pushy.`,
     gate_connects:`Exact opening line when the owner picks up, warm, reference you just spoke with someone at ${brand}. ${hint}`,
@@ -1902,7 +1895,7 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
 
   const lines = {
     interested: `${lead}great question. Homebase helps ${industry} owners run scheduling, time tracking, payroll, hiring, and team messages in one place, and ${proofRef} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
-    give_more: `${lead}totally. The simplest way to think about Homebase is one app for the hourly team, from schedules and clock-ins through payroll and hiring, so owners are not piecing five tools together. What is the most manual part of running the team at ${brand} right now?\n${baseTip}`,
+    give_more: `${lead}totally. The simplest way to think about Homebase is one app for the hourly team, from schedules and clock-ins through payroll and hiring, so owners are not piecing five tools together. How are you handling those pieces at ${brand} today: one system, a few different tools, corporate tools, or more manual work?\n${baseTip}`,
     too_busy: `${lead}completely get it, I caught you in the middle of the day. I do think this could be useful for ${brand}, so when is a better time to catch you, later today or tomorrow morning?\n[Coaching tip: Respect the interruption, then trade for a specific callback time.]`,
     not_interested: `${lead}totally fair, before I let you go, can I ask one quick thing? For a lot of ${industry} owners, the headache is not the software, it is the time lost fixing schedules, time cards, and payroll after the fact. Which of those is most annoying for you right now?\n${baseTip}`,
     who_are_you: `${lead}yeah, of course. We are Homebase, the all-in-one app for hourly teams, scheduling, time tracking, payroll, hiring, and team communication, and owners like ${peer} use us to simplify the week. How are you running those pieces at ${brand} today?\n${baseTip}`,
@@ -1938,6 +1931,7 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     franchise_hq: `${lead}that makes sense, a lot of franchisees have some corporate tools in the mix. Does corporate actually run payroll too, is payroll still on your plate, or is it a little of both?\n[Coaching tip: Clarify what corporate really owns before you accept the objection.]`,
     tried_before: `${lead}I hear you, bad software experiences stick. What happened last time: was it clunky with no payroll, bad enough that you do not want to revisit it, or are you open to what is different with Homebase?\n[Coaching tip: Let them name the old wound before you position the difference.]`,
     what_system: `${lead}got it, if your current setup already covers payroll too, the question is whether it is actually making the week easier. Are you mainly curious what makes Homebase different, frustrated with payroll, or pretty happy with what you have?\n[Coaching tip: Do not re-ask what they already answered; compare from there.]`,
+    after_pitch_yes: `${lead}that makes sense. How are you handling those pieces today: one system, different tools for payroll and scheduling, corporate tools, or more manual work?\n[Coaching tip: Let them name the stack before you diagnose the gap.]`,
     after_pitch_meh: `${lead}no worries, that is helpful to know. Who is the right person for this: the owner, or are you not sure who handles it?\n[Coaching tip: When they are not the decision maker, solve routing first.]`,
     gate_name: `${lead}thank you, that helps. Would it be easier to put me through now, or is there a better time to catch them?\n[Coaching tip: Convert a name into either a transfer or a callback window.]`,
     quantify_time: `${lead}yeah, hours adds up fast every pay period. About how big is the hourly team: under 10, around 15 to 30, 50 or more, or does it depend by location?\n[Coaching tip: Quantify size right after they quantify time.]`,
@@ -1981,9 +1975,10 @@ function fmtScript(text) {
 // they confirm as done.
 const PHASE_ASKS = {
   opening:        [{ key:"pain", val:"asked, awaiting answer" }],
-  interested:     [{ key:"pain", val:"asked, awaiting answer" }],
-  give_more:      [{ key:"pain", val:"asked, awaiting answer" }],
-  who_are_you:    [{ key:"pain", val:"asked, awaiting answer" }],
+  interested:     [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
+  give_more:      [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
+  who_are_you:    [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
+  after_pitch_yes:[{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
   no_value:       [{ key:"solution", val:"asked, awaiting answer" }],
   happy_with_current: [{ key:"solution", val:"asked, awaiting answer" }],
   competitor_other: [{ key:"solution", val:"asked, awaiting answer" }],
@@ -1994,7 +1989,7 @@ const PHASE_ASKS = {
   locked_contract: [{ key:"timeline", val:"asked contract renewal" }],
   named_tool:     [{ key:"solution", val:"named, checking payroll" }],
   not_sure:       [{ key:"solution", val:"unsure on payroll" }],
-  franchise_hq:   [{ key:"solution", val:"asked who runs payroll" }],
+  franchise_hq:   [{ key:"solution", val:"asked what corporate covers" }],
   pain_scheduling:[{ key:"impact", val:"asked employee count for estimated users" }],
   sched_size_small:[{ key:"pain", val:"asked scheduling issue" }],
   sched_size_medium:[{ key:"pain", val:"asked scheduling issue" }],
