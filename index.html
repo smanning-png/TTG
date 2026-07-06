@@ -916,7 +916,7 @@ function freshSql() {
   return {
     pain:     { label:"Pain / use case",    val:null, status:null, mandatory:false },
     timeline: { label:"Purchase timeline",  val:null, status:null, mandatory:false },
-    size:     { label:"Company size",       val:null, status:null, mandatory:false },
+    size:     { label:"Company size (locations)", val:null, status:null, mandatory:false },
     budget:   { label:"Budget signal",      val:null, status:null, mandatory:false },
     solution: { label:"Current solution",   val:null, status:null, mandatory:false },
     impact:   { label:"Estimated users",    val:null, status:null, mandatory:false },
@@ -999,7 +999,7 @@ function getProof(industry, brand) {
 function seedSqlFromForm() {
   if (prospectInfo.known_pain)       sqlState.pain.val     = prospectInfo.known_pain;
   if (prospectInfo.timeline)         sqlState.timeline.val = prospectInfo.timeline;
-  if (prospectInfo.num_locs)         sqlState.size.val     = `${prospectInfo.num_locs} location(s)`;
+  if (prospectInfo.num_locs)         markSql("size", `${prospectInfo.num_locs} location(s)`, true);
   if (prospectInfo.budget)           sqlState.budget.val   = prospectInfo.budget;
   if (prospectInfo.current_solution) sqlState.solution.val = prospectInfo.current_solution;
 }
@@ -1039,6 +1039,18 @@ function markSql(key, value, force) {
   sqlState[key].status = "done";
   sqlState[key].val = value;
   updateSql();
+}
+
+function estimatedUsersFromEmployeeRange(responseId) {
+  const map = {
+    size_small: "Under 10 employees + owner(s)",
+    size_medium: "15-30 employees + owner(s)",
+    size_large: "50+ employees + owner(s)",
+    sched_size_small: "Under 10 employees + owner(s)",
+    sched_size_medium: "15-30 employees + owner(s)",
+    sched_size_large: "50+ employees + owner(s)"
+  };
+  return map[responseId] || "";
 }
 
 // Refer to multiple locations the way a person would: "5 Subways" when the brand
@@ -1105,8 +1117,8 @@ function buildSystemPrompt(info) {
   const missing = getMissingFields();
   const desc = {
     pain:"what their specific pain or problem is", timeline:"when they want to make a change (0-30 days, 1-3 months, 3+ months)",
-    size:"how many employees / locations they have", budget:"whether budget exists for a solution",
-    solution:"what they currently use (competitor, spreadsheets, nothing)", impact:"how many people would use the platform (1-10, 11-20, 21-50, 50+)",
+    size:"how many locations the company has", budget:"whether budget exists for a solution",
+    solution:"what they currently use (competitor, spreadsheets, nothing)", impact:"estimated users: employees plus owner/admin users",
     nextstep:"a confirmed next step (demo, follow-up call, or meeting)", contact:"their full name, phone, and company name"
   };
   const missingList = missing.map(k => `- ${desc[k]}`).join("\n");
@@ -1374,9 +1386,9 @@ const RESP = {
     { id:"not_sure", icon:"ti-help", label:"Not really sure honestly", sub:"Owner unsure" }
   ],
   competitor_cost: [
-    { id:"size_small", icon:"ti-users", label:"Just under 10 of us", sub:"Small team" },
-    { id:"size_medium", icon:"ti-users", label:"Around 15-30 people", sub:"Medium team" },
-    { id:"size_large", icon:"ti-users", label:"50 or more", sub:"Large team" },
+    { id:"size_small", icon:"ti-users", label:"Just under 10 employees", sub:"Estimated users" },
+    { id:"size_medium", icon:"ti-users", label:"Around 15-30 employees", sub:"Estimated users" },
+    { id:"size_large", icon:"ti-users", label:"50 or more employees", sub:"Estimated users" },
     { id:"value_first", icon:"ti-arrow-right", label:"Compare the real total", sub:"Value / ROI" },
     { id:"want_demo", icon:"ti-screen-share", label:"Show me if it's worth it", sub:"Demo request" }
   ],
@@ -1431,9 +1443,9 @@ const RESP = {
     { id:"curious_why", icon:"ti-check", label:"Not bad, we've got a system", sub:"Minimizes pain" }
   ],
   pain_scheduling: [
-    { id:"sched_size_small", icon:"ti-users", label:"Under 10 people", sub:"Small team" },
-    { id:"sched_size_medium", icon:"ti-users", label:"Around 15-30 people", sub:"Medium team" },
-    { id:"sched_size_large", icon:"ti-users", label:"50 or more", sub:"Large team" },
+    { id:"sched_size_small", icon:"ti-users", label:"Under 10 employees", sub:"Estimated users" },
+    { id:"sched_size_medium", icon:"ti-users", label:"Around 15-30 employees", sub:"Estimated users" },
+    { id:"sched_size_large", icon:"ti-users", label:"50 or more employees", sub:"Estimated users" },
     { id:"multi_loc_pain", icon:"ti-building-store", label:"A lot, spread across spots", sub:"Cross-location pain" }
   ],
   pain_compliance: [
@@ -1458,9 +1470,9 @@ const RESP = {
     { id:"not_now", icon:"ti-clock", label:"I need to check my calendar", sub:"Calendar stall" }
   ],
   price_question: [
-    { id:"size_small", icon:"ti-users", label:"Just under 10 of us", sub:"Small team" },
-    { id:"size_medium", icon:"ti-users", label:"Around 15-30 people", sub:"Medium team" },
-    { id:"size_large", icon:"ti-users", label:"50 or more", sub:"Large team" },
+    { id:"size_small", icon:"ti-users", label:"Just under 10 employees", sub:"Estimated users" },
+    { id:"size_medium", icon:"ti-users", label:"Around 15-30 employees", sub:"Estimated users" },
+    { id:"size_large", icon:"ti-users", label:"50 or more employees", sub:"Estimated users" },
     { id:"value_first", icon:"ti-arrow-right", label:"Just tell me the price", sub:"Presses on price" }
   ],
   book_meeting: [
@@ -1543,9 +1555,9 @@ const RESP = {
     { id:"opening", icon:"ti-phone", label:"Owner picks up, use opening", sub:"Restart with owner" }
   ],
   quantify_time: [
-    { id:"size_small", icon:"ti-users", label:"Just under 10 of us", sub:"Small team" },
-    { id:"size_medium", icon:"ti-users", label:"Around 15-30 people", sub:"Medium team" },
-    { id:"size_large", icon:"ti-users", label:"50 or more", sub:"Large team" },
+    { id:"size_small", icon:"ti-users", label:"Just under 10 employees", sub:"Estimated users" },
+    { id:"size_medium", icon:"ti-users", label:"Around 15-30 employees", sub:"Estimated users" },
+    { id:"size_large", icon:"ti-users", label:"50 or more employees", sub:"Estimated users" },
     { id:"multi_loc_pain", icon:"ti-building-store", label:"Depends, spread across stores", sub:"Cross-location" }
   ],
   quantify_cost: [
@@ -1667,12 +1679,12 @@ const SQL_SIGNAL_MAP = {
   quantify_time:{key:"pain",val:"Payroll time pain quantified"}, quantify_cost:{key:"pain",val:"Payroll cost pain"},
   no_payroll:{key:"solution",val:"Has tool, payroll separate"}, what_system:{key:"solution",val:"Uses one tool incl. payroll"},
   happy_with_current:{key:"solution",val:"Has existing tools"}, curious_why:{key:"solution",val:"Manual / spreadsheets"},
-  size_small:{key:"size",val:"1-10 employees"}, size_medium:{key:"size",val:"11-50 employees"}, size_large:{key:"size",val:"50+ employees"},
-  sched_size_small:{key:"size",val:"1-10 employees"}, sched_size_medium:{key:"size",val:"11-50 employees"}, sched_size_large:{key:"size",val:"50+ employees"},
+  size_small:{key:"impact",val:"Under 10 employees + owner(s)"}, size_medium:{key:"impact",val:"15-30 employees + owner(s)"}, size_large:{key:"impact",val:"50+ employees + owner(s)"},
+  sched_size_small:{key:"impact",val:"Under 10 employees + owner(s)"}, sched_size_medium:{key:"impact",val:"15-30 employees + owner(s)"}, sched_size_large:{key:"impact",val:"50+ employees + owner(s)"},
   schedule_build_time:{key:"pain",val:"Scheduling takes too long to build"}, schedule_changes:{key:"pain",val:"Shift swaps / callouts create schedule churn"},
   schedule_availability:{key:"pain",val:"Availability / time-off tracking is messy"}, schedule_labor:{key:"pain",val:"Overtime / coverage visibility concern"},
-  schedule_impact_hours:{key:"impact",val:"Scheduling consumes hours weekly"}, schedule_impact_changes:{key:"impact",val:"Frequent last-minute schedule changes"},
-  schedule_impact_coverage:{key:"impact",val:"Coverage gaps / overstaffing impact"}, schedule_impact_cost:{key:"impact",val:"Overtime / labor cost surprises"},
+  schedule_impact_hours:{key:"pain",val:"Scheduling impact: hours lost weekly"}, schedule_impact_changes:{key:"pain",val:"Scheduling impact: frequent last-minute changes"},
+  schedule_impact_coverage:{key:"pain",val:"Scheduling impact: coverage gaps / overstaffing"}, schedule_impact_cost:{key:"pain",val:"Scheduling impact: overtime / labor cost surprises"},
   timeline_now:{key:"timeline",val:"Immediate (0-30 days)"}, timeline_soon:{key:"timeline",val:"Near-term (1-3 months)"}, timeline_later:{key:"timeline",val:"Mid-term (3+ months)"},
   budget_yes:{key:"budget",val:"Budget confirmed"}, budget_maybe:{key:"budget",val:"Budget likely"}, budget_no:{key:"budget",val:"No budget identified"},
   willing_to_meet:{key:"nextstep",val:"Demo scheduled"}, callback_yes:{key:"nextstep",val:"Follow-up call scheduled"}, book_meeting:{key:"nextstep",val:"Demo requested"},
@@ -1773,8 +1785,8 @@ function buildNextPrompt(responseId, responseLabel) {
   const currentCompetitor = selectedCompetitor || activeCompetitor || getCompetitorFromText(prospectInfo.current_solution || "");
   const missing = getMissingFields();
   const hint = missing.length ? `If natural, weave in a question to uncover one of these missing SQL fields: ${missing.slice(0,3).map(k => ({
-    pain:"their specific pain", timeline:"when they want to change", size:"how many employees",
-    budget:"whether budget exists", solution:"what they currently use", impact:"how many users",
+    pain:"their specific pain", timeline:"when they want to change", size:"how many locations",
+    budget:"whether budget exists", solution:"what they currently use", impact:"estimated users: employees plus owner/admin users",
     nextstep:"a confirmed next step", contact:"their name and contact info"
   }[k])).join(", ")}.` : "All SQL fields covered. Focus on closing the meeting.";
 
@@ -1965,7 +1977,8 @@ function fmtScript(text) {
 // These set an "asked"/pending state that does NOT count toward qualification. The field
 // only becomes "done" when the prospect's actual answer comes through SQL_SIGNAL_MAP or the
 // explicit handlers in handleResponse. Phases where the prospect has ALREADY revealed the
-// info (pain_payroll, size_*, budget_*, etc.) are intentionally NOT here, they confirm as done.
+// info (pain_payroll, employee-count answers, budget_*, etc.) are intentionally NOT here,
+// they confirm as done.
 const PHASE_ASKS = {
   opening:        [{ key:"pain", val:"asked, awaiting answer" }],
   interested:     [{ key:"pain", val:"asked, awaiting answer" }],
@@ -1982,19 +1995,19 @@ const PHASE_ASKS = {
   named_tool:     [{ key:"solution", val:"named, checking payroll" }],
   not_sure:       [{ key:"solution", val:"unsure on payroll" }],
   franchise_hq:   [{ key:"solution", val:"asked who runs payroll" }],
-  pain_scheduling:[{ key:"size", val:"asked team size" }],
-  sched_size_small:[{ key:"impact", val:"asked scheduling impact" }],
-  sched_size_medium:[{ key:"impact", val:"asked scheduling impact" }],
-  sched_size_large:[{ key:"impact", val:"asked scheduling impact" }],
-  schedule_build_time:[{ key:"impact", val:"asked scheduling build-time impact" }],
-  schedule_changes:[{ key:"impact", val:"asked schedule-change impact" }],
-  schedule_availability:[{ key:"impact", val:"asked availability impact" }],
-  schedule_labor:[{ key:"impact", val:"asked labor / coverage impact" }],
+  pain_scheduling:[{ key:"impact", val:"asked employee count for estimated users" }],
+  sched_size_small:[{ key:"pain", val:"asked scheduling issue" }],
+  sched_size_medium:[{ key:"pain", val:"asked scheduling issue" }],
+  sched_size_large:[{ key:"pain", val:"asked scheduling issue" }],
+  schedule_build_time:[{ key:"pain", val:"asked scheduling build-time impact" }],
+  schedule_changes:[{ key:"pain", val:"asked schedule-change impact" }],
+  schedule_availability:[{ key:"pain", val:"asked availability impact" }],
+  schedule_labor:[{ key:"pain", val:"asked labor / coverage impact" }],
   schedule_impact_hours:[{ key:"nextstep", val:"scheduling solution shown" }],
   schedule_impact_changes:[{ key:"nextstep", val:"scheduling solution shown" }],
   schedule_impact_coverage:[{ key:"nextstep", val:"scheduling solution shown" }],
   schedule_impact_cost:[{ key:"nextstep", val:"scheduling solution shown" }],
-  quantify_time:  [{ key:"size", val:"asked team size" }],
+  quantify_time:  [{ key:"impact", val:"asked employee count for estimated users" }],
   price_question: [{ key:"budget", val:"price discussed" }],
   value_first:    [{ key:"budget", val:"value/ROI framed" }],
   want_demo:      [{ key:"nextstep", val:"demo time offered" }],
@@ -2163,13 +2176,10 @@ async function handleResponse(responseId, label) {
   if (responseId === "willing_to_meet" || responseId === "callback_yes") markSql("nextstep","Next step confirmed", true);
   if (responseId === "curious_why") markSql("solution","Manual / spreadsheets", true);
   if (responseId === "tried_before") markSql("solution","Had prior tool", true);
-  // Team size answers both Company Size AND Estimated Users: the whole hourly team uses the app
-  if (responseId === "size_small")  { markSql("size","1-10 employees", true);  markSql("impact","1-10 users", true); }
-  if (responseId === "size_medium") { markSql("size","11-50 employees", true); markSql("impact","11-50 users", true); }
-  if (responseId === "size_large")  { markSql("size","50+ employees", true);  markSql("impact","50+ users", true); }
-  if (responseId === "sched_size_small")  { markSql("size","1-10 employees", true);  markAsked("impact","scheduling impact"); }
-  if (responseId === "sched_size_medium") { markSql("size","11-50 employees", true); markAsked("impact","scheduling impact"); }
-  if (responseId === "sched_size_large")  { markSql("size","50+ employees", true);  markAsked("impact","scheduling impact"); }
+  // Employee-count answers estimate platform users. Company size is location count only.
+  if (["size_small","size_medium","size_large","sched_size_small","sched_size_medium","sched_size_large"].includes(responseId)) {
+    markSql("impact", estimatedUsersFromEmployeeRange(responseId), true);
+  }
   updateSql();
 
   disableResp(true);

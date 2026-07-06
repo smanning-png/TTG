@@ -44,6 +44,7 @@ function readContext(expr) {
 const resp = readContext("RESP");
 const guidance = readContext("FINAL_QUESTION_GUIDANCE");
 const competitorIntel = readContext("COMPETITOR_INTEL");
+const sqlSignalMap = readContext("SQL_SIGNAL_MAP");
 const phases = new Set(Object.keys(resp));
 const missingTargets = [];
 const missingGuidance = [];
@@ -167,6 +168,31 @@ if (!/building the schedule/i.test(schedulingSizePrompt) || !/callouts/i.test(sc
 }
 if (!resp.sched_size_medium.every(option => option.id.startsWith("schedule_"))) {
   throw new Error("Scheduling size responses should stay in scheduling-specific branches.");
+}
+
+for (const phase of ["size_small", "size_medium", "size_large", "sched_size_small", "sched_size_medium", "sched_size_large"]) {
+  if (sqlSignalMap[phase]?.key !== "impact") {
+    throw new Error(`${phase} should populate Estimated users, not Company size.`);
+  }
+}
+readContext(`prospectInfo = {
+  brand: "Buffalo Wild Wings",
+  industry: "Food & Beverage",
+  lead_name: "Dave",
+  num_locs: "2",
+  prospect_role: "owner",
+  current_solution: "",
+  timeline: "",
+  budget: "",
+  known_pain: ""
+}; sqlState = freshSql(); seedSqlFromForm();`);
+const seededSize = readContext("sqlState.size");
+if (seededSize.val !== "2 location(s)" || seededSize.status !== "done") {
+  throw new Error("Company size should be confirmed from number of locations.");
+}
+const estimatedUserValue = readContext(`estimatedUsersFromEmployeeRange("sched_size_medium")`);
+if (!/15-30 employees \+ owner\(s\)/.test(estimatedUserValue)) {
+  throw new Error("Estimated users should include employees plus owner(s).");
 }
 
 console.log(JSON.stringify({
