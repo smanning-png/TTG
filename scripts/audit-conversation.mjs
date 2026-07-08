@@ -111,6 +111,8 @@ for (const options of Object.values(resp)) {
   }
 }
 
+let sawPermissionOpening = false;
+let sawDiscoveryOpening = false;
 for (const [brand, industry] of [["Ace Hardware", "Retail"], ["Subway #441", "Food & Beverage"], ["Local Burger Shop", "Food & Beverage"]]) {
   for (const randomValue of [0.05, 0.45, 0.85]) {
     sandbox.Math.random = () => randomValue;
@@ -126,11 +128,26 @@ for (const [brand, industry] of [["Ace Hardware", "Retail"], ["Subway #441", "Fo
     if (/bad time|catch you at a bad time/i.test(spoken)) {
       throw new Error(`Bad-time wording appeared in spoken opener for ${brand}.`);
     }
-    if (!/(30-second|30 seconds|short version)/i.test(spoken)) {
-      throw new Error(`Missing compact permission ask in opener for ${brand}.`);
+    const mode = readContext("currentOpeningMode");
+    if (mode === "permission") {
+      sawPermissionOpening = true;
+      if (!/(30-second|30 seconds|short version)/i.test(spoken)) {
+        throw new Error(`Missing compact permission ask in permission opener for ${brand}.`);
+      }
+    } else if (mode === "discovery") {
+      sawDiscoveryOpening = true;
+      if (!/(compare notes|people side|mostly solved|completely off|taking more of your week|sanity-check|Which camp)/i.test(spoken)) {
+        throw new Error(`Discovery opener for ${brand} is missing a natural discovery structure.`);
+      }
+    } else {
+      throw new Error(`Unexpected opener mode ${mode} for ${brand}.`);
     }
   }
 }
+if (!sawPermissionOpening || !sawDiscoveryOpening) {
+  throw new Error("Opening rotation should include both permission and discovery styles.");
+}
+readContext('currentOpeningMode = "permission"');
 const openingOptionIds = new Set(readContext('getResponseOptions("opening")').map(option => option.id));
 for (const simpleId of ["interested", "who_are_you", "too_busy", "callback_no", "not_interested", "happy_with_current", "decision_maker_no"]) {
   if (!openingOptionIds.has(simpleId)) {
@@ -142,6 +159,24 @@ for (const prematurePainId of ["pain_payroll", "pain_scheduling", "pain_hiring",
     throw new Error("Opening permission question should not show pain options before the prospect hears the short version.");
   }
 }
+readContext('currentOpeningMode = "discovery"');
+const discoveryOpeningIds = new Set(readContext('getResponseOptions("opening")').map(option => option.id));
+for (const discoveryId of ["happy_with_current", "curious_why", "pain_scheduling", "pain_payroll", "workflow_comms_separate", "too_busy", "not_interested", "decision_maker_no"]) {
+  if (!discoveryOpeningIds.has(discoveryId)) {
+    throw new Error(`Opening discovery response options are missing ${discoveryId}.`);
+  }
+}
+if (discoveryOpeningIds.has("interested") || discoveryOpeningIds.has("callback_no")) {
+  throw new Error("Opening discovery questions should not show permission-only responses.");
+}
+readContext('currentOpeningMode = "gatekeeper"');
+const gatekeeperOpeningIds = new Set(readContext('getResponseOptions("opening")').map(option => option.id));
+for (const gateId of ["gate_connects", "gate_name", "decision_maker_yes", "callback_yes", "gatekeeper_voicemail", "not_interested"]) {
+  if (!gatekeeperOpeningIds.has(gateId)) {
+    throw new Error(`Opening gatekeeper response options are missing ${gateId}.`);
+  }
+}
+readContext('currentOpeningMode = "permission"');
 const competitorGapIds = new Set(readContext('getResponseOptions("competitor_gap")').map(option => option.id));
 for (const scopeId of ["workflow_payroll_separate", "workflow_scheduling_separate", "workflow_hiring_separate", "workflow_comms_separate", "workflow_multiple_separate"]) {
   if (!competitorGapIds.has(scopeId)) {

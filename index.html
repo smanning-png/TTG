@@ -903,6 +903,37 @@ const HOSPITALITY_STACK_RESPONSE_OPTIONS = [
   { id:"not_interested", icon:"ti-x", label:"We're covered, thanks", sub:"Status quo" }
 ];
 
+const OPENING_PERMISSION_RESPONSE_OPTIONS = [
+  { id:"interested", icon:"ti-thumb-up", label:"Sure, go ahead", sub:"Gives permission" },
+  { id:"who_are_you", icon:"ti-help", label:"What is this about?", sub:"Needs context" },
+  { id:"too_busy", icon:"ti-clock", label:"I'm tied up right now", sub:"Time objection" },
+  { id:"callback_no", icon:"ti-mail", label:"Can you send me something?", sub:"Email deflection" },
+  { id:"not_interested", icon:"ti-x", label:"We're not interested", sub:"Brush-off" },
+  { id:"happy_with_current", icon:"ti-circle-check", label:"We already have a system", sub:"Has tools" },
+  { id:"decision_maker_no", icon:"ti-user-question", label:"I'm not the right person", sub:"Wrong contact" },
+  { id:"gatekeeper_blocks", icon:"ti-user-off", label:"Let me take a message", sub:"Gatekeeper blocks" }
+];
+
+const OPENING_DISCOVERY_RESPONSE_OPTIONS = [
+  { id:"happy_with_current", icon:"ti-circle-check", label:"We've got a system that works", sub:"System in place" },
+  { id:"curious_why", icon:"ti-file-spreadsheet", label:"It's still pretty manual", sub:"Manual process" },
+  { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling eats time", sub:"Scheduling pain" },
+  { id:"pain_payroll", icon:"ti-receipt", label:"Payroll or timecards are the headache", sub:"Payroll pain" },
+  { id:"workflow_comms_separate", icon:"ti-message", label:"Keeping everyone updated is separate", sub:"Comms scope" },
+  { id:"too_busy", icon:"ti-clock", label:"I'm tied up right now", sub:"Time objection" },
+  { id:"not_interested", icon:"ti-x", label:"We're not interested", sub:"Brush-off" },
+  { id:"decision_maker_no", icon:"ti-user-question", label:"I'm not the right person", sub:"Wrong contact" }
+];
+
+const OPENING_GATEKEEPER_RESPONSE_OPTIONS = [
+  { id:"gate_connects", icon:"ti-phone-forwarded", label:"Let me put you through", sub:"Warm transfer" },
+  { id:"gate_name", icon:"ti-user", label:"The owner handles it", sub:"Route to owner" },
+  { id:"decision_maker_yes", icon:"ti-user-check", label:"I handle that", sub:"Decision maker" },
+  { id:"callback_yes", icon:"ti-calendar-plus", label:"Try them tomorrow", sub:"Callback time" },
+  { id:"gatekeeper_voicemail", icon:"ti-voicemail", label:"Want their voicemail?", sub:"Voicemail option" },
+  { id:"not_interested", icon:"ti-x", label:"Please don't call here", sub:"Hard block" }
+];
+
 const COMPETITOR_INTEL = {
   competitor_gusto: {
     name:"Gusto",
@@ -1114,6 +1145,7 @@ let prospectInfo = {};
 let currentScriptText = "";
 let sdrName = "";
 let activeCompetitor = null;
+let currentOpeningMode = "permission";
 
 // ===== SDR sign-in: capture the rep's first name once per browser session =====
 function initSdr() {
@@ -1267,22 +1299,76 @@ function buildOpeningInstant(info) {
   // Use the lead's first name if the SDR entered it, otherwise a clear placeholder.
   const name = (info.lead_name && info.lead_name.trim()) ? info.lead_name.trim() : "[First Name]";
   const proofLine = brandSocialProofLine(brand) || `We work with a lot of ${industry} teams, including ${peerContext}.`;
+  const socialProof = brandSocialProofLine(brand)
+    ? `we already work with ${brandSocialProofLocationRef(getBrandSocialProof(brand))}`
+    : `we work with a lot of ${industry} teams, including ${peerContext}`;
+  const hospitality = isHospitalityContext(info);
+  const ownerGroup = hospitality
+    ? `${brand || "hotel"} operators`
+    : `${brand || industry} owners`;
+  const peopleWorkflow = hospitality
+    ? "scheduling, payroll, hiring, and keeping the team on the same page"
+    : "scheduling, payroll, hiring, and keeping everyone on the same page";
   const knownPainContext = known_pain
     ? `I saw ${known_pain.toLowerCase()} may already be on your radar. `
     : "";
   const variants = [
-    `Hey ${name}, it's [Your Name] with Homebase. ${proofLine} Can I give you the 30-second version?`,
-    `Hey ${name}, [Your Name] with Homebase. I know I'm an interruption, so I'll keep it tight. ${proofLine} ${knownPainContext}Can I take 30 seconds to explain why we reached out?`,
-    `Hey ${name}, how've you been?\n\n[⏸ Pause, let them answer]\n\nIt's [Your Name] with Homebase. ${proofLine} Is it fair if I give you the short version?`
+    {
+      mode: "permission",
+      text: `Hey ${name}, it's [Your Name] with Homebase. ${proofLine} Can I give you the 30-second version?`,
+      tip: `Coaching tip: Lead with proof, ask for a small 30-second window, then let their answer point you toward pain, timing, or the right contact.`
+    },
+    {
+      mode: "permission",
+      text: `Hey ${name}, [Your Name] with Homebase. I know I'm an interruption, so I'll keep it tight. ${proofLine} ${knownPainContext}Can I take 30 seconds to explain why we reached out?`,
+      tip: `Coaching tip: Respect the interruption, name the reason, and ask for a small window before pitching.`
+    },
+    {
+      mode: "permission",
+      text: `Hey ${name}, how've you been?\n\n[⏸ Pause, let them answer]\n\nIt's [Your Name] with Homebase. ${proofLine} Is it fair if I give you the short version?`,
+      tip: `Coaching tip: Use the familiar opener naturally, pause for the answer, then ask for the short version.`
+    },
+    {
+      mode: "discovery",
+      text: `Hey ${name}, [Your Name] with Homebase. I know I'm interrupting you, so I'll keep it short.\n\nSince ${socialProof}, I realized we haven't had a chance to compare notes. I'm curious, when it comes to ${peopleWorkflow}, do you feel like you've got a system that works pretty well, or are there still a few headaches you'd rather not deal with?`,
+      tip: `Coaching tip: "Compare notes" feels collaborative; ask about system fit without assuming pain.`
+    },
+    {
+      mode: "discovery",
+      text: `Hey ${name}, [Your Name] with Homebase. I know this call is out of the blue.\n\nWe've been talking with quite a few ${ownerGroup} lately, and I was curious how you're handling the people side of the business these days. Things like schedules, payroll, hiring, and team communication. Have you found a process that works, or is it still a bit more manual than you'd like?`,
+      tip: `Coaching tip: Sound like research, not a pitch; let them describe the current process.`
+    },
+    {
+      mode: "discovery",
+      text: `Hey ${name}, this is [Your Name] with Homebase. Quick question before I let you go.\n\n${proofLine} One thing I hear a lot is operators would rather spend time growing the business than chasing schedules, payroll questions, or hiring. Is that something you've mostly solved, or does it still eat up more time than you'd like?`,
+      tip: `Coaching tip: Normalize the problem without telling them they have it.`
+    },
+    {
+      mode: "discovery",
+      text: `Hey ${name}, [Your Name] with Homebase. I could be completely off here, but since ${socialProof}, I figured it was worth asking.\n\nHave you gotten the employee-management side of the business pretty dialed in, or are there still parts, like scheduling or payroll, that feel more complicated than they should?`,
+      tip: `Coaching tip: "I could be off" lowers defenses and gives them room to correct you.`
+    },
+    {
+      mode: "discovery",
+      text: `Hey ${name}, [Your Name] with Homebase. I'll keep this to about 30 seconds.\n\nI'm reaching out because ${socialProof}, and I was wondering, what's taking more of your week these days, running the business itself or managing all the people stuff that comes with it?`,
+      tip: `Coaching tip: Use time as the wedge; if they say people stuff, you earned discovery.`
+    },
+    {
+      mode: "discovery",
+      text: `Hey ${name}, [Your Name] with Homebase. Can I sanity-check something with you?\n\nWorking with other ${ownerGroup}, I've learned some spend almost no time thinking about schedules or payroll because they've got it dialed in, and others feel like it steals a few hours every week. Which camp would you put yourself in?`,
+      tip: `Coaching tip: The two-camp question makes it easy to answer without feeling sold to.`
+    }
   ];
   const selected = variants[Math.floor(Math.random() * variants.length)];
 
   if (isGate) {
+    currentOpeningMode = "gatekeeper";
     script = `Hi there, it's [Your Name] with Homebase. ${proofLine} I'm trying to reach the person who handles scheduling, time tracking, or payroll for ${brand}. Is ${name} the right person to ask for?\n\n[If asked why]: We help hourly teams keep schedules, time clocks, payroll, hiring, and messages in one app.`;
     tip = `Coaching tip: Give the gatekeeper a clear reason and one simple ask, then stop talking.`;
   } else {
-    script = selected;
-    tip = `Coaching tip: Lead with proof, ask for a small 30-second window, then let their answer point you toward pain, timing, or the right contact.`;
+    currentOpeningMode = selected.mode;
+    script = selected.text;
+    tip = selected.tip;
   }
   return `${script}\n\n[${tip}]`;
 }
@@ -1517,16 +1603,7 @@ function phaseLabel(p) {
 }
 
 const RESP = {
-  opening: [
-    { id:"interested", icon:"ti-thumb-up", label:"Sure, go ahead", sub:"Gives permission" },
-    { id:"who_are_you", icon:"ti-help", label:"What is this about?", sub:"Needs context" },
-    { id:"too_busy", icon:"ti-clock", label:"I'm tied up right now", sub:"Time objection" },
-    { id:"callback_no", icon:"ti-mail", label:"Can you send me something?", sub:"Email deflection" },
-    { id:"not_interested", icon:"ti-x", label:"We're not interested", sub:"Brush-off" },
-    { id:"happy_with_current", icon:"ti-circle-check", label:"We already have a system", sub:"Has tools" },
-    { id:"decision_maker_no", icon:"ti-user-question", label:"I'm not the right person", sub:"Wrong contact" },
-    { id:"gatekeeper_blocks", icon:"ti-user-off", label:"Let me take a message", sub:"Gatekeeper blocks" }
-  ],
+  opening: OPENING_PERMISSION_RESPONSE_OPTIONS,
   interested: CURRENT_STACK_RESPONSE_OPTIONS,
   give_more: CURRENT_STACK_RESPONSE_OPTIONS,
   too_busy: [
@@ -2047,6 +2124,8 @@ const RESP = {
 const STACK_DISCOVERY_PHASES = new Set(["interested", "give_more", "who_are_you", "after_pitch_yes", "happy_with_current"]);
 
 function getResponseOptions(phase) {
+  if (phase === "opening" && currentOpeningMode === "discovery") return OPENING_DISCOVERY_RESPONSE_OPTIONS;
+  if (phase === "opening" && currentOpeningMode === "gatekeeper") return OPENING_GATEKEEPER_RESPONSE_OPTIONS;
   if (STACK_DISCOVERY_PHASES.has(phase) && isHospitalityContext()) return HOSPITALITY_STACK_RESPONSE_OPTIONS;
   return RESP[phase] || [];
 }
@@ -2709,6 +2788,7 @@ async function startCall() {
   seedSqlFromForm();
   conversationHistory = [];
   currentPhase = "opening";
+  currentOpeningMode = "permission";
   activeCompetitor = getCompetitorFromText(prospectInfo.current_solution || "");
 
   document.getElementById("gen-btn").disabled = true;
@@ -2793,7 +2873,7 @@ function renderRetry(msg, phase, scriptText) {
 }
 
 function resetAll() {
-  conversationHistory = []; currentPhase = "opening"; prospectInfo = {}; currentScriptText = "";
+  conversationHistory = []; currentPhase = "opening"; currentOpeningMode = "permission"; prospectInfo = {}; currentScriptText = "";
   activeCompetitor = null;
   document.getElementById("history").innerHTML = "";
   document.getElementById("current-block").innerHTML = "";
