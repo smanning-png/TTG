@@ -272,8 +272,23 @@ if (!hotelSystemPrompt.includes("HOTEL / HOSPITALITY MODE") || !hotelSystemPromp
   throw new Error("Hotel system prompt is missing hospitality-specific guardrails.");
 }
 const innFlowPrompt = sandbox.buildNextPrompt("competitor_innflow", "We use Inn-Flow");
-if (!/accounting and owner reporting/i.test(innFlowPrompt) || !/scheduling, time clocks, payroll, and hiring/i.test(innFlowPrompt)) {
-  throw new Error("Inn-Flow prompt did not separate hotel reporting from people ops.");
+if (!/What parts of the business does Inn-Flow handle/i.test(innFlowPrompt) || /bigger issue/i.test(innFlowPrompt)) {
+  throw new Error("Inn-Flow prompt should ask a neutral scope question before assuming pain.");
+}
+const innFlowOptionIds = new Set(readContext('getResponseOptions("competitor_innflow")').map(option => option.id));
+for (const neutralId of ["innflow_scope_accounting", "innflow_scope_labor", "innflow_scope_payroll", "innflow_scope_whole_platform", "innflow_scope_unsure"]) {
+  if (!innFlowOptionIds.has(neutralId)) {
+    throw new Error(`Inn-Flow scope options are missing ${neutralId}.`);
+  }
+}
+for (const painId of ["competitor_cost", "competitor_support", "competitor_gap", "competitor_switching"]) {
+  if (innFlowOptionIds.has(painId)) {
+    throw new Error("Inn-Flow first follow-up should not show pain/objection options before scope is known.");
+  }
+}
+const innFlowFallback = sandbox.buildFallbackTalkTrack("competitor_innflow", "Inn-Flow handles hotel back office");
+if (!/What parts of the business does Inn-Flow handle/i.test(innFlowFallback) || /Cost or add-ons/i.test(innFlowFallback)) {
+  throw new Error("Inn-Flow fallback should ask scope before pain.");
 }
 
 readContext(`prospectInfo = {

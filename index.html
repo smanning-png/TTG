@@ -825,6 +825,14 @@ const COMPETITOR_RESPONSE_OPTIONS = [
   { id:"not_interested", icon:"ti-x", label:"We're happy with it", sub:"Satisfied today" }
 ];
 
+const INNFLOW_SCOPE_RESPONSE_OPTIONS = [
+  { id:"innflow_scope_accounting", icon:"ti-report-money", label:"Accounting and owner reporting", sub:"Finance / reporting" },
+  { id:"innflow_scope_labor", icon:"ti-calendar-stats", label:"Labor scheduling and time", sub:"Labor workflow" },
+  { id:"innflow_scope_payroll", icon:"ti-receipt", label:"Payroll too", sub:"Payroll included" },
+  { id:"innflow_scope_whole_platform", icon:"ti-building-bank", label:"The whole back-office suite", sub:"Full platform" },
+  { id:"innflow_scope_unsure", icon:"ti-help", label:"Not sure, management company set it up", sub:"Ownership unclear" }
+];
+
 const SCHEDULING_RESPONSE_OPTIONS = [
   { id:"schedule_build_time", icon:"ti-calendar-plus", label:"Building the schedule takes forever", sub:"Time drain" },
   { id:"schedule_changes", icon:"ti-arrows-exchange", label:"Callouts and swaps blow it up", sub:"Coverage chaos" },
@@ -961,7 +969,7 @@ const COMPETITOR_INTEL = {
     name:"Inn-Flow",
     aliases:["inn-flow", "inn flow", "innflow"],
     wedge:"respecting Inn-Flow as hotel back-office software while comparing the day-to-day people workflow: schedules, punches, payroll, hiring, and team communication",
-    ask:"Are you looking at Inn-Flow for accounting and owner reporting, or mainly to fix scheduling, time clocks, payroll, and hiring at the property?",
+    ask:"What parts of the business does Inn-Flow handle for you today: accounting and owner reporting, labor scheduling and time, payroll, or the whole back-office suite?",
     angles:["Separate hotel finance/reporting from property-level people ops", "Ask for the total quote only after they mention pricing", "Book a workflow comparison, not a generic demo"],
     caution:"Do not claim Homebase replaces hotel accounting, USALI reporting, portfolio BI, procurement, or facilities tools."
   },
@@ -1059,6 +1067,9 @@ function competitorSummaryList() {
 }
 
 function competitorPromptInstruction(competitor, hint) {
+  if (competitor.name === "Inn-Flow") {
+    return `Prospect says they use Inn-Flow. This only identifies the current system; it does NOT mean they have a problem with it yet. Acknowledge neutrally and ask this exact type of scope question: ${competitor.ask} Do not ask about cost, support, switching, or gaps until they first explain what Inn-Flow handles. ${hint}`;
+  }
   return `Prospect says they use ${competitor.name}. Use LAER: acknowledge it, explore one thing, then respond only after you understand. Do not bash ${competitor.name}. Use this Homebase wedge if relevant: ${competitor.wedge}. Ask this one discovery question or a close variant of it: ${competitor.ask} ${hint}`;
 }
 
@@ -1451,7 +1462,12 @@ function phaseLabel(p) {
     email_confirmed:"Booked · locked in", email_correction:"Correcting contact",
     competitor_cost:"Objection · competitor cost", competitor_support:"Objection · competitor support",
     competitor_gap:"Objection · competitor gap", competitor_switching:"Objection · switching pain",
-    locked_contract:"Objection · contract lock"
+    locked_contract:"Objection · contract lock",
+    innflow_scope_accounting:"Inn-Flow · accounting/reporting",
+    innflow_scope_labor:"Inn-Flow · labor/time",
+    innflow_scope_payroll:"Inn-Flow · payroll included",
+    innflow_scope_whole_platform:"Inn-Flow · full suite",
+    innflow_scope_unsure:"Inn-Flow · ownership unclear"
   };
   return m[p] || "Continuing the call";
 }
@@ -1515,7 +1531,7 @@ const RESP = {
   competitor_7shifts: COMPETITOR_RESPONSE_OPTIONS,
   competitor_connecteam: COMPETITOR_RESPONSE_OPTIONS,
   competitor_cpa: COMPETITOR_RESPONSE_OPTIONS,
-  competitor_innflow: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_innflow: INNFLOW_SCOPE_RESPONSE_OPTIONS,
   competitor_actabl: COMPETITOR_RESPONSE_OPTIONS,
   competitor_m3: COMPETITOR_RESPONSE_OPTIONS,
   competitor_unifocus: COMPETITOR_RESPONSE_OPTIONS,
@@ -1531,6 +1547,36 @@ const RESP = {
     { id:"what_system", icon:"ti-check", label:"It handles payroll too", sub:"Has payroll" },
     { id:"competitor_switching", icon:"ti-switch-2", label:"Switching sounds painful", sub:"Migration concern" },
     { id:"not_sure", icon:"ti-help", label:"Not really sure honestly", sub:"Owner unsure" }
+  ],
+  innflow_scope_accounting: [
+    { id:"competitor_other", icon:"ti-layout-grid", label:"Separate tools handle staff", sub:"Staff workflow separate" },
+    { id:"curious_why", icon:"ti-file-spreadsheet", label:"Some of it is still manual", sub:"Manual workflow" },
+    { id:"innflow_scope_labor", icon:"ti-calendar-stats", label:"Actually, labor is in Inn-Flow too", sub:"Labor included" },
+    { id:"decision_maker_no", icon:"ti-user-question", label:"Someone else owns that", sub:"Wrong contact" }
+  ],
+  innflow_scope_labor: [
+    { id:"no_payroll", icon:"ti-x", label:"Payroll is separate", sub:"Payroll gap" },
+    { id:"innflow_scope_payroll", icon:"ti-receipt", label:"Payroll is in Inn-Flow too", sub:"Payroll included" },
+    { id:"competitor_gap", icon:"ti-puzzle", label:"It covers it, but not everything", sub:"Potential gap" },
+    { id:"not_interested", icon:"ti-x", label:"It works fine for us", sub:"Status quo" }
+  ],
+  innflow_scope_payroll: [
+    { id:"competitor_gap", icon:"ti-puzzle", label:"It still leaves some work outside", sub:"Workflow gap" },
+    { id:"competitor_cost", icon:"ti-coin", label:"It gets expensive", sub:"Cost concern" },
+    { id:"competitor_support", icon:"ti-headset", label:"Support or setup is heavy", sub:"Service / rollout" },
+    { id:"not_interested", icon:"ti-x", label:"It works fine for us", sub:"Status quo" }
+  ],
+  innflow_scope_whole_platform: [
+    { id:"competitor_gap", icon:"ti-puzzle", label:"The property team still struggles", sub:"Workflow gap" },
+    { id:"competitor_cost", icon:"ti-coin", label:"It's heavier than we need", sub:"Cost / complexity" },
+    { id:"want_demo", icon:"ti-screen-share", label:"I'd compare the people workflow", sub:"Specialist call" },
+    { id:"not_interested", icon:"ti-x", label:"We're happy with it", sub:"Satisfied today" }
+  ],
+  innflow_scope_unsure: [
+    { id:"decision_maker_no", icon:"ti-user-question", label:"Management company owns it", sub:"Wrong contact" },
+    { id:"gate_name", icon:"ti-user", label:"I can point you to who knows", sub:"Route to owner" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Worth comparing anyway", sub:"Specialist call" },
+    { id:"not_interested", icon:"ti-x", label:"We're covered", sub:"Status quo" }
   ],
   competitor_cost: [
     { id:"size_small", icon:"ti-users", label:"Just under 10 employees", sub:"Estimated users" },
@@ -1837,7 +1883,12 @@ const SQL_SIGNAL_MAP = {
   timeline_now:{key:"timeline",val:"Immediate (0-30 days)"}, timeline_soon:{key:"timeline",val:"Near-term (1-3 months)"}, timeline_later:{key:"timeline",val:"Mid-term (3+ months)"},
   budget_yes:{key:"budget",val:"Budget confirmed"}, budget_maybe:{key:"budget",val:"Budget likely"}, budget_no:{key:"budget",val:"No budget identified"},
   willing_to_meet:{key:"nextstep",val:"Demo scheduled"}, callback_yes:{key:"nextstep",val:"Follow-up call scheduled"}, book_meeting:{key:"nextstep",val:"Demo requested"},
-  decision_maker_yes:{key:"contact",val:"Decision maker on the line"}
+  decision_maker_yes:{key:"contact",val:"Decision maker on the line"},
+  innflow_scope_accounting:{key:"solution",val:"Inn-Flow: accounting / owner reporting"},
+  innflow_scope_labor:{key:"solution",val:"Inn-Flow: labor scheduling / time"},
+  innflow_scope_payroll:{key:"solution",val:"Inn-Flow: payroll included"},
+  innflow_scope_whole_platform:{key:"solution",val:"Inn-Flow: full back-office suite"},
+  innflow_scope_unsure:{key:"solution",val:"Inn-Flow scope unclear / management company owned"}
 };
 
 const FINAL_QUESTION_GUIDANCE = {
@@ -1854,6 +1905,11 @@ const FINAL_QUESTION_GUIDANCE = {
   competitor_support: "End by asking whether support pain makes them open to a look, whether there are broader gaps, whether it is not urgent, or whether the current tool is fine.",
   competitor_gap: "End by asking which workflow still sits outside their current tool: payroll, scheduling, hiring/onboarding, communication, or the full flow.",
   competitor_switching: "End by asking whether they want migration info, a specialist to map it, renewal timing, or whether switching is not worth it.",
+  innflow_scope_accounting: "End by asking what handles the staff workflow today: separate tools, manual work, Inn-Flow labor too, or another person owns it.",
+  innflow_scope_labor: "End by asking whether payroll is separate, payroll is also in Inn-Flow, there are gaps, or it works fine.",
+  innflow_scope_payroll: "End by asking whether anything still sits outside Inn-Flow, whether cost/setup is heavy, whether support is an issue, or whether it works fine.",
+  innflow_scope_whole_platform: "End by asking whether the property team still struggles, whether the suite feels heavier than needed, whether they want to compare the people workflow, or whether they are happy.",
+  innflow_scope_unsure: "End by asking who owns it: management company, someone they can route you to, a comparison anyway, or fully covered.",
   locked_contract: "End by asking when the contract renews or whether they are not evaluating.",
   named_tool: "End by asking one payroll-ownership question: does that tool handle payroll, is payroll separate, or are they not sure?",
   not_sure: "End by asking if it is worth a quick look together, if payroll is probably separate, or if another time is better.",
@@ -1976,6 +2032,11 @@ function buildNextPrompt(responseId, responseLabel) {
     competitor_support:`Competitor support objection. Acknowledge the frustration without attacking the competitor. Ask whether support is the only issue or if payroll, scheduling, onboarding, or communication is also taking time. If natural, position Homebase as real people plus an hourly-team workflow. ${hint}`,
     competitor_gap:`Competitor feature/workflow gap. Acknowledge what their current tool does well, then ask which missing workflow matters most: payroll, scheduling, hiring/onboarding, or team communication. Keep Homebase positioned as all-in-one hourly-team operations. ${hint}`,
     competitor_switching:`Switching pain objection. Be honest: switching always takes some work, but a specialist can map what imports, what is manual, and what timing makes sense. Do not overpromise direct deposit or SSN imports. Ask whether they want migration info, a specialist mapping call, renewal timing, or if it is not worth switching. ${hint}`,
+    innflow_scope_accounting:`They clarified Inn-Flow is mainly accounting and owner reporting. Do NOT imply there is a problem with Inn-Flow. Respect the finance lane, then ask ONE neutral question: what handles employee schedules, time clocks, payroll, hiring, and team communication today? ${hint}`,
+    innflow_scope_labor:`They clarified Inn-Flow handles labor scheduling and time. Do NOT assume pain. Ask ONE neutral follow-up: whether payroll and hiring live there too, or whether those are separate. ${hint}`,
+    innflow_scope_payroll:`They clarified Inn-Flow includes payroll. Do NOT assume pain. Acknowledge that it sounds fairly complete, then ask ONE soft comparison question about whether anything still sits outside it for the property team, like hiring, team communication, or manager adoption. ${hint}`,
+    innflow_scope_whole_platform:`They said Inn-Flow handles the whole back-office suite. Respect that. Ask ONE neutral question about whether the property team actually uses it day to day or whether it is mostly ownership/controller workflow. ${hint}`,
+    innflow_scope_unsure:`They are not sure what Inn-Flow handles because management company or someone else owns it. Do not pitch hard. Ask ONE routing question: who owns scheduling, payroll, and staff systems for the property. ${hint}`,
     locked_contract:`Contract lock objection. Do not fight the contract. Ask when renewal comes up and what they would change if the contract were not in the way. Position this as planning ahead, not ripping out a tool today. ${hint}`,
     named_tool:`They just named their current tool. Acknowledge it warmly. IF payroll ownership hasn't already come up earlier in the conversation, ask ONE simple follow-up: does that tool also handle their payroll, or is payroll separate? But if they've ALREADY told you who runs payroll (for example they said they run it themselves, or corporate covers it), do NOT ask again, instead acknowledge what you know and ask a different one-question follow-up that moves toward a product specialist call. ${hint}`,
     not_sure:`They're not sure whether their tool runs payroll. No problem, that's common. Gently note that a lot of owners are surprised their scheduling tool doesn't actually run payroll, and offer that the quickest way to sort it out is a quick product specialist call. ${hint}`,
@@ -2067,6 +2128,9 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
   const currentCompetitor = selectedCompetitor || activeCompetitor || getCompetitorFromText(info.current_solution || "");
 
   if (selectedCompetitor) {
+    if (selectedCompetitor.name === "Inn-Flow") {
+      return `${lead}got it, that makes sense. What parts of the business does Inn-Flow handle for you today: accounting and owner reporting, labor scheduling and time, payroll, or the whole back-office suite?\n[Coaching tip: Do not assume pain yet; first separate finance/reporting from the staff workflow.]`;
+    }
     return `${lead}that makes sense, a lot of owners already have ${selectedCompetitor.name} in place. The reason owners still compare Homebase is ${selectedCompetitor.wedge}. ${selectedCompetitor.ask}\n[Coaching tip: Do not attack ${selectedCompetitor.name}; find the one workflow they still want to improve.]`;
   }
 
@@ -2088,6 +2152,11 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     competitor_support: `${lead}I hear you, support frustration gets old fast when payroll or schedules are on the line. Is support the main issue, or are there workflow gaps too, like payroll, scheduling, onboarding, or team messages?\n[Coaching tip: Acknowledge the frustration, then explore whether the issue is isolated or bigger.]`,
     competitor_gap: `${lead}that is usually where owners start looking, not because the current tool is useless, but because it leaves work outside the system. Which part is still outside it today: payroll, scheduling, hiring, or team communication?\n[Coaching tip: Name the gap, then let them choose the pain.]`,
     competitor_switching: `${lead}that is a fair concern, switching always takes some planning. The useful next step is mapping what imports, what is manual, and what timing makes sense. Would you rather I send migration info first, or map it with a specialist?\n[Coaching tip: Reduce switching anxiety with a concrete migration map.]`,
+    innflow_scope_accounting: `${lead}got it, so Inn-Flow is more in the finance and reporting lane. What handles the staff side today: schedules, time clocks, payroll, hiring, and team communication?\n[Coaching tip: Respect Inn-Flow's finance role before you look for the people-ops workflow.]`,
+    innflow_scope_labor: `${lead}got it, so labor and time are in there too. Does payroll and hiring live in Inn-Flow as well, or are those handled somewhere else?\n[Coaching tip: Keep this neutral; you are mapping the workflow, not assuming pain.]`,
+    innflow_scope_payroll: `${lead}that sounds fairly complete. Is everything the property team needs in that workflow too, like hiring, team communication, and manager adoption, or are any pieces still separate?\n[Coaching tip: If they say it is fully covered, respect it; if they name a gap, then go deeper.]`,
+    innflow_scope_whole_platform: `${lead}makes sense. Is Inn-Flow something the property team uses day to day, or is it mostly an ownership, controller, and back-office workflow?\n[Coaching tip: Separate who uses the system before comparing Homebase.]`,
+    innflow_scope_unsure: `${lead}no worries, that is common when the management company owns the system. Who would know what handles scheduling, payroll, and staff tools for the property?\n[Coaching tip: Route to the system owner instead of forcing a pitch.]`,
     locked_contract: `${lead}that makes sense, no one wants to rip something out mid-contract. If renewal is the real window, when does that come up: soon, in a few months, or closer to year-end?\n[Coaching tip: Turn contract lock into a renewal-timing conversation.]`,
     named_tool: `${lead}got it, that is helpful context. A lot of owners still look at Homebase when they want hours to flow cleanly into payroll without extra re-keying. What do you wish worked better in your current setup?\n${baseTip}`,
     pain_payroll: `${lead}that is exactly the kind of thing we help with. When payroll is messy, it usually means hours are being checked, copied, or corrected by hand before payday. How long does payroll usually take you each pay period?\n[Coaching tip: Expand the pain before you pitch the fix.]`,
@@ -2169,6 +2238,11 @@ const PHASE_ASKS = {
   competitor_support: [{ key:"pain", val:"asked support impact" }],
   competitor_gap: [{ key:"pain", val:"asked current tool gap" }],
   competitor_switching: [{ key:"timeline", val:"asked migration timing" }],
+  innflow_scope_accounting: [{ key:"solution", val:"asked staff workflow outside Inn-Flow" }],
+  innflow_scope_labor: [{ key:"solution", val:"asked payroll / hiring ownership" }],
+  innflow_scope_payroll: [{ key:"solution", val:"asked remaining workflow coverage" }],
+  innflow_scope_whole_platform: [{ key:"solution", val:"asked property-team usage" }],
+  innflow_scope_unsure: [{ key:"contact", val:"asked system owner" }],
   locked_contract: [{ key:"timeline", val:"asked contract renewal" }],
   named_tool:     [{ key:"solution", val:"named, checking payroll" }],
   not_sure:       [{ key:"solution", val:"unsure on payroll" }],
