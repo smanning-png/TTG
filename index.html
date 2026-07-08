@@ -635,10 +635,54 @@ function getBrandSocialProof(brand) {
   return null;
 }
 
+function roundedLocationCountText(count) {
+  const n = Number(count);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  let threshold;
+  if (n <= 20) threshold = 15;
+  else if (n <= 25) threshold = 20;
+  else if (n <= 30) threshold = 25;
+  else threshold = Math.floor((n - 1) / 10) * 10;
+  return `over ${threshold}`;
+}
+
+function brandSocialProofLocationRef(proof) {
+  if (!proof) return "";
+  return `${roundedLocationCountText(proof.locations)} ${proof.brand} locations`;
+}
+
 function brandSocialProofLine(brand) {
   const proof = getBrandSocialProof(brand);
   if (!proof) return "";
-  return `We already work with ${proof.locations} ${proof.brand} locations, and I'm reaching out because we haven't had a chance to connect yet.`;
+  return `We already work with ${brandSocialProofLocationRef(proof)}, and I'm reaching out because we haven't had a chance to connect yet.`;
+}
+
+const HOTEL_BRAND_HINTS = [
+  "hotel", "hotels", "inn", "suites", "resort", "resorts", "lodge", "motel", "hospitality",
+  "holiday inn", "holiday inn express", "ihg", "best western", "accor", "accorhotels", "ibis", "novotel",
+  "mercure", "sofitel", "fairmont", "raffles", "marriott", "courtyard", "residence inn",
+  "springhill", "towneplace", "sheraton", "westin", "renaissance", "ritz carlton",
+  "hilton", "hampton", "doubletree", "embassy suites", "homewood suites", "hyatt",
+  "wyndham", "la quinta", "days inn", "ramada", "super 8", "travelodge", "motel 6",
+  "choice hotels", "choicehotels", "quality inn", "comfort inn", "clarion", "econo lodge", "sleep inn",
+  "radisson", "red roof", "drury", "avid", "candlewood", "staybridge"
+];
+
+function brandKeyContainsPhrase(key, phrase) {
+  return key === phrase || key.startsWith(`${phrase} `) || key.endsWith(` ${phrase}`) || key.includes(` ${phrase} `);
+}
+
+function isHospitalityBrand(brand) {
+  const key = normalizeBrandKey(brand);
+  if (!key) return false;
+  return HOTEL_BRAND_HINTS.some(hint => {
+    const normalizedHint = normalizeBrandKey(hint);
+    return brandKeyContainsPhrase(key, normalizedHint);
+  });
+}
+
+function isHospitalityContext(info = prospectInfo) {
+  return (info && info.industry === "Lodging & Leisure") || isHospitalityBrand(info && info.brand);
 }
 
 // Keyword fallback for brands not in our known-franchisee data
@@ -646,7 +690,7 @@ const INDUSTRY_KEYWORDS = [
   { kw: ["salon","spa","barber","nails","lash","brow","wax","tan","sauna","massage","hair","beauty","fitness","gym","yoga","pilates","crossfit","cycle","wellness","chiropractic","therapy","med spa","medspa"], industry: "Health & Fitness" },
   { kw: ["coffee","cafe","caf\u00e9","pizza","burger","taco","grill","kitchen","bakery","bagel","donut","doughnut","ice cream","cream","smoothie","juice","tea","bar ","brewing","brew","deli","sandwich","sub","wings","chicken","bbq","barbecue","restaurant","eatery","diner","food","snack","candy","chocolate","yogurt","bowl","noodle","ramen","sushi","poke","cookie","pretzel"], industry: "Food & Beverage" },
   { kw: ["hardware","store","shop","retail","resale","thrift","consignment","boutique","mart","market","outlet","furniture","mattress","goods","supply","supplies"], industry: "Retail" },
-  { kw: ["hotel","inn","suites","resort","lodge","motel","hospitality"], industry: "Lodging & Leisure" },
+  { kw: HOTEL_BRAND_HINTS, industry: "Lodging & Leisure" },
   { kw: ["auto","tire","lube","oil","car wash","collision","mechanic","transmission","muffler","brake","detailing","glass"], industry: "Auto & Travel" },
   { kw: ["pet","dog","cat","grooming","kennel","vet","veterinary","animal"], industry: "Pet Services" },
   { kw: ["learning","tutor","tutoring","academy","education","school","kumon","math","reading","stem","coding","kids","childcare","daycare","montessori","preschool"], industry: "Education & Arts" },
@@ -661,6 +705,7 @@ function detectIndustry(brand) {
   if (brandProof) return { industry: brandProof.industry, exact: true };
   // 1) Exact match against known franchisee brands
   if (BRAND_INDUSTRY[b]) return { industry: BRAND_INDUSTRY[b], exact: true };
+  if (isHospitalityBrand(brand)) return { industry: "Lodging & Leisure", exact: false };
   // 2) Partial match: brand contains a known brand name or vice versa
   for (const key in BRAND_INDUSTRY) {
     if (b === key) return { industry: BRAND_INDUSTRY[key], exact: true };
@@ -760,7 +805,7 @@ const SUB_CATEGORIES = [
   { kw:["ice cream","cream","frozen yogurt","froyo","gelato","custard"], peers:["Cold Stone","Baskin Robbins","Ben & Jerrys"], noun:"shops" },
   { kw:["smoothie","juice","bowl","açai","acai","playa"], peers:["Playa Bowls","Smoothie King"], noun:"shops" },
   // Lodging
-  { kw:["hotel","inn","suites","resort","lodge","motel","hampton","holiday inn","marriott","wyndham"], peers:["Holiday Inn","Hampton Inn","Best Western"], noun:"properties" }
+  { kw:HOTEL_BRAND_HINTS, peers:["Holiday Inn","Hampton Inn","Best Western"], noun:"properties" }
 ];
 
 // Natural noun for a prospect's spots, by broad industry (fallback when no sub-match)
@@ -808,6 +853,29 @@ const CURRENT_STACK_RESPONSE_OPTIONS = [
   { id:"not_interested", icon:"ti-x", label:"We're covered, thanks", sub:"Status quo" }
 ];
 
+const HOSPITALITY_STACK_RESPONSE_OPTIONS = [
+  { id:"competitor_innflow", icon:"ti-building-bank", label:"Inn-Flow handles hotel back office", sub:"Hotel accounting / labor" },
+  { id:"competitor_actabl", icon:"ti-chart-bar", label:"Actabl / Hotel Effectiveness handles labor", sub:"Hotel labor intelligence" },
+  { id:"competitor_m3", icon:"ti-report-money", label:"M3 is our hotel finance system", sub:"Hotel accounting / BI" },
+  { id:"competitor_unifocus", icon:"ti-chart-arcs", label:"UniFocus handles labor / ops", sub:"Hotel workforce optimization" },
+  { id:"competitor_hotschedules", icon:"ti-calendar-stats", label:"Fourth / HotSchedules handles scheduling", sub:"Hospitality workforce" },
+  { id:"competitor_harri", icon:"ti-users-group", label:"Harri handles hiring / workforce", sub:"Hospitality workforce OS" },
+  { id:"competitor_wheniwork_deputy_sling", icon:"ti-calendar-time", label:"When I Work / Deputy / Sling schedules", sub:"Scheduling / time app" },
+  { id:"competitor_7shifts", icon:"ti-tools-kitchen-2", label:"7shifts handles our restaurant / F&B team", sub:"Restaurant-side tools" },
+  { id:"competitor_hotel_ops", icon:"ti-clipboard-list", label:"Quore / hotelkit / ALICE handles ops", sub:"Hotel ops / comms" },
+  { id:"competitor_adp", icon:"ti-receipt", label:"ADP handles payroll", sub:"Payroll incumbent" },
+  { id:"competitor_paychex", icon:"ti-receipt", label:"Paychex handles payroll", sub:"Payroll incumbent" },
+  { id:"competitor_hcm_hotel", icon:"ti-id-badge-2", label:"Paylocity / Paycor / UKG handles HR/payroll", sub:"HCM incumbent" },
+  { id:"competitor_cpa", icon:"ti-calculator", label:"Our CPA / bookkeeper handles payroll", sub:"Accountant / bookkeeper" },
+  { id:"competitor_other", icon:"ti-layout-grid", label:"Different tools by department", sub:"Fragmented hotel stack" },
+  { id:"curious_why", icon:"ti-file-spreadsheet", label:"Excel, paper, texts, and manual work", sub:"Manual process" },
+  { id:"franchise_hq", icon:"ti-building", label:"Brand / management company provides it", sub:"HQ-provided tools" },
+  { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is our headache", sub:"Pain surfaces" },
+  { id:"pain_payroll", icon:"ti-receipt", label:"Payroll or timecards are the problem", sub:"Pain surfaces" },
+  { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring / turnover is tough right now", sub:"Pain surfaces" },
+  { id:"not_interested", icon:"ti-x", label:"We're covered, thanks", sub:"Status quo" }
+];
+
 const COMPETITOR_INTEL = {
   competitor_gusto: {
     name:"Gusto",
@@ -851,27 +919,27 @@ const COMPETITOR_INTEL = {
   },
   competitor_toast: {
     name:"Toast",
-    aliases:["toast", "toast payroll", "sling", "sling by toast"],
+    aliases:["toast", "toast payroll"],
     wedge:"Homebase can layer scheduling, time, payroll, hiring, and team messaging around their existing POS instead of making the conversation only about POS hardware",
     ask:"Are you using Toast for POS only, or are scheduling, payroll, tips, and employee communication all running there too?",
     angles:["Homebase integrates with Toast, so the prospect does not have to rip out POS to improve hourly-team ops", "Ask whether payroll, scheduling, and tips feel simple or just connected to POS", "If hardware or processing is sensitive, keep the conversation on team management"],
     caution:"Toast is strong in restaurants and advertises 24/7 support. Do not attack support; ask how the full team workflow feels."
   },
   competitor_hotschedules: {
-    name:"HotSchedules",
+    name:"Fourth / HotSchedules",
     aliases:["hotschedules", "hot schedules", "fourth", "fourth hotschedules"],
-    wedge:"a simpler, more transparent hourly-team app for franchisees who do not need a large enterprise workforce suite",
-    ask:"Are you using HotSchedules mostly for scheduling, or the broader Fourth HR, payroll, compliance, and forecasting suite?",
-    angles:["Acknowledge HotSchedules is strong for enterprise restaurants", "Probe complexity, rollout effort, and whether managers actually use the whole suite", "Position Homebase as quicker to adopt for scheduling, time, payroll, and team messaging"],
-    caution:"HotSchedules has enterprise credibility and major restaurant logos. Win on right-size fit, usability, and speed."
+    wedge:"separating restaurant/F&B tools from the broader hotel property workflow across front desk, housekeeping, maintenance, breakfast, payroll, hiring, and team communication",
+    ask:"Is that being used for the restaurant or F&B side only, or across the whole hotel property?",
+    angles:["Acknowledge Fourth and HotSchedules are strong restaurant workforce tools", "Ask whether front desk, housekeeping, maintenance, breakfast, and payroll still live elsewhere", "Position Homebase as simpler for the full property when they do not need a restaurant-heavy stack"],
+    caution:"Do not dismiss HotSchedules. If the hotel has serious restaurant/bar operations, keep the conversation on the property workflows that still sit outside it."
   },
   competitor_7shifts: {
     name:"7shifts",
     aliases:["7shifts", "7 shifts", "7shift"],
-    wedge:"native payroll plus scheduling, time, hiring, messaging, and broader hourly-team workflows under one Homebase account",
-    ask:"Are you using 7shifts for payroll too, or mainly for scheduling and team communication?",
-    angles:["If it is scheduling-only, bridge to payroll and hiring", "Ask whether tips, labor compliance, onboarding, and payroll still require extra tools", "Use Homebase's franchise social proof where available"],
-    caution:"7shifts is restaurant-focused and strong on scheduling. Win by finding what still sits outside it."
+    wedge:"covering the whole hotel team, not only the restaurant or F&B workflow",
+    ask:"Is 7shifts running the whole property, or mainly the restaurant, bar, or breakfast team?",
+    angles:["Respect 7shifts for restaurant scheduling and tips", "Ask how front desk, housekeeping, maintenance, breakfast, hiring, and payroll are handled", "Position Homebase as the simpler property-wide hourly-team workflow when F&B is not the whole business"],
+    caution:"If the hotel has substantial F&B and tip workflows, 7shifts can be credible. Win only where the rest of the property is fragmented."
   },
   competitor_connecteam: {
     name:"Connecteam",
@@ -888,6 +956,70 @@ const COMPETITOR_INTEL = {
     ask:"What does your CPA handle today: payroll taxes only, or onboarding, time cards, direct deposit, and employee questions too?",
     angles:["Do not attack the CPA relationship", "Probe response time during tax season and manual onboarding", "Position Homebase as the payroll system that can still work alongside their trusted accountant"],
     caution:"This is emotional because of trust. Be respectful and position alongside the CPA."
+  },
+  competitor_innflow: {
+    name:"Inn-Flow",
+    aliases:["inn-flow", "inn flow", "innflow"],
+    wedge:"respecting Inn-Flow as hotel back-office software while comparing the day-to-day people workflow: schedules, punches, payroll, hiring, and team communication",
+    ask:"Are you looking at Inn-Flow for accounting and owner reporting, or mainly to fix scheduling, time clocks, payroll, and hiring at the property?",
+    angles:["Separate hotel finance/reporting from property-level people ops", "Ask for the total quote only after they mention pricing", "Book a workflow comparison, not a generic demo"],
+    caution:"Do not claim Homebase replaces hotel accounting, USALI reporting, portfolio BI, procurement, or facilities tools."
+  },
+  competitor_actabl: {
+    name:"Actabl / Hotel Effectiveness",
+    aliases:["actabl", "hotel effectiveness", "perfectlabor", "perfect labor", "perfecttime", "perfect time", "profitsword", "transcendent"],
+    wedge:"daily execution and payroll simplicity for the GM and hourly team, not heavy portfolio labor intelligence",
+    ask:"Are you looking at Actabl for ProfitSword or BI, Hotel Effectiveness labor, hotel ops, or just cleaner scheduling and timecards?",
+    angles:["Respect hotel labor standards and benchmarking", "Ask whether the pain is advanced labor analytics or basic schedule/time/payroll cleanup", "Use adoption by front desk and housekeeping as the wedge"],
+    caution:"Actabl is strong above-property. Do not fight on hotel benchmarking; find the property-level workflow pain."
+  },
+  competitor_m3: {
+    name:"M3",
+    aliases:["m3", "m3 accounting", "m3 labor", "m3 insight"],
+    wedge:"keeping M3 in the hotel finance lane while Homebase handles property workforce execution",
+    ask:"Is M3 your accounting and reporting system, or are GMs actually building schedules, managing timecards, payroll, hiring, and team messages there too?",
+    angles:["Position as complementary when M3 is embedded in finance", "Ask what tool handles hiring and team communication", "Lower defensiveness by saying this may be M3 plus Homebase, not rip-and-replace"],
+    caution:"M3 is credible for hotel accounting, BI, GAAP, and USALI reporting. Do not pretend Homebase replaces that."
+  },
+  competitor_unifocus: {
+    name:"UniFocus",
+    aliases:["unifocus", "uni focus"],
+    wedge:"right-sized people ops and payroll simplicity before buying advanced occupancy-based labor optimization",
+    ask:"Is the immediate issue forecasting labor demand, or getting schedules, punches, payroll, hiring, and team communication cleaner this month?",
+    angles:["Respect predictive labor and occupancy forecasting", "Ask whether PMS-driven forecasting is truly needed now", "Use faster adoption for limited-service hotel properties as the wedge"],
+    caution:"For larger resorts, union environments, or complex labor standards, UniFocus may be a serious fit. Do not oversell Homebase as advanced hotel ops optimization."
+  },
+  competitor_harri: {
+    name:"Harri",
+    aliases:["harri"],
+    wedge:"a practical scheduling, time, payroll, hiring, and team communication workflow for franchise hotel properties without rolling out an enterprise workforce OS",
+    ask:"Are you looking for enterprise hospitality compliance and AI, or a practical scheduling-time-payroll system for this property?",
+    angles:["Respect Harri's hospitality workforce story", "Ask what problem AI is supposed to solve for the GM today", "Compare rollout effort and payroll ownership"],
+    caution:"Do not get pulled into AI feature chess. Bring it back to workflow, adoption, payroll, and the actual property pain."
+  },
+  competitor_wheniwork_deputy_sling: {
+    name:"When I Work / Deputy / Sling",
+    aliases:["when i work", "wheniwork", "deputy", "sling", "sling by toast"],
+    wedge:"expanding from scheduling visibility into one workflow for timecards, payroll, hiring, HR, and team communication",
+    ask:"What happens after the schedule: are timecards, payroll, hiring, HR, and team messages still handled somewhere else?",
+    angles:["Respect simple schedulers as easy to adopt", "Probe export/download/upload steps before payroll", "Use admin-time ROI instead of feature parity"],
+    caution:"If scheduling is the only problem and they love the price, pain may be weak. Find what still happens around the schedule."
+  },
+  competitor_hotel_ops: {
+    name:"Quore / hotelkit / Beekeeper / ALICE",
+    aliases:["quore", "hotelkit", "hotel kit", "beekeeper", "alice"],
+    wedge:"coexisting with hotel operations tools while Homebase owns schedules, time clocks, payroll, hiring, HR, and schedule-related communication",
+    ask:"Great hotel ops tool. What system tells employees when they work, captures hours, runs payroll, and handles hiring?",
+    angles:["Position coexistence, not replacement", "Separate rooms/tasks/guest requests from people/payroll", "Ask whether another app is creating fragmentation"],
+    caution:"Do not challenge brand-mandated hotel ops tools. Homebase is not for room assignments, work orders, inspections, or guest request workflows."
+  },
+  competitor_hcm_hotel: {
+    name:"Paylocity / Paycor / UKG",
+    aliases:["paylocity", "paycor", "ukg", "kronos", "ultimate kronos"],
+    wedge:"payroll built around the hourly team workflow instead of HR/payroll sitting apart from scheduling, punches, hiring, and property communication",
+    ask:"How much manual work happens before payroll: schedules, punches, timecard edits, imports, corrections, and new-hire setup?",
+    angles:["Respect payroll trust and HR breadth", "Ask how hours move from the property into payroll", "Probe support, fees, and whether scheduling/time is a separate module"],
+    caution:"If corporate mandates the HCM or benefits/complex HR dominate, switching payroll may be blocked. Land scheduling/time pain first."
   },
   competitor_paylogics: {
     name:"Paylogics / iSolved",
@@ -1135,6 +1267,7 @@ function getMissingFields() {
 function buildSystemPrompt(info) {
   const proof = getProof(info.industry, info.brand);
   const brandProof = getBrandSocialProof(info.brand);
+  const hospitality = isHospitalityContext(info);
   const missing = getMissingFields();
   const desc = {
     pain:"what their specific pain or problem is", timeline:"when they want to make a change (0-30 days, 1-3 months, 3+ months)",
@@ -1144,6 +1277,16 @@ function buildSystemPrompt(info) {
   };
   const missingList = missing.map(k => `- ${desc[k]}`).join("\n");
   const locExample = info.num_locs ? `"how are you managing the team across your ${info.num_locs} ${info.brand}s right now?" (or "${info.num_locs} ${info.brand} locations" if pluralizing the name sounds awkward)` : `"how are you managing the team over at ${info.brand} right now?"`;
+  const hospitalityPositioning = hospitality ? `
+HOTEL / HOSPITALITY MODE (critical for ${info.brand}):
+- Split the buyer. Owners/operators care about labor cost, compliance exposure, standardization, payroll, and time back. GMs care about schedule chaos, callouts, timesheets, team communication, and whether employees will actually use the app.
+- Split the use case. Hotel-specific competitors often win the finance/reporting narrative. Homebase should win the day-to-day people operations narrative: schedules, clock-ins, timecards, payroll, hiring, HR, and team communication.
+- Do not overclaim. Never say Homebase replaces PMS, hotel accounting, USALI reporting, portfolio BI, room-status systems, housekeeping optimization, procurement, CapEx, maintenance, work orders, guest requests, or facilities management.
+- If they name Inn-Flow, Actabl, M3, UniFocus, Fourth/HotSchedules, Harri, Quore, hotelkit, Beekeeper, ALICE, or a payroll/HCM incumbent, respect it first. Ask whether they need hotel finance/ops reporting, advanced labor intelligence, or a simpler property-level workforce and payroll workflow.
+- If they say accounting, owner reporting, USALI, or portfolio BI, do not fight there. Ask what the GM uses for employee scheduling, timecards, payroll, hiring, and team communication.
+- If they say scheduling, time, payroll, hiring, employee app, callouts, or team communication, lean in and move toward a product specialist call or workflow comparison.
+- Useful hotel departments to name: front desk, housekeeping, maintenance, breakfast, restaurant/bar if applicable, and admin.
+` : "";
 
   return `You are a cold call script assistant for Homebase SDRs calling franchise owners. Homebase is the ALL-IN-ONE app for running an hourly team: scheduling, time tracking, payroll, hiring, team messaging, and HR, all in one place.
 
@@ -1152,6 +1295,7 @@ POSITIONING (critical):
 - Do not lead with payroll as if it's all we do. Open broad about how they run their team, then discover which areas hurt (could be scheduling, time tracking, hiring, payroll, or several).
 - Once you find a pain area, go deep there. Payroll is absolutely worth probing for fit, but it is one of several hooks, not the headline.
 - A great pitch is "everything to run your hourly team, in one app", not "we do payroll".
+${hospitalityPositioning}
 
 BRAND VOICE (follow exactly):
 - Neighborly: write like a person, not a platform. Warm, relatable, plain language. Be a neighbor they can lean on.
@@ -1181,7 +1325,7 @@ PROSPECT:
 
 SOCIAL PROOF:
 - Homebase has ${proof.locs}+ paying ${info.industry} franchise locations
-- ${brandProof ? `Brand-specific proof: Homebase already works with ${brandProof.locations} ${brandProof.brand} locations. Use this exact count when it fits naturally, especially in the opener or when establishing credibility.` : `No brand-specific proof above 15 paying locations was found for ${info.brand}; use industry or peer proof instead.`}
+- ${brandProof ? `Brand-specific proof: Homebase already works with ${brandSocialProofLocationRef(brandProof)}. Use this rounded count when it fits naturally, especially in the opener or when establishing credibility. Do not use the exact raw location count.` : `No brand-specific proof above 15 paying locations was found for ${info.brand}; use industry or peer proof instead.`}
 - Peer brands: ${proof.peers[0]} and ${proof.peers[1] || proof.peers[0]}
 - ${proof.payroll} of those use Homebase Payroll
 
@@ -1374,6 +1518,14 @@ const RESP = {
   competitor_7shifts: COMPETITOR_RESPONSE_OPTIONS,
   competitor_connecteam: COMPETITOR_RESPONSE_OPTIONS,
   competitor_cpa: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_innflow: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_actabl: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_m3: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_unifocus: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_harri: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_wheniwork_deputy_sling: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_hotel_ops: COMPETITOR_RESPONSE_OPTIONS,
+  competitor_hcm_hotel: COMPETITOR_RESPONSE_OPTIONS,
   competitor_paylogics: COMPETITOR_RESPONSE_OPTIONS,
   competitor_surepayroll: COMPETITOR_RESPONSE_OPTIONS,
   competitor_other: [
@@ -1664,6 +1816,13 @@ const RESP = {
   ]
 };
 
+const STACK_DISCOVERY_PHASES = new Set(["interested", "give_more", "who_are_you", "after_pitch_yes", "happy_with_current"]);
+
+function getResponseOptions(phase) {
+  if (STACK_DISCOVERY_PHASES.has(phase) && isHospitalityContext()) return HOSPITALITY_STACK_RESPONSE_OPTIONS;
+  return RESP[phase] || [];
+}
+
 const SQL_SIGNAL_MAP = {
   pain_payroll:{key:"pain",val:"Payroll pain confirmed"}, pain_scheduling:{key:"pain",val:"Scheduling pain confirmed"},
   pain_compliance:{key:"pain",val:"Compliance concern"}, pain_hiring:{key:"pain",val:"Hiring / turnover pain"},
@@ -1761,6 +1920,9 @@ function getFinalQuestionGuidance(responseId, options) {
   if (getCompetitorIntel(responseId)) {
     return "End by asking what part of the current setup is worth discussing: cost/add-ons, support, missing workflows, contract timing, switching pain, seeing the difference, or staying put.";
   }
+  if (STACK_DISCOVERY_PHASES.has(responseId) && isHospitalityContext()) {
+    return "End by asking what they use today for scheduling, time clocks, payroll, hiring, and team communication, so they can answer with a hotel suite, labor tool, finance system, payroll/HCM, scheduling app, ops tool, management-company system, manual process, pain area, or status quo.";
+  }
   if (FINAL_QUESTION_GUIDANCE[responseId]) return FINAL_QUESTION_GUIDANCE[responseId];
   const labels = options.map(o => o.label).join(", ");
   return `End with one question that clearly invites one of these replies: ${labels}.`;
@@ -1768,11 +1930,12 @@ function getFinalQuestionGuidance(responseId, options) {
 
 function buildNextPrompt(responseId, responseLabel) {
   const { brand, industry } = prospectInfo;
+  const hospitality = isHospitalityContext(prospectInfo);
   const proof = getProof(industry, brand);
   const peer = proof.peers[0];
   const brandProof = getBrandSocialProof(brand);
   const credibilityPoint = brandProof
-    ? `${brandProof.locations} ${brandProof.brand} locations already use Homebase`
+    ? `${brandSocialProofLocationRef(brandProof)} already use Homebase`
     : `${peer} owners use Homebase`;
   const selectedCompetitor = getCompetitorIntel(responseId);
   const currentCompetitor = selectedCompetitor || activeCompetitor || getCompetitorFromText(prospectInfo.current_solution || "");
@@ -1782,11 +1945,20 @@ function buildNextPrompt(responseId, responseLabel) {
     budget:"whether budget exists", solution:"what they currently use", impact:"estimated users: employees plus owner/admin users",
     nextstep:"a confirmed next step", contact:"their name and contact info"
   }[k])).join(", ")}.` : "All SQL fields covered. Focus on closing the meeting.";
+  const stackDiscoveryExamples = hospitality
+    ? "hotel back-office suites, labor tools, PMS/finance-adjacent tools, payroll/HCM, scheduling apps, management-company systems, spreadsheets, or manual work"
+    : "tools, competitors, corporate systems, spreadsheets, or manual work";
+  const discoveryScope = hospitality
+    ? `how they run scheduling, time clocks, payroll, hiring, and team communication across the property`
+    : `how they run the team at ${brand} day to day`;
+  const pitchScope = hospitality
+    ? `Homebase is the property-level people workflow for hotels: schedules, time clocks, payroll, hiring, and team communication in one place`
+    : `Homebase is everything to run an hourly team in one app`;
 
   // The prospect will answer by tapping one of these buttons. The script's closing
   // question MUST be answerable by these options, so the rep never asks something the
   // responses can't address. This is the guardrail against compound/mismatched questions.
-  const options = RESP[responseId] || [];
+  const options = getResponseOptions(responseId);
   const nextOpts = options.map(o => `"${o.label}"`).join(", ");
   const finalQuestionGuidance = getFinalQuestionGuidance(responseId, options);
   const answerable = nextOpts
@@ -1795,12 +1967,12 @@ function buildNextPrompt(responseId, responseLabel) {
 
   const map = {
     opening:`The owner just picked up after a gatekeeper transfer. Use a fresh, direct opener: name, company, one credibility point, clear reason for calling, then ask for 30 seconds. Do not mention the gatekeeper unless it helps the line feel natural.`,
-    interested:`Prospect said "tell me more." One-line all-in-one pitch (everything to run an hourly team in one app), then ONE broad discovery question about how they run the team at ${brand} day to day. Don't list features, don't lead with payroll, let them name their current stack or point to the pain. ${hint}`,
-    give_more:`Prospect is open. Two-sentence pitch: Homebase is everything to run an hourly team in one app, scheduling, time tracking, payroll, and hiring, built for businesses like ${brand}. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team today, including whether they use tools, competitors, corporate systems, spreadsheets, or manual work. ${hint}`,
+    interested:`Prospect said "tell me more." One-line all-in-one pitch (${pitchScope}), then ONE broad discovery question about ${discoveryScope}. Don't list features, don't lead with payroll, let them name their current stack or point to the pain. ${hint}`,
+    give_more:`Prospect is open. Two-sentence pitch: ${pitchScope}, built for businesses like ${brand}. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team today, including whether they use ${stackDiscoveryExamples}. ${hint}`,
     too_busy:`Prospect is busy. Respect their time completely. Do NOT dig into pain. Acknowledge it warmly, then ask for a specific better time to call back ("Totally get it, when's a better time to catch you, later today or tomorrow morning?"). Try to lock a day and time and get a direct number or email so you can follow up. ${hint}`,
     not_interested:`Pattern interrupt: "Totally fair, before I let you go, can I ask one quick thing?" then surface one relatable pain for a ${industry} owner running an hourly team at ${brand}. Under 3 sentences.`,
     no_value:`Prospect doesn't see fit. Curious, low-pressure question about their biggest day-to-day headache running the team at ${brand}, whether that's scheduling, covering shifts, time tracking, payroll, or hiring. Don't pitch, just ask. ${hint}`,
-    who_are_you:`They asked what Homebase is, so they're curious, that's good. Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: Homebase is the all-in-one app to run an hourly team, scheduling, time tracking, payroll, and hiring all in one place. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team at ${brand} today, including whether they use tools, competitors, corporate systems, spreadsheets, or manual work. Keep it conversational, not a feature dump. ${hint}`,
+    who_are_you:`They asked what Homebase is, so they're curious, that's good. Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: ${pitchScope}. Mention that ${credibilityPoint}. End with ONE broad question about ${discoveryScope}, including whether they use ${stackDiscoveryExamples}. Keep it conversational, not a feature dump. ${hint}`,
     happy_with_current:`Ask ONE question, what they're using to run the team today. Just the tool, don't also ask about payroll in the same breath. ${hint}`,
     competitor_other:`They use another tool or Excel. Acknowledge that most owners already have something, then ask ONE question to learn what it actually covers: scheduling/time, payroll too, payroll separate, switching pain, or uncertainty. ${hint}`,
     competitor_cost:`Competitor cost objection. Use the pricing playbook: acknowledge, ask what total they are comparing against, and avoid discounting. If a competitor is known (${currentCompetitor ? currentCompetitor.name : "unknown"}), compare all-in cost, add-ons, year-end fees, support, and time saved. End by asking team size or permission to compare real total cost. ${hint}`,
@@ -1840,7 +2012,7 @@ function buildNextPrompt(responseId, responseLabel) {
     tried_before:`Empathize one sentence. Ask what went sideways. Then set Homebase apart as built for hourly teams like ${brand}. ${hint}`,
     what_system:`They use one tool for scheduling AND payroll already. Do NOT ask whether it handles payroll, they just told you it does. Acknowledge that, then differentiate on a specific angle (built for hourly teams, hours flow straight to payroll with no re-keying, or simpler pricing) and ask what they like or wish was better about their current setup. One question. ${hint}`,
     no_payroll:`Bridge: "That's exactly what most ${industry} owners come to us for. Homebase pulls the hours straight into payroll, so a run takes about five minutes." Then offer a 30-minute call with a product specialist. ${hint}`,
-    after_pitch_yes:`Engaged. ONE broad discovery question into how they run the team at ${brand} today, let them name tools, competitors, spreadsheets/manual work, corporate systems, or a pain area. ${hint}`,
+    after_pitch_yes:`Engaged. ONE broad discovery question into ${discoveryScope}, let them name ${stackDiscoveryExamples}, or a pain area. ${hint}`,
     after_pitch_meh:`Ask one thing: who the right person is, or whether they are not sure. Do not ask for contact details in the same turn.`,
     gate_name:`Got a name. Ask for the direct number or best time to reach them. Warm, non-pushy.`,
     gate_connects:`Exact opening line when the owner picks up, warm, reference you just spoke with someone at ${brand}. ${hint}`,
@@ -1880,10 +2052,18 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
   const info = prospectInfo || {};
   const brand = info.brand || "your team";
   const industry = info.industry || "franchise";
+  const hospitality = isHospitalityContext(info);
+  const industryLabel = hospitality ? "hotel" : industry;
+  const peopleWorkflow = hospitality
+    ? "schedules, time clocks, payroll, hiring, and team messages for the property"
+    : "scheduling, time tracking, payroll, hiring, and team messages";
+  const currentStackQuestion = hospitality
+    ? `What are you using today for scheduling, time clocks, payroll, hiring, and team communication at ${brand}: a hotel suite, a few separate tools, management-company tools, or manual work?`
+    : `How are you handling those pieces at ${brand} today: one system, a few different tools, corporate tools, or more manual work?`;
   const proof = getProof(industry, brand);
   const peer = proof.peers[0] || "similar owners";
   const brandProof = getBrandSocialProof(brand);
-  const proofRef = brandProof ? `${brandProof.locations} ${brandProof.brand} locations` : `${peer} owners`;
+  const proofRef = brandProof ? brandSocialProofLocationRef(brandProof) : `${peer} owners`;
   const lead = info.lead_name ? `${info.lead_name}, ` : "";
   const baseTip = "[Coaching tip: Keep it calm, ask one question, and move toward pain or a booked next step.]";
   const selectedCompetitor = getCompetitorIntel(responseId);
@@ -1894,12 +2074,12 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
   }
 
   const lines = {
-    interested: `${lead}great question. Homebase helps ${industry} owners run scheduling, time tracking, payroll, hiring, and team messages in one place, and ${proofRef} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
-    give_more: `${lead}totally. The simplest way to think about Homebase is one app for the hourly team, from schedules and clock-ins through payroll and hiring, so owners are not piecing five tools together. How are you handling those pieces at ${brand} today: one system, a few different tools, corporate tools, or more manual work?\n${baseTip}`,
+    interested: `${lead}great question. Homebase helps ${industryLabel} owners run ${peopleWorkflow} in one place, and ${proofRef} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
+    give_more: `${lead}totally. The simplest way to think about Homebase is one app for the hourly team, from schedules and clock-ins through payroll, hiring, and team communication, so managers are not piecing five tools together. ${currentStackQuestion}\n${baseTip}`,
     too_busy: `${lead}completely get it, I caught you in the middle of the day. I do think this could be useful for ${brand}, so when is a better time to catch you, later today or tomorrow morning?\n[Coaching tip: Respect the interruption, then trade for a specific callback time.]`,
-    not_interested: `${lead}totally fair, before I let you go, can I ask one quick thing? For a lot of ${industry} owners, the headache is not the software, it is the time lost fixing schedules, time cards, and payroll after the fact. Which of those is most annoying for you right now?\n${baseTip}`,
-    who_are_you: `${lead}yeah, of course. We are Homebase, the all-in-one app for hourly teams, scheduling, time tracking, payroll, hiring, and team communication, and owners like ${peer} use us to simplify the week. How are you running those pieces at ${brand} today?\n${baseTip}`,
-    happy_with_current: `${lead}that makes sense, most owners we talk to have something in place already. What are you using today to handle scheduling, time tracking, and payroll?\n${baseTip}`,
+    not_interested: `${lead}totally fair, before I let you go, can I ask one quick thing? For a lot of ${industryLabel} owners, the headache is not the software, it is the time lost fixing schedules, time cards, and payroll after the fact. Which of those is most annoying for you right now?\n${baseTip}`,
+    who_are_you: `${lead}yeah, of course. We are Homebase, the all-in-one app for hourly teams, ${peopleWorkflow}, and owners like ${peer} use us to simplify the week. ${currentStackQuestion}\n${baseTip}`,
+    happy_with_current: `${lead}that makes sense, most owners we talk to have something in place already. What are you using today to handle ${hospitality ? "hotel scheduling, time clocks, payroll, hiring, and team communication" : "scheduling, time tracking, and payroll"}?\n${baseTip}`,
     competitor_other: `${lead}got it, most owners already have a tool somewhere in the process. Does it mainly cover scheduling and time, payroll too, or is payroll still separate?\n${baseTip}`,
     competitor_cost: `${lead}totally fair, price only matters once we know the real total. With ${currentCompetitor ? currentCompetitor.name : "your current setup"}, the useful comparison is base price, add-ons, year-end fees, and time spent fixing payroll or schedules. How many hourly employees would we be comparing for ${brand}?\n[Coaching tip: Treat price as a value and fit question, not a discount fight.]`,
     competitor_support: `${lead}I hear you, support frustration gets old fast when payroll or schedules are on the line. Is support the main issue, or are there workflow gaps too, like payroll, scheduling, onboarding, or team messages?\n[Coaching tip: Acknowledge the frustration, then explore whether the issue is isolated or bigger.]`,
@@ -2021,7 +2201,7 @@ function markAskedForPhase(phase) {
 function renderCurrent(scriptText, phase) {
   currentScriptText = scriptText;
   markAskedForPhase(phase);
-  const options = RESP[phase] || [];
+  const options = getResponseOptions(phase);
   const end = options.length === 0;
   const win = phase === "email_confirmed" || phase === "callback_yes" || phase === "willing_to_meet" || phase === "email_correction";
   const btns = options.map(o =>

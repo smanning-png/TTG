@@ -108,7 +108,7 @@ for (const [brand, industry] of [["Ace Hardware", "Retail"], ["Subway #441", "Fo
   }
 }
 
-const brandProof = sandbox.buildOpeningInstant({
+const aceBrandProof = sandbox.buildOpeningInstant({
   brand: "Ace Hardware",
   industry: "Retail",
   lead_name: "Maria",
@@ -116,8 +116,13 @@ const brandProof = sandbox.buildOpeningInstant({
   prospect_role: "owner",
   known_pain: ""
 });
-if (!brandProof.includes("25 Ace Hardware locations")) {
-  throw new Error("Brand-level social proof did not render for Ace Hardware.");
+if (!aceBrandProof.includes("over 20 Ace Hardware locations") || aceBrandProof.includes("25 Ace Hardware locations")) {
+  throw new Error("Brand-level social proof should use rounded count wording for Ace Hardware.");
+}
+
+const holidayProofLine = readContext('brandSocialProofLine("Holiday Inn")');
+if (!holidayProofLine.includes("over 100 Holiday Inn locations") || holidayProofLine.includes("110 Holiday Inn locations")) {
+  throw new Error("Brand-level social proof should use rounded count wording for Holiday Inn.");
 }
 
 const toastPrompt = sandbox.buildNextPrompt("competitor_toast", "We use Toast");
@@ -175,6 +180,76 @@ for (const phase of broadStackPhases) {
 const broadStackPrompt = sandbox.buildNextPrompt("interested", "Yeah, what does it do?");
 if (!broadStackPrompt.includes("Toast handles POS / some team tools") || !broadStackPrompt.includes("Gusto handles payroll")) {
   throw new Error("Broad discovery prompt is missing competitor/current-stack response labels.");
+}
+
+const accorIndustry = readContext('detectIndustry("Accor").industry');
+if (accorIndustry !== "Lodging & Leisure") {
+  throw new Error("Accor should auto-detect as Lodging & Leisure.");
+}
+const cinnabonIndustry = readContext('detectIndustry("Cinnabon").industry');
+if (cinnabonIndustry !== "Food & Beverage") {
+  throw new Error("Cinnabon should not be misclassified as lodging because it contains 'inn'.");
+}
+
+readContext(`prospectInfo = {
+  brand: "Holiday Inn",
+  industry: "Lodging & Leisure",
+  lead_name: "Maria",
+  num_locs: "3",
+  prospect_role: "owner",
+  current_solution: "",
+  timeline: "",
+  budget: "",
+  known_pain: ""
+}; sqlState = freshSql();`);
+
+const hotelStackOptions = readContext('getResponseOptions("interested")');
+const hotelStackIds = new Set(hotelStackOptions.map(option => option.id));
+const requiredHotelOptions = [
+  "competitor_innflow",
+  "competitor_actabl",
+  "competitor_m3",
+  "competitor_unifocus",
+  "competitor_harri",
+  "competitor_wheniwork_deputy_sling",
+  "competitor_hotel_ops",
+  "competitor_hcm_hotel"
+];
+for (const required of requiredHotelOptions) {
+  if (!hotelStackIds.has(required)) {
+    throw new Error(`Hotel current-stack options are missing ${required}.`);
+  }
+  if (!phases.has(required)) {
+    throw new Error(`Hotel current-stack option ${required} has no response phase.`);
+  }
+}
+if (hotelStackIds.has("competitor_toast") || hotelStackIds.has("competitor_gusto")) {
+  throw new Error("Hotel current-stack options should not default to the generic F&B stack.");
+}
+const hotelPrompt = sandbox.buildNextPrompt("interested", "Yeah, what does it do?");
+if (!hotelPrompt.includes("Inn-Flow handles hotel back office") || !hotelPrompt.includes("Quore / hotelkit / ALICE handles ops")) {
+  throw new Error("Hotel discovery prompt is missing hospitality competitor response labels.");
+}
+if (!/time clocks/i.test(hotelPrompt) || !/hotel suite/i.test(hotelPrompt)) {
+  throw new Error("Hotel discovery prompt should ask about hotel-specific workforce stack.");
+}
+const hotelSystemPrompt = sandbox.buildSystemPrompt({
+  brand: "Holiday Inn",
+  industry: "Lodging & Leisure",
+  lead_name: "Maria",
+  num_locs: "3",
+  prospect_role: "owner",
+  current_solution: "",
+  timeline: "",
+  budget: "",
+  known_pain: ""
+});
+if (!hotelSystemPrompt.includes("HOTEL / HOSPITALITY MODE") || !hotelSystemPrompt.includes("Never say Homebase replaces PMS")) {
+  throw new Error("Hotel system prompt is missing hospitality-specific guardrails.");
+}
+const innFlowPrompt = sandbox.buildNextPrompt("competitor_innflow", "We use Inn-Flow");
+if (!/accounting and owner reporting/i.test(innFlowPrompt) || !/scheduling, time clocks, payroll, and hiring/i.test(innFlowPrompt)) {
+  throw new Error("Inn-Flow prompt did not separate hotel reporting from people ops.");
 }
 
 readContext(`prospectInfo = {
