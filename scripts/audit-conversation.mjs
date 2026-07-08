@@ -311,6 +311,21 @@ const innFlowFallback = sandbox.buildFallbackTalkTrack("competitor_innflow", "In
 if (!/What parts of the business does Inn-Flow handle/i.test(innFlowFallback) || /Cost or add-ons/i.test(innFlowFallback)) {
   throw new Error("Inn-Flow fallback should ask scope before pain.");
 }
+const innFlowFullSuiteIds = new Set(readContext('getResponseOptions("innflow_scope_whole_platform")').map(option => option.id));
+for (const neutralId of ["innflow_usage_property_team", "innflow_usage_back_office", "innflow_usage_both", "innflow_scope_unsure"]) {
+  if (!innFlowFullSuiteIds.has(neutralId)) {
+    throw new Error(`Inn-Flow full-suite usage options are missing ${neutralId}.`);
+  }
+}
+for (const prematurePainId of ["competitor_gap", "competitor_cost", "competitor_support", "want_demo"]) {
+  if (innFlowFullSuiteIds.has(prematurePainId)) {
+    throw new Error("Inn-Flow full-suite usage question should not show pain/demo options before user type is known.");
+  }
+}
+const innFlowFullSuiteFallback = sandbox.buildFallbackTalkTrack("innflow_scope_whole_platform", "The whole back-office suite");
+if (!/Who actually uses Inn-Flow day to day/i.test(innFlowFullSuiteFallback) || /struggles|heavier than we need|compare/i.test(innFlowFullSuiteFallback)) {
+  throw new Error("Inn-Flow full-suite fallback should ask a usage question before pain.");
+}
 
 readContext(`prospectInfo = {
   brand: "Buffalo Wild Wings",
