@@ -904,7 +904,7 @@ const HOSPITALITY_STACK_RESPONSE_OPTIONS = [
 ];
 
 const OPENING_PERMISSION_RESPONSE_OPTIONS = [
-  { id:"interested", icon:"ti-thumb-up", label:"Sure, go ahead", sub:"Gives permission" },
+  { id:"owner_check", icon:"ti-thumb-up", label:"Sure, go ahead", sub:"Verify owner first" },
   { id:"who_are_you", icon:"ti-help", label:"What is this about?", sub:"Needs context" },
   { id:"too_busy", icon:"ti-clock", label:"I'm tied up right now", sub:"Time objection" },
   { id:"callback_no", icon:"ti-mail", label:"Can you send me something?", sub:"Email deflection" },
@@ -932,6 +932,21 @@ const OPENING_GATEKEEPER_RESPONSE_OPTIONS = [
   { id:"callback_yes", icon:"ti-calendar-plus", label:"Try them tomorrow", sub:"Callback time" },
   { id:"gatekeeper_voicemail", icon:"ti-voicemail", label:"Want their voicemail?", sub:"Voicemail option" },
   { id:"not_interested", icon:"ti-x", label:"Please don't call here", sub:"Hard block" }
+];
+
+const OWNER_CHECK_RESPONSE_OPTIONS = [
+  { id:"owner_one_location", icon:"ti-building-store", label:"Yes, I own one location", sub:"Owner confirmed" },
+  { id:"owner_multi_location", icon:"ti-building-store", label:"Yes, multiple locations", sub:"Owner confirmed" },
+  { id:"operator_not_owner", icon:"ti-user-cog", label:"I operate it, but don't own it", sub:"Operator / influencer" },
+  { id:"manager_not_dm", icon:"ti-user-question", label:"I'm the manager, not the owner", sub:"Need owner" },
+  { id:"wrong_contact", icon:"ti-x", label:"No, wrong person", sub:"Bad contact" }
+];
+
+const LOCATION_COUNT_RESPONSE_OPTIONS = [
+  { id:"locs_two_three", icon:"ti-building-store", label:"2-3 locations", sub:"Small multi-location" },
+  { id:"locs_four_nine", icon:"ti-building-community", label:"4-9 locations", sub:"Growing group" },
+  { id:"locs_ten_plus", icon:"ti-buildings", label:"10+ locations", sub:"Larger operator" },
+  { id:"locs_unsure", icon:"ti-help", label:"Not sure / it varies", sub:"Exact count unclear" }
 ];
 
 const COMPETITOR_INTEL = {
@@ -1539,6 +1554,12 @@ function phaseLabel(p) {
   if (competitor) return `Competitor · ${competitor.name}`;
   const m = {
     opening:"Opening · cold intro", interested:"Prospect engaged", give_more:"Pitch delivered",
+    owner_check:"Owner check", owner_one_location:"Owner · one location",
+    owner_multi_location:"Owner · multiple locations",
+    locs_two_three:"Locations · 2-3", locs_four_nine:"Locations · 4-9",
+    locs_ten_plus:"Locations · 10+", locs_unsure:"Locations · unclear",
+    operator_not_owner:"Operator · not owner", manager_not_dm:"Manager · not owner",
+    wrong_contact:"Wrong contact",
     too_busy:"Time objection", not_interested:"Brush-off", no_value:"No value seen",
     who_are_you:"Awareness stage", happy_with_current:"Has existing tools",
     gatekeeper_blocks:"Gatekeeper navigation", gatekeeper_voicemail:"Left voicemail",
@@ -1604,6 +1625,30 @@ function phaseLabel(p) {
 
 const RESP = {
   opening: OPENING_PERMISSION_RESPONSE_OPTIONS,
+  owner_check: OWNER_CHECK_RESPONSE_OPTIONS,
+  owner_one_location: CURRENT_STACK_RESPONSE_OPTIONS,
+  owner_multi_location: LOCATION_COUNT_RESPONSE_OPTIONS,
+  locs_two_three: CURRENT_STACK_RESPONSE_OPTIONS,
+  locs_four_nine: CURRENT_STACK_RESPONSE_OPTIONS,
+  locs_ten_plus: CURRENT_STACK_RESPONSE_OPTIONS,
+  locs_unsure: CURRENT_STACK_RESPONSE_OPTIONS,
+  operator_not_owner: [
+    { id:"decision_maker_yes", icon:"ti-user-check", label:"I help decide tools", sub:"Influencer / decision maker" },
+    { id:"gate_name", icon:"ti-user", label:"The owner handles tools", sub:"Route to owner" },
+    { id:"callback_yes", icon:"ti-calendar-plus", label:"The owner is available later", sub:"Callback path" },
+    { id:"not_interested", icon:"ti-x", label:"We're not changing anything", sub:"Status quo" }
+  ],
+  manager_not_dm: [
+    { id:"gate_name", icon:"ti-user", label:"The owner handles it", sub:"Route to owner" },
+    { id:"callback_yes", icon:"ti-calendar-plus", label:"Try the owner later", sub:"Callback path" },
+    { id:"gatekeeper_voicemail", icon:"ti-voicemail", label:"Want their voicemail?", sub:"Voicemail option" },
+    { id:"not_interested", icon:"ti-x", label:"Please don't keep calling", sub:"Hard block" }
+  ],
+  wrong_contact: [
+    { id:"gate_name", icon:"ti-user", label:"I can point you to them", sub:"Get right contact" },
+    { id:"callback_yes", icon:"ti-calendar-plus", label:"Try the store later", sub:"Callback path" },
+    { id:"not_interested", icon:"ti-x", label:"No idea / don't call", sub:"Dead end" }
+  ],
   interested: CURRENT_STACK_RESPONSE_OPTIONS,
   give_more: CURRENT_STACK_RESPONSE_OPTIONS,
   too_busy: [
@@ -2121,7 +2166,10 @@ const RESP = {
   ]
 };
 
-const STACK_DISCOVERY_PHASES = new Set(["interested", "give_more", "who_are_you", "after_pitch_yes", "happy_with_current"]);
+const STACK_DISCOVERY_PHASES = new Set([
+  "interested", "give_more", "who_are_you", "after_pitch_yes", "happy_with_current",
+  "owner_one_location", "locs_two_three", "locs_four_nine", "locs_ten_plus", "locs_unsure"
+]);
 
 function getResponseOptions(phase) {
   if (phase === "opening" && currentOpeningMode === "discovery") return OPENING_DISCOVERY_RESPONSE_OPTIONS;
@@ -2149,6 +2197,9 @@ const SQL_SIGNAL_MAP = {
   no_payroll:{key:"solution",val:"Has tool, payroll separate"}, what_system:{key:"solution",val:"Uses one tool incl. payroll"},
   happy_with_current:{key:"solution",val:"Has existing tools"}, competitor_other:{key:"solution",val:"Mixed tools / another tool / Excel"},
   curious_why:{key:"solution",val:"Manual / spreadsheets"}, franchise_hq:{key:"solution",val:"Franchisor / corporate-provided tools"},
+  owner_one_location:{key:"size",val:"1 location"}, owner_multi_location:{key:"size",val:"Multiple locations"},
+  locs_two_three:{key:"size",val:"2-3 locations"}, locs_four_nine:{key:"size",val:"4-9 locations"},
+  locs_ten_plus:{key:"size",val:"10+ locations"}, locs_unsure:{key:"size",val:"Multiple locations, exact count unclear"},
   size_small:{key:"impact",val:"Under 10 employees + owner(s)"}, size_medium:{key:"impact",val:"15-30 employees + owner(s)"}, size_large:{key:"impact",val:"50+ employees + owner(s)"},
   sched_size_small:{key:"impact",val:"Under 10 employees + owner(s)"}, sched_size_medium:{key:"impact",val:"15-30 employees + owner(s)"}, sched_size_large:{key:"impact",val:"50+ employees + owner(s)"},
   schedule_build_time:{key:"pain",val:"Scheduling takes too long to build"}, schedule_changes:{key:"pain",val:"Shift swaps / callouts create schedule churn"},
@@ -2182,6 +2233,16 @@ const SQL_SIGNAL_MAP = {
 
 const FINAL_QUESTION_GUIDANCE = {
   opening: "End by asking permission for the 30-second version after naming the reason for the call. The only natural answers are yes, what is this, busy, send info, not interested, already covered, wrong person, or take a message.",
+  owner_check: "End by asking whether they own or operate the business/location you are calling about. The only natural answers are yes one location, yes multiple locations, operator but not owner, manager not owner, or wrong person.",
+  owner_one_location: "End by asking what they use today for the hourly team workflow so they can answer with a named tool, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
+  owner_multi_location: "End by asking whether they have 2-3, 4-9, 10+ locations, or are not sure of the exact count.",
+  locs_two_three: "End by asking what they use today across the locations for the hourly team workflow.",
+  locs_four_nine: "End by asking what they use today across the group for the hourly team workflow.",
+  locs_ten_plus: "End by asking what they use today across all locations for the hourly team workflow.",
+  locs_unsure: "End by asking what they use today for the hourly team workflow.",
+  operator_not_owner: "End by asking whether they help decide staff tools or whether the owner handles those decisions.",
+  manager_not_dm: "End by asking who owns decisions around scheduling, payroll, and staff tools.",
+  wrong_contact: "End by asking whether they can point you to the right person or whether you should leave it there.",
   interested: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
   give_more: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
   too_busy: "End by asking what they want next: a specific callback time, a short email, a 30-second explanation now, or no more calls.",
@@ -2338,6 +2399,16 @@ function buildNextPrompt(responseId, responseLabel) {
 
   const map = {
     opening:`The owner just picked up after a gatekeeper transfer. Use a fresh, direct opener: name, company, one credibility point, clear reason for calling, then ask for 30 seconds. Do not mention the gatekeeper unless it helps the line feel natural.`,
+    owner_check:`They gave permission for the short version, but before pitching, verify you have the right person. Ask ONE lightweight question like: "Before I jump in, I just want to make sure I have this right: you own or operate ${brand}, is that right?" Do not pitch Homebase yet. ${hint}`,
+    owner_one_location:`They confirmed they own or operate one ${brand} location. Acknowledge it, then move into the normal short version: ${pitchScope}. End with ONE broad discovery question about ${discoveryScope}. ${hint}`,
+    owner_multi_location:`They confirmed they own or operate multiple ${brand} locations. Acknowledge that, then ask ONE location-count question: do they have 2-3 locations, 4-9, 10+, or is the exact count not handy. Do not ask about employees here; company size is locations. ${hint}`,
+    locs_two_three:`They have 2-3 ${brand} locations. Acknowledge the multi-location context, then give the short version (${pitchScope}) and ask ONE broad discovery question about what they use today for the team workflow. ${hint}`,
+    locs_four_nine:`They have 4-9 ${brand} locations. Acknowledge that there is more cross-location coordination, then give the short version (${pitchScope}) and ask ONE broad discovery question about what they use today for the team workflow. ${hint}`,
+    locs_ten_plus:`They have 10+ ${brand} locations. Acknowledge the scale without overhyping it, then give the short version (${pitchScope}) and ask ONE broad discovery question about what they use today for the team workflow across locations. ${hint}`,
+    locs_unsure:`They are not sure of the exact location count, but the account is multi-location. Keep it easy, give the short version (${pitchScope}), then ask ONE broad discovery question about what they use today for the team workflow. ${hint}`,
+    operator_not_owner:`They operate the business but may not own it. Do not assume they are the buyer. Ask ONE routing question: whether they help decide scheduling, payroll, and staff tools, or whether the owner handles that. ${hint}`,
+    manager_not_dm:`They are a manager, not the owner. Be respectful and do not pitch hard. Ask ONE question to get the person who handles scheduling, payroll, and staff-tool decisions, or the best time to reach them. ${hint}`,
+    wrong_contact:`They said this is the wrong person. Be gracious. Ask ONE question only: can they point you to who owns the ${brand} location or staff-tool decisions, or should you leave it there. ${hint}`,
     interested:`Prospect gave permission for the short version or asked what it does. One-line all-in-one pitch (${pitchScope}), then ONE broad discovery question about ${discoveryScope}. Don't list features, don't lead with payroll, let them name their current stack or point to the pain. ${hint}`,
     give_more:`Prospect is open. Two-sentence pitch: ${pitchScope}, built for businesses like ${brand}. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team today, including whether they use ${stackDiscoveryExamples}. ${hint}`,
     too_busy:`Prospect is busy. Respect their time completely. Do NOT dig into pain. Acknowledge it warmly, then ask for a specific better time to call back ("Totally get it, when's a better time to catch you, later today or tomorrow morning?"). Try to lock a day and time and get a direct number or email so you can follow up. ${hint}`,
@@ -2479,6 +2550,16 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
 
   const lines = {
     opening: `${lead}it's [Your Name] with Homebase. ${proofRef} use us for the hourly-team workflow. Is it fair if I give you the short version?\n[Coaching tip: This is only a permission question; do not diagnose pain yet.]`,
+    owner_check: `${lead}before I jump in, I just want to make sure I have this right: you own or operate ${brand}, is that right?\n[Coaching tip: Verify you are talking to the right person before pitching.]`,
+    owner_one_location: `${lead}perfect, thanks. For that ${brand} location, Homebase helps keep ${peopleWorkflow} in one place. What are you using today to manage and pay the team?\n[Coaching tip: Owner confirmed; now map their current workflow.]`,
+    owner_multi_location: `${lead}got it, that is helpful. Do you own just a couple locations, more like 4 to 9, or 10 plus?\n[Coaching tip: Company size means location count, not employee count.]`,
+    locs_two_three: `${lead}perfect, with a few ${brand} locations, keeping the team workflow consistent starts to matter. Homebase brings ${peopleWorkflow} into one place. What are you using today across those locations?\n${baseTip}`,
+    locs_four_nine: `${lead}got it, with 4 to 9 locations there is usually a lot to coordinate across managers. Homebase keeps ${peopleWorkflow} in one place. What are you using today across the group?\n${baseTip}`,
+    locs_ten_plus: `${lead}that is a real operating footprint. Homebase helps multi-location teams keep ${peopleWorkflow} together instead of spread across tools. What are you using today across the locations?\n${baseTip}`,
+    locs_unsure: `${lead}no worries, exact count is not the important part yet. Homebase helps keep ${peopleWorkflow} in one place. What are you using today for managing and paying the team?\n${baseTip}`,
+    operator_not_owner: `${lead}got it, thanks for clarifying. Are you involved in decisions around scheduling, payroll, and staff tools, or does the owner handle those?\n[Coaching tip: Qualify influence before pitching.]`,
+    manager_not_dm: `${lead}got it, I appreciate that. Who usually owns decisions around scheduling, payroll, and staff tools for this location?\n[Coaching tip: Route to the decision maker instead of forcing the pitch.]`,
+    wrong_contact: `${lead}thanks for telling me. Do you know who owns the ${brand} location or staff-tool decisions, or should I leave it there?\n[Coaching tip: Keep this gracious and make one routing ask.]`,
     interested: hospitality
       ? `${lead}absolutely. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
       : `${lead}absolutely. Homebase helps ${industryLabel} owners run ${peopleWorkflow} in one place, and ${proofRef} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
@@ -2609,7 +2690,17 @@ function fmtScript(text) {
 // info (pain_payroll, employee-count answers, budget_*, etc.) are intentionally NOT here,
 // they confirm as done.
 const PHASE_ASKS = {
+  owner_check:    [{ key:"contact", val:"asked owner/operator status" }, { key:"size", val:"asked location count" }],
   interested:     [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
+  owner_one_location: [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
+  owner_multi_location: [{ key:"size", val:"asked exact location count" }],
+  locs_two_three: [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
+  locs_four_nine: [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
+  locs_ten_plus: [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
+  locs_unsure: [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
+  operator_not_owner: [{ key:"contact", val:"asked decision authority" }],
+  manager_not_dm: [{ key:"contact", val:"asked owner / decision maker" }],
+  wrong_contact: [{ key:"contact", val:"asked right contact" }],
   give_more:      [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
   who_are_you:    [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
   after_pitch_yes:[{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
@@ -2832,6 +2923,11 @@ async function handleResponse(responseId, label) {
   if (responseId === "competitor_gap") markAsked("pain","possible workflow gap");
   if (responseId === "competitor_switching") markAsked("timeline","switching / migration timing");
   if (responseId === "locked_contract") markAsked("timeline","contract renewal timing");
+  if (["owner_one_location","owner_multi_location","locs_two_three","locs_four_nine","locs_ten_plus","locs_unsure"].includes(responseId)) {
+    markSql("contact","Owner / operator confirmed", true);
+  }
+  if (responseId === "operator_not_owner") markAsked("contact","operator, checking decision authority");
+  if (["manager_not_dm","wrong_contact"].includes(responseId)) markAsked("contact","not decision maker");
   if (responseId === "willing_to_meet" || responseId === "callback_yes") markSql("nextstep","Next step confirmed", true);
   if (responseId === "curious_why") markSql("solution","Manual / spreadsheets", true);
   if (responseId === "tried_before") markSql("solution","Had prior tool", true);

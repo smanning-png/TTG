@@ -149,9 +149,24 @@ if (!sawPermissionOpening || !sawDiscoveryOpening) {
 }
 readContext('currentOpeningMode = "permission"');
 const openingOptionIds = new Set(readContext('getResponseOptions("opening")').map(option => option.id));
-for (const simpleId of ["interested", "who_are_you", "too_busy", "callback_no", "not_interested", "happy_with_current", "decision_maker_no"]) {
+for (const simpleId of ["owner_check", "who_are_you", "too_busy", "callback_no", "not_interested", "happy_with_current", "decision_maker_no"]) {
   if (!openingOptionIds.has(simpleId)) {
     throw new Error(`Opening permission response options are missing ${simpleId}.`);
+  }
+}
+if (openingOptionIds.has("interested")) {
+  throw new Error("Opening permission should verify owner/operator before jumping into the pitch.");
+}
+const ownerCheckIds = new Set(readContext('getResponseOptions("owner_check")').map(option => option.id));
+for (const ownerId of ["owner_one_location", "owner_multi_location", "operator_not_owner", "manager_not_dm", "wrong_contact"]) {
+  if (!ownerCheckIds.has(ownerId)) {
+    throw new Error(`Owner check response options are missing ${ownerId}.`);
+  }
+}
+const locationCountIds = new Set(readContext('getResponseOptions("owner_multi_location")').map(option => option.id));
+for (const locId of ["locs_two_three", "locs_four_nine", "locs_ten_plus", "locs_unsure"]) {
+  if (!locationCountIds.has(locId)) {
+    throw new Error(`Location-count response options are missing ${locId}.`);
   }
 }
 for (const prematurePainId of ["pain_payroll", "pain_scheduling", "pain_hiring", "pain_comms", "pain_compliance"]) {
@@ -294,7 +309,7 @@ if (resp.want_demo.some(option => ["wants_info", "price_question"].includes(opti
   throw new Error("Demo-interest response options should move toward scheduling, not info or pricing gates.");
 }
 
-const broadStackPhases = ["interested", "give_more", "who_are_you", "after_pitch_yes"];
+const broadStackPhases = ["interested", "give_more", "who_are_you", "after_pitch_yes", "owner_one_location", "locs_two_three", "locs_four_nine", "locs_ten_plus", "locs_unsure"];
 const requiredStackOptions = [
   "competitor_toast",
   "competitor_gusto",
@@ -475,6 +490,23 @@ for (const phase of ["size_small", "size_medium", "size_large", "sched_size_smal
   if (sqlSignalMap[phase]?.key !== "impact") {
     throw new Error(`${phase} should populate Estimated users, not Company size.`);
   }
+}
+for (const phase of ["owner_one_location", "owner_multi_location", "locs_two_three", "locs_four_nine", "locs_ten_plus", "locs_unsure"]) {
+  if (sqlSignalMap[phase]?.key !== "size") {
+    throw new Error(`${phase} should populate Company size as location count.`);
+  }
+}
+const ownerPrompt = sandbox.buildNextPrompt("owner_check", "Sure, go ahead");
+const multiLocationPrompt = sandbox.buildNextPrompt("owner_multi_location", "Yes, multiple locations");
+if (!/own or operate/i.test(ownerPrompt) || /payroll pain/i.test(ownerPrompt)) {
+  throw new Error("Owner check should verify owner/operator status before pitching.");
+}
+if (!/2-3 locations/i.test(multiLocationPrompt) || !/company size is locations/i.test(multiLocationPrompt)) {
+  throw new Error("Multi-location prompt should ask for location count, not employees.");
+}
+const handleResponseSource = sandbox.handleResponse.toString();
+if (!/owner_one_location[\s\S]*owner_multi_location[\s\S]*markSql\("contact","Owner \/ operator confirmed", true\)/.test(handleResponseSource)) {
+  throw new Error("Owner-confirmed answers should mark the contact signal as confirmed.");
 }
 readContext(`prospectInfo = {
   brand: "Buffalo Wild Wings",
