@@ -246,8 +246,16 @@ const hotelPrompt = sandbox.buildNextPrompt("interested", "Yeah, what does it do
 if (!hotelPrompt.includes("Inn-Flow handles hotel back office") || !hotelPrompt.includes("Quore / hotelkit / ALICE handles ops")) {
   throw new Error("Hotel discovery prompt is missing hospitality competitor response labels.");
 }
-if (!/time clocks/i.test(hotelPrompt) || !/hotel suite/i.test(hotelPrompt)) {
+if (!/managing and paying staff/i.test(hotelPrompt) || !/hotel suite/i.test(hotelPrompt)) {
   throw new Error("Hotel discovery prompt should ask about hotel-specific workforce stack.");
+}
+const hotelWhoAreYouPrompt = sandbox.buildNextPrompt("who_are_you", "What is Homebase?");
+if (!/What are you using today for managing and paying staff/i.test(hotelWhoAreYouPrompt) || !/property-level people workflow for hotels/i.test(hotelWhoAreYouPrompt)) {
+  throw new Error("Hotel who-are-you prompt should use the shorter managing-and-paying-staff talk track.");
+}
+const hotelWhoAreYouFallback = sandbox.buildFallbackTalkTrack("who_are_you", "What is Homebase?");
+if (!/What are you using today for managing and paying staff/i.test(hotelWhoAreYouFallback) || /What are you using today for scheduling, time clocks, payroll, hiring, and team communication/i.test(hotelWhoAreYouFallback)) {
+  throw new Error("Hotel who-are-you fallback should not repeat the long workflow list in the question.");
 }
 const hotelSystemPrompt = sandbox.buildSystemPrompt({
   brand: "Holiday Inn",

@@ -1918,7 +1918,7 @@ function getFinalQuestionGuidance(responseId, options) {
     return "End by asking what part of the current setup is worth discussing: cost/add-ons, support, missing workflows, contract timing, switching pain, seeing the difference, or staying put.";
   }
   if (STACK_DISCOVERY_PHASES.has(responseId) && isHospitalityContext()) {
-    return "End by asking what they use today for scheduling, time clocks, payroll, hiring, and team communication, so they can answer with a hotel suite, labor tool, finance system, payroll/HCM, scheduling app, ops tool, management-company system, manual process, pain area, or status quo.";
+    return "End by asking: What are you using today for managing and paying staff? This should let them answer with a hotel suite, labor tool, finance system, payroll/HCM, scheduling app, ops tool, management-company system, manual process, pain area, or status quo.";
   }
   if (FINAL_QUESTION_GUIDANCE[responseId]) return FINAL_QUESTION_GUIDANCE[responseId];
   const labels = options.map(o => o.label).join(", ");
@@ -1932,7 +1932,7 @@ function buildNextPrompt(responseId, responseLabel) {
   const peer = proof.peers[0];
   const brandProof = getBrandSocialProof(brand);
   const credibilityPoint = brandProof
-    ? `${brandSocialProofLocationRef(brandProof)} already use Homebase`
+    ? `${brandSocialProofLocationRef(brandProof)} already use ${hospitality ? "it" : "Homebase"}`
     : `${peer} owners use Homebase`;
   const selectedCompetitor = getCompetitorIntel(responseId);
   const currentCompetitor = selectedCompetitor || activeCompetitor || getCompetitorFromText(prospectInfo.current_solution || "");
@@ -1946,10 +1946,10 @@ function buildNextPrompt(responseId, responseLabel) {
     ? "hotel back-office suites, labor tools, PMS/finance-adjacent tools, payroll/HCM, scheduling apps, management-company systems, spreadsheets, or manual work"
     : "tools, competitors, corporate systems, spreadsheets, or manual work";
   const discoveryScope = hospitality
-    ? `how they run scheduling, time clocks, payroll, hiring, and team communication across the property`
+    ? `what they use today for managing and paying staff`
     : `how they run the team at ${brand} day to day`;
   const pitchScope = hospitality
-    ? `Homebase is the property-level people workflow for hotels: schedules, time clocks, payroll, hiring, and team communication in one place`
+    ? `Homebase is the property-level people workflow for hotels, so schedules, time clocks, payroll, hiring, and team communication all live in one place`
     : `Homebase is everything to run an hourly team in one app`;
 
   // The prospect will answer by tapping one of these buttons. The script's closing
@@ -1969,7 +1969,7 @@ function buildNextPrompt(responseId, responseLabel) {
     too_busy:`Prospect is busy. Respect their time completely. Do NOT dig into pain. Acknowledge it warmly, then ask for a specific better time to call back ("Totally get it, when's a better time to catch you, later today or tomorrow morning?"). Try to lock a day and time and get a direct number or email so you can follow up. ${hint}`,
     not_interested:`Pattern interrupt: "Totally fair, before I let you go, can I ask one quick thing?" then surface one relatable pain for a ${industry} owner running an hourly team at ${brand}. Under 3 sentences.`,
     no_value:`Prospect doesn't see fit. Curious, low-pressure question about their biggest day-to-day headache running the team at ${brand}, whether that's scheduling, covering shifts, time tracking, payroll, or hiring. Don't pitch, just ask. ${hint}`,
-    who_are_you:`They asked what Homebase is, so they're curious, that's good. Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: ${pitchScope}. Mention that ${credibilityPoint}. End with ONE broad question about ${discoveryScope}, including whether they use ${stackDiscoveryExamples}. Keep it conversational, not a feature dump. ${hint}`,
+    who_are_you:`They asked what Homebase is, so they're curious, that's good. ${hospitality ? `Use this concise structure: "Great question. ${pitchScope}, and ${credibilityPoint}. What are you using today for managing and paying staff?"` : `Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: ${pitchScope}. Mention that ${credibilityPoint}. End with ONE broad question about ${discoveryScope}, including whether they use ${stackDiscoveryExamples}.`} Keep it conversational, not a feature dump. ${hint}`,
     happy_with_current:`Ask ONE question, what they're using to run the team today. Just the tool, don't also ask about payroll in the same breath. ${hint}`,
     competitor_other:`They use another tool or Excel. Acknowledge that most owners already have something, then ask ONE question to learn what it actually covers: scheduling/time, payroll too, payroll separate, switching pain, or uncertainty. ${hint}`,
     competitor_cost:`Competitor cost objection. Use the pricing playbook: acknowledge, ask what total they are comparing against, and avoid discounting. If a competitor is known (${currentCompetitor ? currentCompetitor.name : "unknown"}), compare all-in cost, add-ons, year-end fees, support, and time saved. End by asking team size or permission to compare real total cost. ${hint}`,
@@ -2052,10 +2052,10 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
   const hospitality = isHospitalityContext(info);
   const industryLabel = hospitality ? "hotel" : industry;
   const peopleWorkflow = hospitality
-    ? "schedules, time clocks, payroll, hiring, and team messages for the property"
+    ? "schedules, time clocks, payroll, hiring, and team communication"
     : "scheduling, time tracking, payroll, hiring, and team messages";
   const currentStackQuestion = hospitality
-    ? `What are you using today for scheduling, time clocks, payroll, hiring, and team communication at ${brand}: a hotel suite, a few separate tools, management-company tools, or manual work?`
+    ? `What are you using today for managing and paying staff?`
     : `How are you handling those pieces at ${brand} today: one system, a few different tools, corporate tools, or more manual work?`;
   const proof = getProof(industry, brand);
   const peer = proof.peers[0] || "similar owners";
@@ -2071,11 +2071,17 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
   }
 
   const lines = {
-    interested: `${lead}great question. Homebase helps ${industryLabel} owners run ${peopleWorkflow} in one place, and ${proofRef} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
-    give_more: `${lead}totally. The simplest way to think about Homebase is one app for the hourly team, from schedules and clock-ins through payroll, hiring, and team communication, so managers are not piecing five tools together. ${currentStackQuestion}\n${baseTip}`,
+    interested: hospitality
+      ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
+      : `${lead}great question. Homebase helps ${industryLabel} owners run ${peopleWorkflow} in one place, and ${proofRef} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
+    give_more: hospitality
+      ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
+      : `${lead}totally. The simplest way to think about Homebase is one app for the hourly team, from schedules and clock-ins through payroll, hiring, and team communication, so managers are not piecing five tools together. ${currentStackQuestion}\n${baseTip}`,
     too_busy: `${lead}completely get it, I caught you in the middle of the day. I do think this could be useful for ${brand}, so when is a better time to catch you, later today or tomorrow morning?\n[Coaching tip: Respect the interruption, then trade for a specific callback time.]`,
     not_interested: `${lead}totally fair, before I let you go, can I ask one quick thing? For a lot of ${industryLabel} owners, the headache is not the software, it is the time lost fixing schedules, time cards, and payroll after the fact. Which of those is most annoying for you right now?\n${baseTip}`,
-    who_are_you: `${lead}yeah, of course. We are Homebase, the all-in-one app for hourly teams, ${peopleWorkflow}, and owners like ${peer} use us to simplify the week. ${currentStackQuestion}\n${baseTip}`,
+    who_are_you: hospitality
+      ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
+      : `${lead}yeah, of course. We are Homebase, the all-in-one app for hourly teams, ${peopleWorkflow}, and owners like ${peer} use us to simplify the week. ${currentStackQuestion}\n${baseTip}`,
     happy_with_current: `${lead}that makes sense, most owners we talk to have something in place already. What are you using today to handle ${hospitality ? "hotel scheduling, time clocks, payroll, hiring, and team communication" : "scheduling, time tracking, and payroll"}?\n${baseTip}`,
     competitor_other: `${lead}got it, most owners already have a tool somewhere in the process. Does it mainly cover scheduling and time, payroll too, or is payroll still separate?\n${baseTip}`,
     competitor_cost: `${lead}totally fair, price only matters once we know the real total. With ${currentCompetitor ? currentCompetitor.name : "your current setup"}, the useful comparison is base price, add-ons, year-end fees, and time spent fixing payroll or schedules. How many hourly employees would we be comparing for ${brand}?\n[Coaching tip: Treat price as a value and fit question, not a discount fight.]`,
