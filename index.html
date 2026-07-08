@@ -843,6 +843,15 @@ const COMPETITOR_SCOPE_RESPONSE_OPTIONS = [
   { id:"competitor_scope_unsure", icon:"ti-help", label:"Not sure / someone else owns it", sub:"Ownership unclear" }
 ];
 
+const TEAM_COMMS_METHOD_RESPONSE_OPTIONS = [
+  { id:"comms_group_texts", icon:"ti-message", label:"Group texts or WhatsApp", sub:"Current method" },
+  { id:"comms_posted_notes", icon:"ti-notes", label:"Posted notes or printed schedules", sub:"Current method" },
+  { id:"comms_manager_relay", icon:"ti-users", label:"Managers pass messages along", sub:"Manager relay" },
+  { id:"comms_ops_tool", icon:"ti-device-mobile-message", label:"Another app handles messages", sub:"Separate comms tool" },
+  { id:"comms_missed_messages", icon:"ti-alert-circle", label:"Messages get missed", sub:"Pain confirmed" },
+  { id:"comms_works_fine", icon:"ti-circle-check", label:"It works fine today", sub:"Status quo" }
+];
+
 const SCHEDULING_RESPONSE_OPTIONS = [
   { id:"schedule_build_time", icon:"ti-calendar-plus", label:"Building the schedule takes forever", sub:"Time drain" },
   { id:"schedule_changes", icon:"ti-arrows-exchange", label:"Callouts and swaps blow it up", sub:"Coverage chaos" },
@@ -1449,6 +1458,17 @@ function phaseLabel(p) {
     gatekeeper_blocks:"Gatekeeper navigation", gatekeeper_voicemail:"Left voicemail",
     pain_payroll:"Pain · payroll", pain_scheduling:"Pain · scheduling", pain_compliance:"Pain · compliance",
     pain_hiring:"Pain · hiring", pain_comms:"Pain · team comms",
+    workflow_payroll_separate:"Scope · payroll separate",
+    workflow_scheduling_separate:"Scope · scheduling separate",
+    workflow_hiring_separate:"Scope · hiring separate",
+    workflow_comms_separate:"Scope · team comms separate",
+    workflow_multiple_separate:"Scope · multiple workflows separate",
+    comms_group_texts:"Team comms · group texts",
+    comms_posted_notes:"Team comms · posted notes",
+    comms_manager_relay:"Team comms · manager relay",
+    comms_ops_tool:"Team comms · separate app",
+    comms_missed_messages:"Pain · missed messages",
+    comms_works_fine:"Team comms · working fine",
     want_demo:"Product call request", price_question:"Price objection", book_meeting:"Meeting close",
     not_now:"Timing objection", callback_yes:"Callback booked", callback_no:"Email follow-up",
     softens:"Prospect re-engages", curious_why:"Objection · managing fine",
@@ -1596,10 +1616,7 @@ const RESP = {
     { id:"not_interested", icon:"ti-x", label:"It's not a priority", sub:"Backs off" }
   ],
   innflow_outside_comms: [
-    { id:"pain_comms", icon:"ti-messages", label:"Communication is the main gap", sub:"Team messages" },
-    { id:"competitor_gap", icon:"ti-puzzle", label:"There are other gaps too", sub:"Multiple gaps" },
-    { id:"want_demo", icon:"ti-screen-share", label:"Worth comparing the workflow", sub:"Specialist call" },
-    { id:"not_interested", icon:"ti-x", label:"It's not a priority", sub:"Backs off" }
+    ...TEAM_COMMS_METHOD_RESPONSE_OPTIONS
   ],
   innflow_outside_manager_work: [
     { id:"competitor_gap", icon:"ti-puzzle", label:"Manual work is the issue", sub:"Workflow gap" },
@@ -1699,11 +1716,38 @@ const RESP = {
     { id:"not_interested", icon:"ti-x", label:"It's fine overall", sub:"Backs off" }
   ],
   competitor_gap: [
-    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is still clunky", sub:"Payroll gap" },
-    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling still takes work", sub:"Scheduling gap" },
-    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring/onboarding is separate", sub:"Hiring gap" },
-    { id:"pain_comms", icon:"ti-message", label:"Team communication is separate", sub:"Comms gap" },
-    { id:"want_demo", icon:"ti-screen-share", label:"Show me the all-in-one flow", sub:"Specialist call request" }
+    { id:"workflow_payroll_separate", icon:"ti-receipt", label:"Payroll is separate", sub:"Outside current tool" },
+    { id:"workflow_scheduling_separate", icon:"ti-calendar", label:"Scheduling is separate", sub:"Outside current tool" },
+    { id:"workflow_hiring_separate", icon:"ti-user-plus", label:"Hiring/onboarding is separate", sub:"Outside current tool" },
+    { id:"workflow_comms_separate", icon:"ti-message", label:"Team communication is separate", sub:"Outside current tool" },
+    { id:"workflow_multiple_separate", icon:"ti-puzzle", label:"A few workflows are separate", sub:"Fragmented workflow" }
+  ],
+  workflow_payroll_separate: [
+    { id:"curious_why", icon:"ti-file-spreadsheet", label:"Hours are copied over manually", sub:"Manual process" },
+    { id:"what_system", icon:"ti-check", label:"Payroll provider handles it", sub:"Separate payroll tool" },
+    { id:"no_payroll", icon:"ti-x", label:"Payroll is still unresolved", sub:"Payroll gap" },
+    { id:"not_sure", icon:"ti-help", label:"I'm not sure how it flows", sub:"Unsure" }
+  ],
+  workflow_scheduling_separate: [
+    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is the real headache", sub:"Pain confirmed" },
+    { id:"competitor_other", icon:"ti-layout-grid", label:"We use a separate scheduler", sub:"Separate tool" },
+    { id:"curious_why", icon:"ti-file-spreadsheet", label:"It's mostly manual", sub:"Manual process" },
+    { id:"not_interested", icon:"ti-x", label:"It works fine today", sub:"Status quo" }
+  ],
+  workflow_hiring_separate: [
+    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring is the real headache", sub:"Pain confirmed" },
+    { id:"competitor_other", icon:"ti-layout-grid", label:"We use a separate hiring tool", sub:"Separate tool" },
+    { id:"curious_why", icon:"ti-file-spreadsheet", label:"It's mostly manual", sub:"Manual process" },
+    { id:"not_interested", icon:"ti-x", label:"It works fine today", sub:"Status quo" }
+  ],
+  workflow_comms_separate: [
+    ...TEAM_COMMS_METHOD_RESPONSE_OPTIONS
+  ],
+  workflow_multiple_separate: [
+    { id:"workflow_payroll_separate", icon:"ti-receipt", label:"Payroll is one of them", sub:"Payroll separate" },
+    { id:"workflow_scheduling_separate", icon:"ti-calendar", label:"Scheduling is one of them", sub:"Scheduling separate" },
+    { id:"workflow_hiring_separate", icon:"ti-user-plus", label:"Hiring is one of them", sub:"Hiring separate" },
+    { id:"workflow_comms_separate", icon:"ti-message", label:"Team communication is one of them", sub:"Comms separate" }
   ],
   competitor_switching: [
     { id:"wants_info", icon:"ti-file-text", label:"Send migration info first", sub:"Needs reassurance" },
@@ -1759,9 +1803,43 @@ const RESP = {
     { id:"not_now", icon:"ti-clock", label:"Real but not my focus now", sub:"Not priority" }
   ],
   pain_comms: [
-    { id:"want_demo", icon:"ti-screen-share", label:"I'd like to see how it works", sub:"Opens to solution" },
-    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll's more of a problem", sub:"Bigger pain" },
-    { id:"not_now", icon:"ti-clock", label:"Not top priority", sub:"Not urgent" }
+    ...TEAM_COMMS_METHOD_RESPONSE_OPTIONS
+  ],
+  comms_group_texts: [
+    { id:"comms_missed_messages", icon:"ti-alert-circle", label:"Texts get missed or buried", sub:"Pain confirmed" },
+    { id:"comms_works_fine", icon:"ti-circle-check", label:"Texts work fine for us", sub:"Status quo" },
+    { id:"want_demo", icon:"ti-screen-share", label:"I'd compare a cleaner flow", sub:"Specialist call" },
+    { id:"not_now", icon:"ti-clock", label:"Not urgent right now", sub:"Timing" }
+  ],
+  comms_posted_notes: [
+    { id:"comms_missed_messages", icon:"ti-alert-circle", label:"People miss updates", sub:"Pain confirmed" },
+    { id:"schedule_changes", icon:"ti-arrows-exchange", label:"Schedule changes are the issue", sub:"Related scheduling pain" },
+    { id:"want_demo", icon:"ti-screen-share", label:"I'd compare a cleaner flow", sub:"Specialist call" },
+    { id:"not_now", icon:"ti-clock", label:"Not urgent right now", sub:"Timing" }
+  ],
+  comms_manager_relay: [
+    { id:"comms_missed_messages", icon:"ti-alert-circle", label:"Managers chase people too much", sub:"Pain confirmed" },
+    { id:"schedule_changes", icon:"ti-arrows-exchange", label:"It shows up when shifts change", sub:"Related scheduling pain" },
+    { id:"want_demo", icon:"ti-screen-share", label:"I'd compare a cleaner flow", sub:"Specialist call" },
+    { id:"not_now", icon:"ti-clock", label:"Not urgent right now", sub:"Timing" }
+  ],
+  comms_ops_tool: [
+    { id:"comms_works_fine", icon:"ti-circle-check", label:"That app works fine", sub:"Status quo" },
+    { id:"competitor_gap", icon:"ti-puzzle", label:"It's separate from the rest", sub:"Workflow gap" },
+    { id:"want_demo", icon:"ti-screen-share", label:"I'd compare the all-in-one flow", sub:"Specialist call" },
+    { id:"not_now", icon:"ti-clock", label:"Not urgent right now", sub:"Timing" }
+  ],
+  comms_missed_messages: [
+    { id:"want_demo", icon:"ti-screen-share", label:"Worth seeing the team app", sub:"Specialist call" },
+    { id:"schedule_changes", icon:"ti-arrows-exchange", label:"Mostly around shift changes", sub:"Scheduling impact" },
+    { id:"not_now", icon:"ti-clock", label:"Real, but not urgent", sub:"Timing" },
+    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is still bigger", sub:"Bigger pain" }
+  ],
+  comms_works_fine: [
+    { id:"not_interested", icon:"ti-x", label:"We're covered", sub:"Status quo" },
+    { id:"competitor_gap", icon:"ti-puzzle", label:"Other workflows are separate", sub:"Workflow gap" },
+    { id:"wants_info", icon:"ti-file-text", label:"Send info for later", sub:"Nurture path" },
+    { id:"not_now", icon:"ti-clock", label:"Maybe later", sub:"Timing" }
   ],
   want_demo: [
     { id:"willing_to_meet", icon:"ti-calendar-event", label:"Tomorrow at 10am works", sub:"Time confirmed" },
@@ -1977,6 +2055,17 @@ const SQL_SIGNAL_MAP = {
   pain_payroll:{key:"pain",val:"Payroll pain confirmed"}, pain_scheduling:{key:"pain",val:"Scheduling pain confirmed"},
   pain_compliance:{key:"pain",val:"Compliance concern"}, pain_hiring:{key:"pain",val:"Hiring / turnover pain"},
   pain_comms:{key:"pain",val:"Team comms pain"}, errors_confirmed:{key:"pain",val:"Payroll errors confirmed"},
+  workflow_payroll_separate:{key:"solution",val:"Payroll separate from current tool"},
+  workflow_scheduling_separate:{key:"solution",val:"Scheduling separate from current tool"},
+  workflow_hiring_separate:{key:"solution",val:"Hiring / onboarding separate from current tool"},
+  workflow_comms_separate:{key:"solution",val:"Team communication separate from current tool"},
+  workflow_multiple_separate:{key:"solution",val:"Multiple workflows separate from current tool"},
+  comms_group_texts:{key:"solution",val:"Team communication via group texts / WhatsApp"},
+  comms_posted_notes:{key:"solution",val:"Team communication via posted notes / printed schedules"},
+  comms_manager_relay:{key:"solution",val:"Team communication relayed by managers"},
+  comms_ops_tool:{key:"solution",val:"Separate app handles team communication"},
+  comms_missed_messages:{key:"pain",val:"Team messages missed / manager chasing"},
+  comms_works_fine:{key:"solution",val:"Team communication works fine today"},
   quantify_time:{key:"pain",val:"Payroll time pain quantified"}, quantify_cost:{key:"pain",val:"Payroll cost pain"},
   no_payroll:{key:"solution",val:"Has tool, payroll separate"}, what_system:{key:"solution",val:"Uses one tool incl. payroll"},
   happy_with_current:{key:"solution",val:"Has existing tools"}, competitor_other:{key:"solution",val:"Mixed tools / another tool / Excel"},
@@ -2024,13 +2113,13 @@ const FINAL_QUESTION_GUIDANCE = {
   competitor_other: "End by asking whether the tool mainly handles scheduling/time, payroll too, payroll separately, switching pain, or uncertainty.",
   competitor_cost: "End by asking for team size or permission to compare the real all-in total.",
   competitor_support: "End by asking whether support pain makes them open to a look, whether there are broader gaps, whether it is not urgent, or whether the current tool is fine.",
-  competitor_gap: "End by asking which workflow still sits outside their current tool: payroll, scheduling, hiring/onboarding, communication, or the full flow.",
+  competitor_gap: "End by asking which workflow still sits outside their current tool: payroll, scheduling, hiring/onboarding, team communication, or multiple workflows.",
   competitor_switching: "End by asking whether they want migration info, a specialist to map it, renewal timing, or whether switching is not worth it.",
   innflow_scope_accounting: "End by asking what handles the staff workflow today: separate tools, manual work, Inn-Flow labor too, or another person owns it.",
   innflow_scope_labor: "End by asking whether payroll is separate, payroll is also in Inn-Flow, there are gaps, or it works fine.",
   innflow_scope_payroll: "End by asking what, if anything, sits outside Inn-Flow for the property team: hiring/onboarding, team communication, manager side work, nothing, or not sure.",
   innflow_outside_hiring: "End by asking whether hiring/onboarding is the main gap, the workflow gap is broader, comparing is worthwhile, or it is not a priority.",
-  innflow_outside_comms: "End by asking whether communication is the main gap, there are other gaps too, comparing is worthwhile, or it is not a priority.",
+  innflow_outside_comms: "End by asking how they reach staff today so they can answer with group texts/WhatsApp, posted notes, manager relay, another app, missed messages, or works fine.",
   innflow_outside_manager_work: "End by asking whether manual work is the issue, adoption/support is the issue, comparing is worthwhile, or it is manageable.",
   innflow_property_covered: "End by asking whether they are happy, locked in, want info for later, or someone else reviews tools.",
   innflow_scope_whole_platform: "End by asking who actually uses Inn-Flow day to day: property team, ownership/controller, both, or not sure.",
@@ -2043,7 +2132,7 @@ const FINAL_QUESTION_GUIDANCE = {
   competitor_scope_pos_ops: "End by asking whether that also handles scheduling/time, payroll is separate, staff workflows are separate, or it is enough.",
   competitor_scope_finance_reporting: "End by asking what handles staff workflow today: separate tools, manual work, labor/time in the same system, or someone else owns it.",
   competitor_scope_comms_ops: "End by asking whether it also handles schedules/time, payroll is separate, the full flow is not covered, or it works fine.",
-  competitor_scope_all_in_one: "End by asking whether anything still sits outside it, whether cost/setup/support is heavy, or whether they are happy.",
+  competitor_scope_all_in_one: "End by asking whether it is working well enough, whether coverage is the issue, whether cost/setup/support is heavy, or whether they are happy.",
   competitor_scope_unsure: "End by asking who owns it: someone else, someone they can route you to, a comparison anyway, or fully covered.",
   locked_contract: "End by asking when the contract renews or whether they are not evaluating.",
   named_tool: "End by asking one payroll-ownership question: does that tool handle payroll, is payroll separate, or are they not sure?",
@@ -2054,7 +2143,18 @@ const FINAL_QUESTION_GUIDANCE = {
   pain_scheduling: "End by asking how many hourly employees they schedule.",
   pain_compliance: "End by asking whether compliance has created real cost, is worth seeing, or should wait.",
   pain_hiring: "End by asking whether they want to see the hiring flow, whether payroll is also a problem, or whether hiring is not urgent.",
-  pain_comms: "End by asking whether they want to see team messaging, whether payroll is bigger, or whether communication is not urgent.",
+  pain_comms: "End by asking how they reach staff today so they can answer with group texts/WhatsApp, posted notes, manager relay, another app, missed messages, or works fine.",
+  workflow_payroll_separate: "End by asking how hours get into payroll today: copied manually, payroll provider handles it, payroll unresolved, or not sure.",
+  workflow_scheduling_separate: "End by asking how scheduling works today: real headache, separate scheduler, manual, or works fine.",
+  workflow_hiring_separate: "End by asking how hiring works today: real headache, separate hiring tool, manual, or works fine.",
+  workflow_comms_separate: "End by asking how they reach staff today so they can answer with group texts/WhatsApp, posted notes, manager relay, another app, missed messages, or works fine.",
+  workflow_multiple_separate: "End by asking which separate workflow matters most: payroll, scheduling, hiring, or team communication.",
+  comms_group_texts: "End by asking whether texts get missed, work fine, are worth comparing against a cleaner flow, or are not urgent.",
+  comms_posted_notes: "End by asking whether people miss updates, schedule changes are the issue, a cleaner flow is worth comparing, or it is not urgent.",
+  comms_manager_relay: "End by asking whether managers chase people too much, shift changes are the issue, a cleaner flow is worth comparing, or it is not urgent.",
+  comms_ops_tool: "End by asking whether the app works fine, it is separate from the rest, comparing the all-in-one flow is worthwhile, or it is not urgent.",
+  comms_missed_messages: "End by asking whether it is worth seeing the team app, whether the issue is mainly shift changes, whether it is real but not urgent, or whether payroll is bigger.",
+  comms_works_fine: "End by asking whether they are covered, other workflows are separate, they want info for later, or timing is later.",
   want_demo: "End by asking them to pick between two specific times for a 30-minute call with a product specialist, such as tomorrow at 10am or the following day at 2pm. Keep the close focused on scheduling unless the prospect raises a new objection.",
   price_question: "End by asking how many people would use it, with small, medium, large, or price-only as natural replies.",
   book_meeting: "End by asking them to pick between two specific times for a product specialist call or offer another time that works for them.",
@@ -2162,20 +2262,20 @@ function buildNextPrompt(responseId, responseLabel) {
     interested:`Prospect gave permission for the short version or asked what it does. One-line all-in-one pitch (${pitchScope}), then ONE broad discovery question about ${discoveryScope}. Don't list features, don't lead with payroll, let them name their current stack or point to the pain. ${hint}`,
     give_more:`Prospect is open. Two-sentence pitch: ${pitchScope}, built for businesses like ${brand}. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team today, including whether they use ${stackDiscoveryExamples}. ${hint}`,
     too_busy:`Prospect is busy. Respect their time completely. Do NOT dig into pain. Acknowledge it warmly, then ask for a specific better time to call back ("Totally get it, when's a better time to catch you, later today or tomorrow morning?"). Try to lock a day and time and get a direct number or email so you can follow up. ${hint}`,
-    not_interested:`Pattern interrupt: "Totally fair, before I let you go, can I ask one quick thing?" then surface one relatable pain for a ${industry} owner running an hourly team at ${brand}. Under 3 sentences.`,
+    not_interested:`Pattern interrupt: "Totally fair, before I let you go, can I ask one quick thing?" Ask why this feels like a no: manual process works, corporate handles it, tried it before, not relevant, or timing. Do not ask an open pain question here. Under 3 sentences.`,
     no_value:`Prospect doesn't see fit. Curious, low-pressure question about their biggest day-to-day headache running the team at ${brand}, whether that's scheduling, covering shifts, time tracking, payroll, or hiring. Don't pitch, just ask. ${hint}`,
     who_are_you:`They asked what Homebase is, so they're curious, that's good. ${hospitality ? `Use this concise structure: "Great question. ${pitchScope}, and ${credibilityPoint}. What are you using today for managing and paying staff?"` : `Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: ${pitchScope}. Mention that ${credibilityPoint}. End with ONE broad question about ${discoveryScope}, including whether they use ${stackDiscoveryExamples}.`} Keep it conversational, not a feature dump. ${hint}`,
     happy_with_current:`Ask ONE question, what they're using to run the team today. Just the tool, don't also ask about payroll in the same breath. ${hint}`,
     competitor_other:`They use another tool or Excel. Acknowledge that most owners already have something, then ask ONE question to learn what it actually covers: scheduling/time, payroll too, payroll separate, switching pain, or uncertainty. ${hint}`,
     competitor_cost:`Competitor cost objection. Use the pricing playbook: acknowledge, ask what total they are comparing against, and avoid discounting. If a competitor is known (${currentCompetitor ? currentCompetitor.name : "unknown"}), compare all-in cost, add-ons, year-end fees, support, and time saved. End by asking team size or permission to compare real total cost. ${hint}`,
     competitor_support:`Competitor support objection. Acknowledge the frustration without attacking the competitor. Ask whether support is the only issue or if payroll, scheduling, onboarding, or communication is also taking time. If natural, position Homebase as real people plus an hourly-team workflow. ${hint}`,
-    competitor_gap:`Competitor feature/workflow gap. Acknowledge what their current tool does well, then ask which missing workflow matters most: payroll, scheduling, hiring/onboarding, or team communication. Keep Homebase positioned as all-in-one hourly-team operations. ${hint}`,
+    competitor_gap:`They said the current tool does not cover everything. Do NOT mark the next answer as pain by itself. Ask ONE neutral scope question: which workflow sits outside it today, payroll, scheduling, hiring/onboarding, team communication, or multiple workflows. ${hint}`,
     competitor_switching:`Switching pain objection. Be honest: switching always takes some work, but a specialist can map what imports, what is manual, and what timing makes sense. Do not overpromise direct deposit or SSN imports. Ask whether they want migration info, a specialist mapping call, renewal timing, or if it is not worth switching. ${hint}`,
     innflow_scope_accounting:`They clarified Inn-Flow is mainly accounting and owner reporting. Do NOT imply there is a problem with Inn-Flow. Respect the finance lane, then ask ONE neutral question: what handles employee schedules, time clocks, payroll, hiring, and team communication today? ${hint}`,
-    innflow_scope_labor:`They clarified Inn-Flow handles labor scheduling and time. Do NOT assume pain. Ask ONE neutral follow-up: whether payroll and hiring live there too, or whether those are separate. ${hint}`,
+    innflow_scope_labor:`They clarified Inn-Flow handles labor scheduling and time. Do NOT assume pain. Ask ONE neutral follow-up that can be answered by: payroll is separate, payroll is in Inn-Flow too, it covers most but not everything, or it works fine. ${hint}`,
     innflow_scope_payroll:`They clarified Inn-Flow includes payroll. Do NOT assume pain. Acknowledge that it sounds fairly complete, then ask ONE scope question only: what, if anything, still sits outside Inn-Flow for the property team, such as hiring/onboarding, team communication, manager side work, nothing, or not sure. Do not ask about cost or support yet. ${hint}`,
     innflow_outside_hiring:`They said hiring or onboarding is outside Inn-Flow. Acknowledge the scope gap without attacking Inn-Flow. Ask ONE question about whether hiring is the main gap or whether the property workflow gap is broader. ${hint}`,
-    innflow_outside_comms:`They said team communication is outside Inn-Flow. Acknowledge the scope gap without attacking Inn-Flow. Ask ONE question about whether communication is the main gap or whether there are other property workflow gaps too. ${hint}`,
+    innflow_outside_comms:`They said team communication is outside Inn-Flow. Treat that as scope, not pain. Ask ONE neutral current-method question: how are they reaching staff today, such as group texts, WhatsApp, posted notes, manager relay, another app, missed messages, or it works fine. ${hint}`,
     innflow_outside_manager_work:`They said managers still do side work outside Inn-Flow. Ask ONE question to clarify whether the issue is manual workflow, adoption/support, or whether it is manageable. ${hint}`,
     innflow_property_covered:`They said the property workflow is covered. Respect that fully. Do not dig for pain. Ask ONE low-pressure next step question: are they happy as-is, locked in, should you send info for later, or does someone else review tools. ${hint}`,
     innflow_scope_whole_platform:`They said Inn-Flow handles the whole back-office suite. Respect that. Ask ONE usage question only: who actually uses it day to day, the property team, ownership/controller, both, or they are not sure. Do not ask about pain yet. ${hint}`,
@@ -2188,7 +2288,7 @@ function buildNextPrompt(responseId, responseLabel) {
     competitor_scope_pos_ops:`They clarified ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles POS or department workflow. Do NOT assume pain. Ask ONE neutral follow-up about whether staff management and payroll are also in that system or separate. ${hint}`,
     competitor_scope_finance_reporting:`They clarified ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles finance, reporting, or back office. Do NOT assume pain. Respect that lane, then ask ONE neutral question about what handles schedules, time clocks, payroll, hiring, and team communication. ${hint}`,
     competitor_scope_comms_ops:`They clarified ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles team ops or communication. Do NOT assume pain. Ask ONE neutral follow-up about whether scheduling, time, and payroll are also there or handled separately. ${hint}`,
-    competitor_scope_all_in_one:`They clarified ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles most of the workflow. Do NOT assume pain. Acknowledge that it sounds fairly complete, then ask ONE soft comparison question about whether anything still sits outside it or whether it works well enough today. ${hint}`,
+    competitor_scope_all_in_one:`They clarified ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles most of the workflow. Do NOT assume pain. Acknowledge that it sounds fairly complete, then ask ONE question that can be answered by: working well enough, coverage gap, cost, support/setup, or satisfied. ${hint}`,
     competitor_scope_unsure:`They are not sure what ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles or someone else owns it. Do not pitch hard. Ask ONE routing question: who owns scheduling, payroll, and staff systems. ${hint}`,
     locked_contract:`Contract lock objection. Do not fight the contract. Ask when renewal comes up and what they would change if the contract were not in the way. Position this as planning ahead, not ripping out a tool today. ${hint}`,
     named_tool:`They just named their current tool. Acknowledge it warmly. IF payroll ownership hasn't already come up earlier in the conversation, ask ONE simple follow-up: does that tool also handle their payroll, or is payroll separate? But if they've ALREADY told you who runs payroll (for example they said they run it themselves, or corporate covers it), do NOT ask again, instead acknowledge what you know and ask a different one-question follow-up that moves toward a product specialist call. ${hint}`,
@@ -2200,8 +2300,8 @@ function buildNextPrompt(responseId, responseLabel) {
     sched_size_small:`They just quantified scheduling pain as a small team. Stay in the scheduling lane and avoid changing topics. Acknowledge that even small teams lose time when schedules change, then ask which scheduling issue is the biggest headache: building the schedule, callouts/swaps, availability/time off, or overtime/coverage surprises. ${hint}`,
     sched_size_medium:`They just quantified scheduling pain as around 15-30 people. Stay in the scheduling lane and avoid changing topics. Acknowledge that this is enough staff for schedules to change all week, then ask which scheduling issue creates the most impact: building the schedule, callouts/swaps, availability/time off, or overtime/coverage surprises. ${hint}`,
     sched_size_large:`They just quantified scheduling pain as 50+ people or a spread-out team. Stay in the scheduling lane and avoid changing topics. Acknowledge the coverage complexity, then ask which scheduling issue is hardest to control: building schedules, callouts/swaps, availability/time off, or overtime/coverage surprises. ${hint}`,
-    schedule_build_time:`Scheduling build-time pain. Dig deeper before solving: ask how many hours a week they spend building, revising, and posting the schedule. Mention Homebase only lightly as templates, AI-assisted scheduling, and drag-and-drop scheduling after the impact is clear. ${hint}`,
-    schedule_changes:`Schedule churn pain: callouts, swaps, and last-minute changes. Dig deeper before solving: ask how often the posted schedule changes and whether that creates coverage gaps or manager text-chasing. Mention Homebase only lightly as open shifts, shift swaps, team notifications, and messaging after the impact is clear. ${hint}`,
+    schedule_build_time:`Scheduling build-time pain. Ask ONE impact question that can be answered by: it eats hours every week, changes after posting are the killer, or they want to see a faster builder. Mention Homebase only lightly after the impact is clear. ${hint}`,
+    schedule_changes:`Schedule churn pain: callouts, swaps, and last-minute changes. Ask ONE impact question that can be answered by: last-minute changes are constant, coverage gaps cause stress, or they want to see shift swaps. Mention Homebase only lightly after the impact is clear. ${hint}`,
     schedule_availability:`Availability and time-off pain. Dig deeper before solving: ask whether managers are chasing availability manually or whether bad availability creates coverage gaps. Mention Homebase only lightly as availability approvals, PTO/time-off management, conflict detection, and mobile updates after the impact is clear. ${hint}`,
     schedule_labor:`Scheduling labor-visibility pain. Dig deeper before solving: ask whether the problem is overtime surprises, overstaffing, understaffing, or not seeing labor cost before publishing. Mention Homebase only lightly as overtime alerts, labor cost visibility, sales/labor forecasting, and POS integration after the impact is clear. ${hint}`,
     schedule_impact_hours:`Impact confirmed: scheduling consumes hours weekly. Now bridge to solution: Homebase helps build schedules faster with templates, AI-assisted scheduling, and drag-and-drop tools, then notifies the team automatically. Ask whether it is worth seeing the faster scheduling workflow with a product specialist. ${hint}`,
@@ -2209,8 +2309,19 @@ function buildNextPrompt(responseId, responseLabel) {
     schedule_impact_coverage:`Impact confirmed: coverage gaps or over/understaffing hurt operations. Now bridge to solution: Homebase helps track availability and time off, highlights conflicts, sends updates, and gives managers clearer coverage visibility before shifts fall apart. Ask whether it is worth seeing the coverage controls with a product specialist. ${hint}`,
     schedule_impact_cost:`Impact confirmed: overtime or labor cost surprises matter. Now bridge to solution: Homebase gives overtime alerts, labor cost visibility, and POS-connected labor/sales forecasting so managers can catch cost issues before publishing. Ask whether it is worth seeing that on a product specialist call. ${hint}`,
     pain_compliance:`Compliance concern. Ask if they worry about overtime or break rules. Mention Homebase has compliance tools built for owners like them. ${hint}`,
-    pain_hiring:`Hiring/turnover pain. Empathize, mention Homebase has hiring tools for hourly teams. One follow-up question. ${hint}`,
-    pain_comms:`Team comms pain. Mention Homebase team messaging. Ask how they reach their staff at ${brand} today. ${hint}`,
+    pain_hiring:`Hiring/turnover came up. Ask ONE question that can be answered by: they want to see hiring improved, payroll is actually bigger, or hiring is not the focus right now. Do not ask a generic "how are you handling hiring" question unless the response options are hiring methods. ${hint}`,
+    pain_comms:`Team comms came up. Before positioning Homebase, ask ONE neutral current-method question: how are they reaching staff today, such as group texts, WhatsApp, posted notes, manager relay, another app, missed messages, or it works fine. ${hint}`,
+    workflow_payroll_separate:`They said payroll sits outside the current tool. Treat that as scope, not automatic pain. Ask ONE neutral question about how hours get into payroll today: copied manually, payroll provider handles it, unresolved, or not sure. ${hint}`,
+    workflow_scheduling_separate:`They said scheduling sits outside the current tool. Treat that as scope, not automatic pain. Ask ONE neutral question about how scheduling works today: separate scheduler, manual process, real headache, or works fine. ${hint}`,
+    workflow_hiring_separate:`They said hiring/onboarding sits outside the current tool. Treat that as scope, not automatic pain. Ask ONE neutral question about how hiring works today: separate tool, manual process, real headache, or works fine. ${hint}`,
+    workflow_comms_separate:`They said team communication sits outside the current tool. Treat that as scope, not automatic pain. Ask ONE neutral current-method question: how are they reaching staff today, such as group texts, WhatsApp, posted notes, manager relay, another app, missed messages, or it works fine. ${hint}`,
+    workflow_multiple_separate:`They said multiple workflows sit outside the current tool. Treat that as scope, not automatic pain. Ask ONE question about which separate workflow matters most to clean up first: payroll, scheduling, hiring, or team communication. ${hint}`,
+    comms_group_texts:`They use group texts or WhatsApp for team communication. Do not assume pain. Ask ONE question about whether texts get missed or buried, work fine, are worth comparing against a cleaner flow, or are not urgent. ${hint}`,
+    comms_posted_notes:`They use posted notes or printed schedules for communication. Do not assume pain. Ask ONE question about whether people miss updates, schedule changes create the issue, a cleaner flow is worth comparing, or it is not urgent. ${hint}`,
+    comms_manager_relay:`Managers pass messages along. Do not assume pain. Ask ONE question about whether managers chase people too much, shift changes create the issue, a cleaner flow is worth comparing, or it is not urgent. ${hint}`,
+    comms_ops_tool:`Another app handles team messages. Do not assume pain. Ask ONE question about whether that app works fine, whether being separate from the rest is the issue, whether comparing the all-in-one flow is worthwhile, or whether it is not urgent. ${hint}`,
+    comms_missed_messages:`They confirmed messages get missed or managers are chasing people. Now pain is real. Briefly connect Homebase team communication and scheduling updates, then ask whether it is worth seeing with a product specialist or whether the issue is mainly around shift changes. ${hint}`,
+    comms_works_fine:`They said team communication works fine. Respect that. Do not keep pushing communication pain. Ask ONE low-pressure question about whether they are covered, another workflow is separate, they want info for later, or timing is later. ${hint}`,
     want_demo:`Prospect wants to see it. Advance directly to scheduling. Offer a 30-minute call with a product specialist, then give two specific time options, such as tomorrow at 10am or the following day at 2pm, and ask which works better. Make it clear the product specialist can walk through their setup. ${hint}`,
     price_question:`Price before value. Defer warmly: "Pricing's pretty simple, but quick question first so I point you to the right setup." ONE discovery question. ${hint}`,
     book_meeting:`Ready to meet. Lock a 30-minute call with a product specialist. Offer two specific meeting times, such as tomorrow at 10am or the following day at 2pm, and ask which one works better or what other time they prefer. Mention the specialist can walk through the exact ${brand} setup.`,
@@ -2269,8 +2380,8 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     ? "schedules, time clocks, payroll, hiring, and team communication"
     : "scheduling, time tracking, payroll, hiring, and team messages";
   const currentStackQuestion = hospitality
-    ? `What are you using today for managing and paying staff?`
-    : `How are you handling those pieces at ${brand} today: one system, a few different tools, corporate tools, or more manual work?`;
+    ? `What are you using today for managing and paying staff, or is one part of that the headache?`
+    : `How are you handling those pieces at ${brand} today: one system, a few different tools, corporate tools, manual work, or one painful area?`;
   const proof = getProof(industry, brand);
   const peer = proof.peers[0] || "similar owners";
   const brandProof = getBrandSocialProof(brand);
@@ -2288,6 +2399,7 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
   }
 
   const lines = {
+    opening: `${lead}it's [Your Name] with Homebase. ${proofRef} use us for the hourly-team workflow. Is it fair if I give you the short version?\n[Coaching tip: This is only a permission question; do not diagnose pain yet.]`,
     interested: hospitality
       ? `${lead}absolutely. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
       : `${lead}absolutely. Homebase helps ${industryLabel} owners run ${peopleWorkflow} in one place, and ${proofRef} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
@@ -2295,21 +2407,22 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
       ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
       : `${lead}totally. The simplest way to think about Homebase is one app for the hourly team, from schedules and clock-ins through payroll, hiring, and team communication, so managers are not piecing five tools together. ${currentStackQuestion}\n${baseTip}`,
     too_busy: `${lead}completely get it, I caught you in the middle of the day. I do think this could be useful for ${brand}, so when is a better time to catch you, later today or tomorrow morning?\n[Coaching tip: Respect the interruption, then trade for a specific callback time.]`,
-    not_interested: `${lead}totally fair, before I let you go, can I ask one quick thing? For a lot of ${industryLabel} owners, the headache is not the software, it is the time lost fixing schedules, time cards, and payroll after the fact. Which of those is most annoying for you right now?\n${baseTip}`,
+    not_interested: `${lead}totally fair, before I let you go, can I ask one quick thing? Is this a no because your manual process works, corporate handles it, you tried something before, it is not relevant, or timing is just off?\n[Coaching tip: Diagnose the brush-off before you decide whether to keep going.]`,
+    no_value: `${lead}totally fair. Is it mainly that the team is small, corporate already handles HR, or this just is not the right time?\n[Coaching tip: Let them name why it feels irrelevant before you decide whether there is a path.]`,
     who_are_you: hospitality
       ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
       : `${lead}yeah, of course. We are Homebase, the all-in-one app for hourly teams, ${peopleWorkflow}, and owners like ${peer} use us to simplify the week. ${currentStackQuestion}\n${baseTip}`,
     happy_with_current: `${lead}that makes sense, most owners we talk to have something in place already. What are you using today to handle ${hospitality ? "hotel scheduling, time clocks, payroll, hiring, and team communication" : "scheduling, time tracking, and payroll"}?\n${baseTip}`,
-    competitor_other: `${lead}got it, most owners already have a tool somewhere in the process. Does it mainly cover scheduling and time, payroll too, or is payroll still separate?\n${baseTip}`,
+    competitor_other: `${lead}got it, most owners already have a tool somewhere in the process. Does it mainly cover scheduling and time, payroll too, is payroll separate, is switching the concern, or are you not sure yet?\n${baseTip}`,
     competitor_cost: `${lead}totally fair, price only matters once we know the real total. With ${currentCompetitor ? currentCompetitor.name : "your current setup"}, the useful comparison is base price, add-ons, year-end fees, and time spent fixing payroll or schedules. How many hourly employees would we be comparing for ${brand}?\n[Coaching tip: Treat price as a value and fit question, not a discount fight.]`,
     competitor_support: `${lead}I hear you, support frustration gets old fast when payroll or schedules are on the line. Is support the main issue, or are there workflow gaps too, like payroll, scheduling, onboarding, or team messages?\n[Coaching tip: Acknowledge the frustration, then explore whether the issue is isolated or bigger.]`,
-    competitor_gap: `${lead}that is usually where owners start looking, not because the current tool is useless, but because it leaves work outside the system. Which part is still outside it today: payroll, scheduling, hiring, or team communication?\n[Coaching tip: Name the gap, then let them choose the pain.]`,
+    competitor_gap: `${lead}that makes sense. Which workflow still sits outside it today: payroll, scheduling, hiring and onboarding, team communication, or a few of those?\n[Coaching tip: Treat this as scope first; a separate workflow is not automatically pain.]`,
     competitor_switching: `${lead}that is a fair concern, switching always takes some planning. The useful next step is mapping what imports, what is manual, and what timing makes sense. Would you rather I send migration info first, or map it with a specialist?\n[Coaching tip: Reduce switching anxiety with a concrete migration map.]`,
     innflow_scope_accounting: `${lead}got it, so Inn-Flow is more in the finance and reporting lane. What handles the staff side today: schedules, time clocks, payroll, hiring, and team communication?\n[Coaching tip: Respect Inn-Flow's finance role before you look for the people-ops workflow.]`,
-    innflow_scope_labor: `${lead}got it, so labor and time are in there too. Does payroll and hiring live in Inn-Flow as well, or are those handled somewhere else?\n[Coaching tip: Keep this neutral; you are mapping the workflow, not assuming pain.]`,
+    innflow_scope_labor: `${lead}got it, so labor and time are in there too. Is payroll separate, is payroll in Inn-Flow as well, does it cover most but not everything, or is it working fine?\n[Coaching tip: Keep this neutral; you are mapping the workflow, not assuming pain.]`,
     innflow_scope_payroll: `${lead}that sounds fairly complete. What, if anything, still sits outside Inn-Flow for the property team: hiring and onboarding, team communication, manager side work, nothing, or are you not sure?\n[Coaching tip: Keep this as a scope question before diagnosing fit.]`,
     innflow_outside_hiring: `${lead}got it, so hiring or onboarding is separate. Is that the main workflow you would want cleaner, or is the gap broader than hiring?\n[Coaching tip: Now that they named a specific outside workflow, clarify impact before positioning Homebase.]`,
-    innflow_outside_comms: `${lead}got it, so team communication is separate. Is communication the main gap, or are there other parts of the property workflow still outside Inn-Flow too?\n[Coaching tip: Stay in the workflow they named before widening the conversation.]`,
+    innflow_outside_comms: `${lead}got it, so team communication is separate. How are you reaching your ${brand} staff today: group texts, WhatsApp, posted notes, managers passing messages along, or another app?\n[Coaching tip: Capture the current method before diagnosing pain.]`,
     innflow_outside_manager_work: `${lead}got it, so managers still have side work around it. Is that mostly manual work, adoption and support, or is it manageable enough today?\n[Coaching tip: Separate workflow pain from rollout/support pain.]`,
     innflow_property_covered: `${lead}that makes sense, sounds like you have a pretty complete setup. Are you happy with it as-is, locked in for now, or should I send a short note in case you ever compare options later?\n[Coaching tip: Respect a covered workflow; do not force pain where they have not given you any.]`,
     innflow_scope_whole_platform: `${lead}makes sense. Who actually uses Inn-Flow day to day: the property team, ownership and controller, both, or are you not sure?\n[Coaching tip: Keep this as a usage question before diagnosing pain.]`,
@@ -2322,41 +2435,60 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     competitor_scope_pos_ops: `${lead}got it, so it is more tied to POS or a department workflow. Does it also handle staff scheduling, time, and payroll, or are those separate?\n[Coaching tip: Separate POS/department tools from the people workflow.]`,
     competitor_scope_finance_reporting: `${lead}that makes sense, that sounds more like finance or reporting. What handles the staff side today: schedules, time clocks, payroll, hiring, and team communication?\n[Coaching tip: Respect the finance lane before looking for staff workflow.]`,
     competitor_scope_comms_ops: `${lead}got it, so team ops or communication is covered. Are scheduling, time tracking, and payroll in that same system too, or separate?\n[Coaching tip: Map the edges of the tool before you position Homebase.]`,
-    competitor_scope_all_in_one: `${lead}that sounds pretty complete. Is anything still outside that workflow, or does it work well enough for the team today?\n[Coaching tip: If they say it works, respect it; if they name a gap, then go deeper.]`,
+    competitor_scope_all_in_one: `${lead}that sounds pretty complete. Is it working well enough, or is the issue coverage, cost, support, or setup?\n[Coaching tip: If they say it works, respect it; if they name an issue, then go deeper.]`,
     competitor_scope_unsure: `${lead}no worries. Who would know what handles scheduling, payroll, and staff systems for the business?\n[Coaching tip: Route to the system owner instead of forcing a pitch.]`,
     locked_contract: `${lead}that makes sense, no one wants to rip something out mid-contract. If renewal is the real window, when does that come up: soon, in a few months, or closer to year-end?\n[Coaching tip: Turn contract lock into a renewal-timing conversation.]`,
-    named_tool: `${lead}got it, that is helpful context. A lot of owners still look at Homebase when they want hours to flow cleanly into payroll without extra re-keying. What do you wish worked better in your current setup?\n${baseTip}`,
+    named_tool: `${lead}got it, that is helpful context. Does that tool also handle payroll for you, is payroll separate, or are you not totally sure?\n[Coaching tip: Confirm payroll ownership before comparing workflows.]`,
     pain_payroll: `${lead}that is exactly the kind of thing we help with. When payroll is messy, it usually means hours are being checked, copied, or corrected by hand before payday. How long does payroll usually take you each pay period?\n[Coaching tip: Expand the pain before you pitch the fix.]`,
     pain_scheduling: `${lead}yeah, scheduling can eat the week fast, especially when swaps and callouts start stacking up. About how many hourly employees are you scheduling at ${brand}?\n[Coaching tip: Quantify the team size so the pain feels concrete.]`,
     sched_size_small: `${lead}got it. Even with a smaller team, scheduling can still create a lot of back-and-forth when availability changes. What part is most painful right now: building the schedule, covering callouts and swaps, tracking availability and time off, or avoiding overtime and coverage surprises?\n[Coaching tip: Stay in the scheduling lane and define the specific scheduling pain.]`,
     sched_size_medium: `${lead}yeah, with 15 to 30 people, the schedule can start changing all week. What is the biggest scheduling headache right now: building it, covering callouts and swaps, tracking availability and time off, or avoiding overtime and coverage surprises?\n[Coaching tip: Stay in the scheduling lane before you show the fix.]`,
     sched_size_large: `${lead}with a team that size, scheduling is usually a coverage and visibility problem, not just a calendar problem. Which part is hardest to control: building schedules, callouts and swaps, availability and time off, or overtime and coverage surprises?\n[Coaching tip: Keep the pain specific so the specialist call has a reason.]`,
-    schedule_build_time: `${lead}that makes sense, building the schedule is where a lot of managers lose hours before the week even starts. About how much time does it take each week once you include revisions and posting it to the team?\n[Coaching tip: Quantify scheduling time before talking features.]`,
-    schedule_changes: `${lead}that is usually where the real chaos is, because the schedule is never really done once callouts and swaps start. How often are you changing the posted schedule: constantly, mainly when coverage gaps pop up, or enough that it is worth seeing a better workflow?\n[Coaching tip: Tie swaps and callouts to operational impact.]`,
+    schedule_build_time: `${lead}that makes sense, building the schedule is where a lot of managers lose hours before the week even starts. Is it mainly eating hours each week, do changes after posting cause the pain, or would you rather see the faster builder?\n[Coaching tip: Let them define the impact before talking features.]`,
+    schedule_changes: `${lead}that is usually where the real chaos is, because the schedule is never really done once callouts and swaps start. Are last-minute changes constant, do coverage gaps create the stress, or would you rather see how shift swaps work?\n[Coaching tip: Tie swaps and callouts to operational impact.]`,
     schedule_availability: `${lead}totally, availability and time off get messy fast when they live in texts or someone else's memory. Are you mostly chasing availability manually, dealing with coverage gaps from bad availability, or would it help to see how approvals work?\n[Coaching tip: Separate data collection pain from coverage impact.]`,
     schedule_labor: `${lead}that matters, because labor surprises show up after the schedule is already posted. Is the bigger issue overtime surprises, overstaffing or understaffing, or would it help to see labor visibility before you publish?\n[Coaching tip: Connect scheduling to cost before showing the dashboard.]`,
     schedule_impact_hours: `${lead}that is exactly the scheduling time Homebase is meant to give back. Managers can use templates, AI-assisted scheduling, and drag-and-drop tools, then notify the whole team when the schedule is published. Is it worth seeing that faster workflow?\n[Coaching tip: Now that impact is clear, connect the pain to the scheduling workflow.]`,
     schedule_impact_changes: `${lead}that is where Homebase helps the most: the team can see schedules on mobile, request swaps, pick up open shifts, and get updates without managers chasing everyone by text. Is it worth seeing how that works?\n[Coaching tip: Show the fix for the exact churn they named.]`,
     schedule_impact_coverage: `${lead}coverage gaps are exactly what scheduling software should prevent before the day falls apart. Homebase helps track availability and time off, flags conflicts, and keeps the team updated when things change. Want to see the coverage controls?\n[Coaching tip: Tie coverage pain to visibility and conflict prevention.]`,
     schedule_impact_cost: `${lead}that is a real business reason to fix scheduling. Homebase can show overtime alerts and labor costs as you build the schedule, with sales and labor visibility from POS integrations. Want to see the overtime and labor view with a product specialist?\n[Coaching tip: Connect scheduling to dollars, then ask for the specialist call.]`,
-    pain_hiring: `${lead}that makes sense, turnover creates a lot of hidden work. Homebase helps owners post jobs, track applicants, and get new hires into the team flow faster. How are you handling hiring right now?\n${baseTip}`,
+    pain_hiring: `${lead}that makes sense, turnover creates a lot of hidden work. Is hiring the thing you would want to see improved, is payroll actually the bigger problem, or is hiring not the focus right now?\n${baseTip}`,
+    pain_comms: `${lead}that makes sense. How are you reaching your ${brand} staff today: group texts, WhatsApp, posted notes, managers passing messages along, or another app?\n[Coaching tip: Capture the current method before diagnosing pain.]`,
+    workflow_payroll_separate: `${lead}got it, so payroll is separate. How are hours getting into payroll today: copied over manually, handled by the payroll provider, still unresolved, or are you not sure?\n[Coaching tip: Map the handoff before calling it painful.]`,
+    workflow_scheduling_separate: `${lead}got it, so scheduling is separate. Is scheduling a real headache today, handled in a separate scheduler, mostly manual, or working fine?\n[Coaching tip: Separate tool scope from actual scheduling pain.]`,
+    workflow_hiring_separate: `${lead}got it, so hiring or onboarding is separate. Is that a real headache today, handled in a separate hiring tool, mostly manual, or working fine?\n[Coaching tip: Separate tool scope from actual hiring pain.]`,
+    workflow_comms_separate: `${lead}got it, so team communication is separate. How are you reaching your ${brand} staff today: group texts, WhatsApp, posted notes, managers passing messages along, or another app?\n[Coaching tip: Capture the current method before diagnosing pain.]`,
+    workflow_multiple_separate: `${lead}got it, a few pieces are separate. Which one matters most to clean up first: payroll, scheduling, hiring, or team communication?\n[Coaching tip: Focus the next question on one workflow before diagnosing pain.]`,
+    comms_group_texts: `${lead}got it, group texts are common. Are messages getting missed or buried, is it working fine, or would it be worth comparing a cleaner team app flow?\n[Coaching tip: Texting is only pain if they say it creates misses, delays, or manager chasing.]`,
+    comms_posted_notes: `${lead}got it, posted notes and printed schedules can work if updates are simple. Are people missing updates, is the real issue schedule changes, or is it working fine enough today?\n[Coaching tip: Look for impact before positioning mobile communication.]`,
+    comms_manager_relay: `${lead}got it, so managers are passing messages along. Are they chasing people more than they should, does it mostly show up around shift changes, or is it manageable today?\n[Coaching tip: Manager relay becomes pain when it creates chasing, missed updates, or coverage issues.]`,
+    comms_ops_tool: `${lead}got it, so another app handles messages. Does that app work fine, or is the issue that communication is separate from schedules, time, and payroll?\n[Coaching tip: Respect a working comms tool; only compare Homebase if the separation matters.]`,
+    comms_missed_messages: `${lead}that is exactly where a team app can help: schedules, shift updates, and messages live where employees already check work. Is it worth seeing that with a product specialist, or is the issue mainly around shift changes?\n[Coaching tip: Now that pain is confirmed, connect it to a clear workflow.]`,
+    comms_works_fine: `${lead}makes sense, if communication is working then I would not force that angle. Is there another workflow that is separate, should I send info for later, or are you covered for now?\n[Coaching tip: Respect status quo and pivot only if they open another door.]`,
     want_demo: `${lead}perfect, that is probably the fastest way to see if it fits. Let's set up a 30-minute call with a product specialist who can walk through the exact ${brand} setup. I have tomorrow at 10am or the following day at 2pm open, which works better?\n[Coaching tip: When they ask to see it, move straight to calendar options.]`,
     price_question: `${lead}pricing is pretty straightforward, and it depends on the setup and team size, so I do not want to guess wrong. Quick question first, about how many hourly employees would need to use it at ${brand}?\n[Coaching tip: Earn the right to talk price by getting one sizing detail.]`,
     book_meeting: `${lead}great, let's get something real on the calendar. We can set up a 30-minute call with a product specialist who can walk through the exact ${brand} workflow. I have tomorrow at 10am or the following day at 2pm open, which one works better?\n[Coaching tip: Move from interest to two concrete calendar options.]`,
     callback_yes: `${lead}perfect, I will make a note to call you back then. What is the best direct number or email to reach you?\n[Coaching tip: A callback only counts if you capture a reliable way back in.]`,
+    not_sure: `${lead}no problem, a lot of owners are not sure where payroll starts and the scheduling tool ends. Is it worth a quick look, do you think payroll is probably separate, or is another time better?\n[Coaching tip: Turn uncertainty into either discovery or timing.]`,
+    gatekeeper_blocks: `${lead}totally understand. What is the best path here: can I get the owner's name, leave a voicemail, call back tomorrow morning, or should I leave it there?\n[Coaching tip: Ask for one clean route to the owner.]`,
+    gatekeeper_voicemail: `${lead}perfect, I will leave a short voicemail and keep it simple. I will follow up later unless they call me back first.\n[Coaching tip: Log the voicemail and exit cleanly.]`,
     not_now: `${lead}totally fair, timing matters. If this is not for today, when would it make sense to revisit: next week, the next month or two, end of year, or not a priority?\n[Coaching tip: Turn vague timing into a clear follow-up window.]`,
     callback_no: `${lead}I can keep it to a short note on how ${proofRef} use Homebase, no big pitch. Should I follow up after you have a chance to review it, or would you rather I leave it there?\n[Coaching tip: Respect the deflection, but clarify whether the door is open.]`,
     softens: `${lead}appreciate it, I will make this quick. Homebase puts scheduling, time tracking, payroll, hiring, and team messages in one place for hourly teams. Do you want the 30-second version now, or do you truly need to jump?\n[Coaching tip: Use the small opening they gave you without over-talking.]`,
     franchise_hq: `${lead}that makes sense, a lot of franchisees have some corporate tools in the mix. Does corporate actually run payroll too, is payroll still on your plate, or is it a little of both?\n[Coaching tip: Clarify what corporate really owns before you accept the objection.]`,
     tried_before: `${lead}I hear you, bad software experiences stick. What happened last time: was it clunky with no payroll, bad enough that you do not want to revisit it, or are you open to what is different with Homebase?\n[Coaching tip: Let them name the old wound before you position the difference.]`,
     what_system: `${lead}got it, if your current setup already covers payroll too, the question is whether it is actually making the week easier. Are you mainly curious what makes Homebase different, frustrated with payroll, or pretty happy with what you have?\n[Coaching tip: Do not re-ask what they already answered; compare from there.]`,
+    no_payroll: `${lead}got it, so payroll is separate. Is payroll taking a few hours, are errors the frustrating part, or would it help to see how Homebase connects hours into payroll?\n[Coaching tip: Separate payroll ownership from actual payroll pain.]`,
     after_pitch_yes: `${lead}that makes sense. How are you handling those pieces today: one system, different tools for payroll and scheduling, corporate tools, or more manual work?\n[Coaching tip: Let them name the stack before you diagnose the gap.]`,
     after_pitch_meh: `${lead}no worries, that is helpful to know. Who is the right person for this: the owner, or are you not sure who handles it?\n[Coaching tip: When they are not the decision maker, solve routing first.]`,
     gate_name: `${lead}thank you, that helps. Would it be easier to put me through now, or is there a better time to catch them?\n[Coaching tip: Convert a name into either a transfer or a callback window.]`,
+    gate_connects: `${lead}great, when the owner picks up, start fresh: name, Homebase, one proof point, and ask for the short version.\n[Coaching tip: Treat the transfer like a new call, not a continuation with the gatekeeper.]`,
     quantify_time: `${lead}yeah, hours adds up fast every pay period. About how big is the hourly team: under 10, around 15 to 30, 50 or more, or does it depend by location?\n[Coaching tip: Quantify size right after they quantify time.]`,
     quantify_cost: `${lead}that is exactly the kind of cleanup Homebase is meant to prevent. Have mistakes caused actual rework, or would it be easier to see how the fix works?\n[Coaching tip: Move from annoyance to impact, then to a useful next step.]`,
     errors_confirmed: `${lead}that is exactly why owners come to us. Hours flow straight into payroll, so there is less re-keying and less cleanup. Do you want to find time to look at it, or see how Homebase prevents that?\n[Coaching tip: Once they confirm errors, connect the pain to a specialist call.]`,
     decision_maker_no: `${lead}got it, thanks for pointing me in the right direction. Who usually handles this: are you unsure, or can you get the owner?\n[Coaching tip: Keep the ask simple when you need the right contact.]`,
+    decision_maker_yes: `${lead}perfect, if you handle this, I can keep it tight. Can I give you the short version?\n[Coaching tip: Confirm permission, then move into the pitch.]`,
+    size_small: `${lead}with a smaller team, the question is whether it saves enough time to matter. Would this actually help, is it still painful even with a few people, do you mainly want pricing, or are you managing okay?\n[Coaching tip: Small teams need value fit before a hard meeting ask.]`,
     size_medium: `${lead}with a team that size, even small workflow issues can eat real time. Is the bigger drag scheduling, payroll cleanup, or would it help to see how Homebase handles a team that size?\n[Coaching tip: Do not assume payroll; let them keep you in the pain lane.]`,
     size_large: `${lead}with that many people, the hard part is usually keeping schedules, payroll, and location visibility clean across the whole team. Is scheduling coverage the biggest headache, is it payroll, is it the across-location view, or do you want to see how the setup works?\n[Coaching tip: Large teams need a focused next topic, not a feature dump.]`,
     timeline_now: `${lead}if this is near-term, it is worth getting a real look on the calendar. Should we schedule a 30-minute call with a product specialist?\n[Coaching tip: Immediate timing deserves a direct meeting ask.]`,
@@ -2365,6 +2497,11 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     budget_yes: `${lead}great, if budget is there, the best next step is having a product specialist walk through whether the workflow fits ${brand}. Should we get that call booked?\n[Coaching tip: Budget plus interest should turn into a calendar ask.]`,
     budget_maybe: `${lead}that is enough to take a quick look without overcommitting. Would a product specialist call be worth putting on the calendar?\n[Coaching tip: Lower the ask when budget is not firm.]`,
     budget_no: `${lead}understood, timing and budget have to line up. Should I follow up when budget opens later, or is this not going to happen?\n[Coaching tip: Separate future nurture from a real no.]`,
+    pain_compliance: `${lead}that is worth taking seriously. Has compliance created fines or rework, would you want to see how Homebase helps, or is it something to revisit later?\n[Coaching tip: Compliance pain should become either real cost, a demo path, or timing.]`,
+    willing_to_meet: `${lead}perfect, I will send the invite. What is the best email or direct number to use?\n[Coaching tip: Once time is agreed, capture contact info and read it back.]`,
+    curious_why: `${lead}got it, so you have a process that mostly works. Is payroll taking time but manageable, is it honestly painful, or do you really not need anything here?\n[Coaching tip: Let them tell you whether manual work is tolerable or painful.]`,
+    multi_loc_pain: `${lead}with multiple locations, it usually comes down to total staff, payroll complexity, or visibility across properties. Which is the bigger issue: total headcount, payroll, or seeing it across locations?\n[Coaching tip: Multi-location pain needs a specific anchor.]`,
+    value_first: `${lead}fair, price only matters if the value is there. Is the main friction payroll, scheduling, hiring and turnover, or would you rather see the whole flow first?\n[Coaching tip: Re-anchor price pressure to the workflow they care about.]`,
     wants_info: `${lead}happy to send something over. I will keep it short and focused on how ${industry} owners use Homebase for scheduling, time tracking, and payroll. Should I follow up next week after you review it, or is this not a fit?\n[Coaching tip: Do not let an info request become a dead end.]`,
     gives_email: `Perfect, let me read that back to make sure I got it right. That is the email you want the invite sent to, right?\n[Coaching tip: Always confirm contact info out loud before you hang up.]`,
     gives_phone: `Got it, let me read that back so I do not fat-finger it. That is the best number to reach you at, right?\n[Coaching tip: Confirm the number, then restate the next step.]`,
@@ -2402,15 +2539,25 @@ const PHASE_ASKS = {
   competitor_other: [{ key:"solution", val:"asked, awaiting answer" }],
   competitor_cost: [{ key:"budget", val:"asked competitor total cost" }],
   competitor_support: [{ key:"pain", val:"asked support impact" }],
-  competitor_gap: [{ key:"pain", val:"asked current tool gap" }],
+  competitor_gap: [{ key:"solution", val:"asked missing workflow scope" }],
   competitor_switching: [{ key:"timeline", val:"asked migration timing" }],
   innflow_scope_accounting: [{ key:"solution", val:"asked staff workflow outside Inn-Flow" }],
   innflow_scope_labor: [{ key:"solution", val:"asked payroll / hiring ownership" }],
   innflow_scope_payroll: [{ key:"solution", val:"asked remaining property workflow scope" }],
   innflow_outside_hiring: [{ key:"pain", val:"asked hiring gap impact" }],
-  innflow_outside_comms: [{ key:"pain", val:"asked communication gap impact" }],
+  innflow_outside_comms: [{ key:"solution", val:"asked communication method" }],
   innflow_outside_manager_work: [{ key:"pain", val:"asked manual manager work impact" }],
   innflow_property_covered: [{ key:"timeline", val:"asked future comparison path" }],
+  workflow_payroll_separate: [{ key:"solution", val:"asked payroll handoff method" }],
+  workflow_scheduling_separate: [{ key:"solution", val:"asked scheduling method" }],
+  workflow_hiring_separate: [{ key:"solution", val:"asked hiring method" }],
+  workflow_comms_separate: [{ key:"solution", val:"asked communication method" }],
+  workflow_multiple_separate: [{ key:"solution", val:"asked priority workflow scope" }],
+  comms_group_texts: [{ key:"pain", val:"asked whether texts create misses" }],
+  comms_posted_notes: [{ key:"pain", val:"asked whether posted updates are missed" }],
+  comms_manager_relay: [{ key:"pain", val:"asked whether manager relay creates chasing" }],
+  comms_ops_tool: [{ key:"pain", val:"asked whether separate comms tool creates workflow gap" }],
+  comms_works_fine: [{ key:"timeline", val:"asked future interest" }],
   innflow_scope_whole_platform: [{ key:"solution", val:"asked Inn-Flow user type" }],
   innflow_usage_property_team: [{ key:"solution", val:"asked Inn-Flow team fit" }],
   innflow_usage_back_office: [{ key:"solution", val:"asked staff workflow outside Inn-Flow" }],
@@ -2602,7 +2749,7 @@ async function handleResponse(responseId, label) {
   if (SQL_SIGNAL_MAP[responseId]) { const s = SQL_SIGNAL_MAP[responseId]; markSql(s.key, s.val, true); }
   if (responseId === "competitor_cost") { markSql("budget","Competitor cost / add-ons concern", true); markSql("pain","Competitor cost concern", true); }
   if (responseId === "competitor_support") markSql("pain","Competitor support frustration", true);
-  if (responseId === "competitor_gap") markSql("pain","Current tool workflow gap", true);
+  if (responseId === "competitor_gap") markAsked("pain","possible workflow gap");
   if (responseId === "competitor_switching") markAsked("timeline","switching / migration timing");
   if (responseId === "locked_contract") markAsked("timeline","contract renewal timing");
   if (responseId === "willing_to_meet" || responseId === "callback_yes") markSql("nextstep","Next step confirmed", true);

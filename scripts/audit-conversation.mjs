@@ -64,6 +64,30 @@ if (missingTargets.length || missingGuidance.length) {
 }
 
 readContext(`prospectInfo = {
+  brand: "Holiday Inn",
+  industry: "Lodging & Leisure",
+  lead_name: "Pam",
+  num_locs: "2",
+  prospect_role: "owner",
+  current_solution: "",
+  timeline: "",
+  budget: "",
+  known_pain: ""
+}; sqlState = freshSql(); activeCompetitor = { name: "Inn-Flow" };`);
+
+const genericFallbackPhases = [];
+for (const [phase, options] of Object.entries(resp)) {
+  if (!options.length) continue;
+  const fallback = sandbox.buildFallbackTalkTrack(phase, phase);
+  if (/The reason I am asking is|What part of that is most painful/i.test(fallback)) {
+    genericFallbackPhases.push(phase);
+  }
+}
+if (genericFallbackPhases.length) {
+  throw new Error(`Response phases using generic fallback question: ${genericFallbackPhases.join(", ")}`);
+}
+
+readContext(`prospectInfo = {
   brand: "Ace Hardware",
   industry: "Retail",
   lead_name: "Maria",
@@ -116,6 +140,38 @@ for (const simpleId of ["interested", "who_are_you", "too_busy", "callback_no", 
 for (const prematurePainId of ["pain_payroll", "pain_scheduling", "pain_hiring", "pain_comms", "pain_compliance"]) {
   if (openingOptionIds.has(prematurePainId)) {
     throw new Error("Opening permission question should not show pain options before the prospect hears the short version.");
+  }
+}
+const competitorGapIds = new Set(readContext('getResponseOptions("competitor_gap")').map(option => option.id));
+for (const scopeId of ["workflow_payroll_separate", "workflow_scheduling_separate", "workflow_hiring_separate", "workflow_comms_separate", "workflow_multiple_separate"]) {
+  if (!competitorGapIds.has(scopeId)) {
+    throw new Error(`Competitor gap scope options are missing ${scopeId}.`);
+  }
+}
+for (const prematurePainId of ["pain_payroll", "pain_scheduling", "pain_hiring", "pain_comms", "want_demo"]) {
+  if (competitorGapIds.has(prematurePainId)) {
+    throw new Error("Competitor gap scope question should not show pain/demo options before the missing workflow is known.");
+  }
+}
+if (/responseId === "competitor_gap"[\s\S]*markSql\("pain"/.test(sandbox.handleResponse.toString())) {
+  throw new Error("Selecting competitor_gap should ask for scope, not immediately confirm pain.");
+}
+for (const neutralScopeId of ["workflow_comms_separate", "innflow_outside_comms"]) {
+  if (sqlSignalMap[neutralScopeId]?.key === "pain") {
+    throw new Error(`${neutralScopeId} should be tracked as scope/current solution, not pain.`);
+  }
+}
+for (const commsPhase of ["workflow_comms_separate", "innflow_outside_comms", "pain_comms"]) {
+  const ids = new Set(readContext(`getResponseOptions("${commsPhase}")`).map(option => option.id));
+  for (const methodId of ["comms_group_texts", "comms_posted_notes", "comms_manager_relay", "comms_ops_tool", "comms_missed_messages", "comms_works_fine"]) {
+    if (!ids.has(methodId)) {
+      throw new Error(`${commsPhase} should offer communication-method responses; missing ${methodId}.`);
+    }
+  }
+  for (const mismatchId of ["want_demo", "pain_payroll", "not_now"]) {
+    if (ids.has(mismatchId)) {
+      throw new Error(`${commsPhase} asks how they reach staff and should not show ${mismatchId} at that point.`);
+    }
   }
 }
 
