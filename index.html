@@ -1476,6 +1476,10 @@ function phaseLabel(p) {
     innflow_scope_accounting:"Inn-Flow · accounting/reporting",
     innflow_scope_labor:"Inn-Flow · labor/time",
     innflow_scope_payroll:"Inn-Flow · payroll included",
+    innflow_outside_hiring:"Inn-Flow · hiring separate",
+    innflow_outside_comms:"Inn-Flow · communication separate",
+    innflow_outside_manager_work:"Inn-Flow · manual manager work",
+    innflow_property_covered:"Inn-Flow · property workflow covered",
     innflow_scope_whole_platform:"Inn-Flow · full suite",
     innflow_usage_property_team:"Inn-Flow · property team usage",
     innflow_usage_back_office:"Inn-Flow · back-office usage",
@@ -1494,16 +1498,14 @@ function phaseLabel(p) {
 
 const RESP = {
   opening: [
-    { id:"interested", icon:"ti-thumb-up", label:"Yeah, what does it do?", sub:"Prospect engages" },
-    { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is a mess for us", sub:"Volunteers pain" },
-    { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is the headache", sub:"Volunteers pain" },
-    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring and turnover", sub:"Volunteers pain" },
-    { id:"too_busy", icon:"ti-clock", label:"I'm really busy right now", sub:"Time objection" },
+    { id:"interested", icon:"ti-thumb-up", label:"Sure, go ahead", sub:"Gives permission" },
+    { id:"who_are_you", icon:"ti-help", label:"What is this about?", sub:"Needs context" },
+    { id:"too_busy", icon:"ti-clock", label:"I'm tied up right now", sub:"Time objection" },
+    { id:"callback_no", icon:"ti-mail", label:"Can you send me something?", sub:"Email deflection" },
     { id:"not_interested", icon:"ti-x", label:"We're not interested", sub:"Brush-off" },
-    { id:"who_are_you", icon:"ti-help", label:"What is Homebase?", sub:"Needs context" },
-    { id:"happy_with_current", icon:"ti-circle-check", label:"We already use something", sub:"Has tools" },
-    { id:"gatekeeper_blocks", icon:"ti-user-off", label:"Let me take a message", sub:"Gatekeeper blocks" },
-    { id:"decision_maker_no", icon:"ti-user-question", label:"I'm not the right person", sub:"Wrong contact" }
+    { id:"happy_with_current", icon:"ti-circle-check", label:"We already have a system", sub:"Has tools" },
+    { id:"decision_maker_no", icon:"ti-user-question", label:"I'm not the right person", sub:"Wrong contact" },
+    { id:"gatekeeper_blocks", icon:"ti-user-off", label:"Let me take a message", sub:"Gatekeeper blocks" }
   ],
   interested: CURRENT_STACK_RESPONSE_OPTIONS,
   give_more: CURRENT_STACK_RESPONSE_OPTIONS,
@@ -1581,10 +1583,35 @@ const RESP = {
     { id:"not_interested", icon:"ti-x", label:"It works fine for us", sub:"Status quo" }
   ],
   innflow_scope_payroll: [
-    { id:"competitor_gap", icon:"ti-puzzle", label:"It still leaves some work outside", sub:"Workflow gap" },
-    { id:"competitor_cost", icon:"ti-coin", label:"It gets expensive", sub:"Cost concern" },
-    { id:"competitor_support", icon:"ti-headset", label:"Support or setup is heavy", sub:"Service / rollout" },
-    { id:"not_interested", icon:"ti-x", label:"It works fine for us", sub:"Status quo" }
+    { id:"innflow_outside_hiring", icon:"ti-user-plus", label:"Hiring or onboarding is separate", sub:"Outside Inn-Flow" },
+    { id:"innflow_outside_comms", icon:"ti-messages", label:"Team communication is separate", sub:"Outside Inn-Flow" },
+    { id:"innflow_outside_manager_work", icon:"ti-clipboard-list", label:"Managers still do side work", sub:"Manual property workflow" },
+    { id:"innflow_property_covered", icon:"ti-circle-check", label:"No, property workflow is covered", sub:"Covered today" },
+    { id:"innflow_scope_unsure", icon:"ti-help", label:"Not sure what else is in there", sub:"Scope unclear" }
+  ],
+  innflow_outside_hiring: [
+    { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring is the main gap", sub:"Hiring / onboarding" },
+    { id:"competitor_gap", icon:"ti-puzzle", label:"It's broader than hiring", sub:"Multiple gaps" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Worth comparing the workflow", sub:"Specialist call" },
+    { id:"not_interested", icon:"ti-x", label:"It's not a priority", sub:"Backs off" }
+  ],
+  innflow_outside_comms: [
+    { id:"pain_comms", icon:"ti-messages", label:"Communication is the main gap", sub:"Team messages" },
+    { id:"competitor_gap", icon:"ti-puzzle", label:"There are other gaps too", sub:"Multiple gaps" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Worth comparing the workflow", sub:"Specialist call" },
+    { id:"not_interested", icon:"ti-x", label:"It's not a priority", sub:"Backs off" }
+  ],
+  innflow_outside_manager_work: [
+    { id:"competitor_gap", icon:"ti-puzzle", label:"Manual work is the issue", sub:"Workflow gap" },
+    { id:"competitor_support", icon:"ti-headset", label:"Adoption or help is the issue", sub:"Service / rollout" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Worth comparing with Homebase", sub:"Specialist call" },
+    { id:"not_interested", icon:"ti-x", label:"It's manageable", sub:"Backs off" }
+  ],
+  innflow_property_covered: [
+    { id:"not_interested", icon:"ti-x", label:"We're happy with it", sub:"Satisfied today" },
+    { id:"locked_contract", icon:"ti-lock", label:"We're locked in anyway", sub:"Contract timing" },
+    { id:"wants_info", icon:"ti-file-text", label:"Send info for later", sub:"Nurture path" },
+    { id:"decision_maker_no", icon:"ti-user-question", label:"Someone else reviews tools", sub:"Wrong contact" }
   ],
   innflow_scope_whole_platform: [
     { id:"innflow_usage_property_team", icon:"ti-users", label:"Property team uses it day to day", sub:"GM / staff workflow" },
@@ -1967,6 +1994,10 @@ const SQL_SIGNAL_MAP = {
   innflow_scope_accounting:{key:"solution",val:"Inn-Flow: accounting / owner reporting"},
   innflow_scope_labor:{key:"solution",val:"Inn-Flow: labor scheduling / time"},
   innflow_scope_payroll:{key:"solution",val:"Inn-Flow: payroll included"},
+  innflow_outside_hiring:{key:"solution",val:"Inn-Flow: hiring / onboarding separate"},
+  innflow_outside_comms:{key:"solution",val:"Inn-Flow: team communication separate"},
+  innflow_outside_manager_work:{key:"solution",val:"Inn-Flow: manual manager side work remains"},
+  innflow_property_covered:{key:"solution",val:"Inn-Flow covers property workflow"},
   innflow_scope_whole_platform:{key:"solution",val:"Inn-Flow: full back-office suite"},
   innflow_usage_property_team:{key:"solution",val:"Inn-Flow used day-to-day by property team"},
   innflow_usage_back_office:{key:"solution",val:"Inn-Flow mostly ownership/controller workflow"},
@@ -1982,7 +2013,7 @@ const SQL_SIGNAL_MAP = {
 };
 
 const FINAL_QUESTION_GUIDANCE = {
-  opening: "End by asking permission for the 30-second version after naming the reason for the call.",
+  opening: "End by asking permission for the 30-second version after naming the reason for the call. The only natural answers are yes, what is this, busy, send info, not interested, already covered, wrong person, or take a message.",
   interested: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
   give_more: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
   too_busy: "End by asking what they want next: a specific callback time, a short email, a 30-second explanation now, or no more calls.",
@@ -1997,7 +2028,11 @@ const FINAL_QUESTION_GUIDANCE = {
   competitor_switching: "End by asking whether they want migration info, a specialist to map it, renewal timing, or whether switching is not worth it.",
   innflow_scope_accounting: "End by asking what handles the staff workflow today: separate tools, manual work, Inn-Flow labor too, or another person owns it.",
   innflow_scope_labor: "End by asking whether payroll is separate, payroll is also in Inn-Flow, there are gaps, or it works fine.",
-  innflow_scope_payroll: "End by asking whether anything still sits outside Inn-Flow, whether cost/setup is heavy, whether support is an issue, or whether it works fine.",
+  innflow_scope_payroll: "End by asking what, if anything, sits outside Inn-Flow for the property team: hiring/onboarding, team communication, manager side work, nothing, or not sure.",
+  innflow_outside_hiring: "End by asking whether hiring/onboarding is the main gap, the workflow gap is broader, comparing is worthwhile, or it is not a priority.",
+  innflow_outside_comms: "End by asking whether communication is the main gap, there are other gaps too, comparing is worthwhile, or it is not a priority.",
+  innflow_outside_manager_work: "End by asking whether manual work is the issue, adoption/support is the issue, comparing is worthwhile, or it is manageable.",
+  innflow_property_covered: "End by asking whether they are happy, locked in, want info for later, or someone else reviews tools.",
   innflow_scope_whole_platform: "End by asking who actually uses Inn-Flow day to day: property team, ownership/controller, both, or not sure.",
   innflow_usage_property_team: "End by asking whether it works fine, there are workflow gaps, adoption/support is heavy, or comparing the team workflow is worthwhile.",
   innflow_usage_back_office: "End by asking what handles the staff side: separate tools, manual workflow, a known gap, or someone else owns it.",
@@ -2124,7 +2159,7 @@ function buildNextPrompt(responseId, responseLabel) {
 
   const map = {
     opening:`The owner just picked up after a gatekeeper transfer. Use a fresh, direct opener: name, company, one credibility point, clear reason for calling, then ask for 30 seconds. Do not mention the gatekeeper unless it helps the line feel natural.`,
-    interested:`Prospect said "tell me more." One-line all-in-one pitch (${pitchScope}), then ONE broad discovery question about ${discoveryScope}. Don't list features, don't lead with payroll, let them name their current stack or point to the pain. ${hint}`,
+    interested:`Prospect gave permission for the short version or asked what it does. One-line all-in-one pitch (${pitchScope}), then ONE broad discovery question about ${discoveryScope}. Don't list features, don't lead with payroll, let them name their current stack or point to the pain. ${hint}`,
     give_more:`Prospect is open. Two-sentence pitch: ${pitchScope}, built for businesses like ${brand}. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team today, including whether they use ${stackDiscoveryExamples}. ${hint}`,
     too_busy:`Prospect is busy. Respect their time completely. Do NOT dig into pain. Acknowledge it warmly, then ask for a specific better time to call back ("Totally get it, when's a better time to catch you, later today or tomorrow morning?"). Try to lock a day and time and get a direct number or email so you can follow up. ${hint}`,
     not_interested:`Pattern interrupt: "Totally fair, before I let you go, can I ask one quick thing?" then surface one relatable pain for a ${industry} owner running an hourly team at ${brand}. Under 3 sentences.`,
@@ -2138,7 +2173,11 @@ function buildNextPrompt(responseId, responseLabel) {
     competitor_switching:`Switching pain objection. Be honest: switching always takes some work, but a specialist can map what imports, what is manual, and what timing makes sense. Do not overpromise direct deposit or SSN imports. Ask whether they want migration info, a specialist mapping call, renewal timing, or if it is not worth switching. ${hint}`,
     innflow_scope_accounting:`They clarified Inn-Flow is mainly accounting and owner reporting. Do NOT imply there is a problem with Inn-Flow. Respect the finance lane, then ask ONE neutral question: what handles employee schedules, time clocks, payroll, hiring, and team communication today? ${hint}`,
     innflow_scope_labor:`They clarified Inn-Flow handles labor scheduling and time. Do NOT assume pain. Ask ONE neutral follow-up: whether payroll and hiring live there too, or whether those are separate. ${hint}`,
-    innflow_scope_payroll:`They clarified Inn-Flow includes payroll. Do NOT assume pain. Acknowledge that it sounds fairly complete, then ask ONE soft comparison question about whether anything still sits outside it for the property team, like hiring, team communication, or manager adoption. ${hint}`,
+    innflow_scope_payroll:`They clarified Inn-Flow includes payroll. Do NOT assume pain. Acknowledge that it sounds fairly complete, then ask ONE scope question only: what, if anything, still sits outside Inn-Flow for the property team, such as hiring/onboarding, team communication, manager side work, nothing, or not sure. Do not ask about cost or support yet. ${hint}`,
+    innflow_outside_hiring:`They said hiring or onboarding is outside Inn-Flow. Acknowledge the scope gap without attacking Inn-Flow. Ask ONE question about whether hiring is the main gap or whether the property workflow gap is broader. ${hint}`,
+    innflow_outside_comms:`They said team communication is outside Inn-Flow. Acknowledge the scope gap without attacking Inn-Flow. Ask ONE question about whether communication is the main gap or whether there are other property workflow gaps too. ${hint}`,
+    innflow_outside_manager_work:`They said managers still do side work outside Inn-Flow. Ask ONE question to clarify whether the issue is manual workflow, adoption/support, or whether it is manageable. ${hint}`,
+    innflow_property_covered:`They said the property workflow is covered. Respect that fully. Do not dig for pain. Ask ONE low-pressure next step question: are they happy as-is, locked in, should you send info for later, or does someone else review tools. ${hint}`,
     innflow_scope_whole_platform:`They said Inn-Flow handles the whole back-office suite. Respect that. Ask ONE usage question only: who actually uses it day to day, the property team, ownership/controller, both, or they are not sure. Do not ask about pain yet. ${hint}`,
     innflow_usage_property_team:`They said the property team uses Inn-Flow day to day. Now it is okay to test fit gently. Ask ONE question about whether it is working well enough for the team, whether any workflow sits outside it, or whether adoption/support is heavy. ${hint}`,
     innflow_usage_back_office:`They said Inn-Flow is mostly ownership/controller/back-office workflow. Respect that. Ask ONE neutral question about what handles staff scheduling, time clocks, payroll, hiring, and team communication today. ${hint}`,
@@ -2250,8 +2289,8 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
 
   const lines = {
     interested: hospitality
-      ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
-      : `${lead}great question. Homebase helps ${industryLabel} owners run ${peopleWorkflow} in one place, and ${proofRef} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
+      ? `${lead}absolutely. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
+      : `${lead}absolutely. Homebase helps ${industryLabel} owners run ${peopleWorkflow} in one place, and ${proofRef} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
     give_more: hospitality
       ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
       : `${lead}totally. The simplest way to think about Homebase is one app for the hourly team, from schedules and clock-ins through payroll, hiring, and team communication, so managers are not piecing five tools together. ${currentStackQuestion}\n${baseTip}`,
@@ -2268,7 +2307,11 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     competitor_switching: `${lead}that is a fair concern, switching always takes some planning. The useful next step is mapping what imports, what is manual, and what timing makes sense. Would you rather I send migration info first, or map it with a specialist?\n[Coaching tip: Reduce switching anxiety with a concrete migration map.]`,
     innflow_scope_accounting: `${lead}got it, so Inn-Flow is more in the finance and reporting lane. What handles the staff side today: schedules, time clocks, payroll, hiring, and team communication?\n[Coaching tip: Respect Inn-Flow's finance role before you look for the people-ops workflow.]`,
     innflow_scope_labor: `${lead}got it, so labor and time are in there too. Does payroll and hiring live in Inn-Flow as well, or are those handled somewhere else?\n[Coaching tip: Keep this neutral; you are mapping the workflow, not assuming pain.]`,
-    innflow_scope_payroll: `${lead}that sounds fairly complete. Is everything the property team needs in that workflow too, like hiring, team communication, and manager adoption, or are any pieces still separate?\n[Coaching tip: If they say it is fully covered, respect it; if they name a gap, then go deeper.]`,
+    innflow_scope_payroll: `${lead}that sounds fairly complete. What, if anything, still sits outside Inn-Flow for the property team: hiring and onboarding, team communication, manager side work, nothing, or are you not sure?\n[Coaching tip: Keep this as a scope question before diagnosing fit.]`,
+    innflow_outside_hiring: `${lead}got it, so hiring or onboarding is separate. Is that the main workflow you would want cleaner, or is the gap broader than hiring?\n[Coaching tip: Now that they named a specific outside workflow, clarify impact before positioning Homebase.]`,
+    innflow_outside_comms: `${lead}got it, so team communication is separate. Is communication the main gap, or are there other parts of the property workflow still outside Inn-Flow too?\n[Coaching tip: Stay in the workflow they named before widening the conversation.]`,
+    innflow_outside_manager_work: `${lead}got it, so managers still have side work around it. Is that mostly manual work, adoption and support, or is it manageable enough today?\n[Coaching tip: Separate workflow pain from rollout/support pain.]`,
+    innflow_property_covered: `${lead}that makes sense, sounds like you have a pretty complete setup. Are you happy with it as-is, locked in for now, or should I send a short note in case you ever compare options later?\n[Coaching tip: Respect a covered workflow; do not force pain where they have not given you any.]`,
     innflow_scope_whole_platform: `${lead}makes sense. Who actually uses Inn-Flow day to day: the property team, ownership and controller, both, or are you not sure?\n[Coaching tip: Keep this as a usage question before diagnosing pain.]`,
     innflow_usage_property_team: `${lead}got it, so the property team is in it day to day. Is it working well enough for them, or are there still pieces outside it like hiring, team communication, or manager adoption?\n[Coaching tip: Now that you know who uses it, gently test fit without assuming pain.]`,
     innflow_usage_back_office: `${lead}got it, so Inn-Flow is more of the ownership and controller workflow. What handles the staff side today: schedules, time clocks, payroll, hiring, and team communication?\n[Coaching tip: Respect the back-office lane, then map the property team's people workflow.]`,
@@ -2350,7 +2393,6 @@ function fmtScript(text) {
 // info (pain_payroll, employee-count answers, budget_*, etc.) are intentionally NOT here,
 // they confirm as done.
 const PHASE_ASKS = {
-  opening:        [{ key:"pain", val:"asked, awaiting answer" }],
   interested:     [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
   give_more:      [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
   who_are_you:    [{ key:"solution", val:"asked current stack" }, { key:"pain", val:"asked, awaiting answer" }],
@@ -2364,7 +2406,11 @@ const PHASE_ASKS = {
   competitor_switching: [{ key:"timeline", val:"asked migration timing" }],
   innflow_scope_accounting: [{ key:"solution", val:"asked staff workflow outside Inn-Flow" }],
   innflow_scope_labor: [{ key:"solution", val:"asked payroll / hiring ownership" }],
-  innflow_scope_payroll: [{ key:"solution", val:"asked remaining workflow coverage" }],
+  innflow_scope_payroll: [{ key:"solution", val:"asked remaining property workflow scope" }],
+  innflow_outside_hiring: [{ key:"pain", val:"asked hiring gap impact" }],
+  innflow_outside_comms: [{ key:"pain", val:"asked communication gap impact" }],
+  innflow_outside_manager_work: [{ key:"pain", val:"asked manual manager work impact" }],
+  innflow_property_covered: [{ key:"timeline", val:"asked future comparison path" }],
   innflow_scope_whole_platform: [{ key:"solution", val:"asked Inn-Flow user type" }],
   innflow_usage_property_team: [{ key:"solution", val:"asked Inn-Flow team fit" }],
   innflow_usage_back_office: [{ key:"solution", val:"asked staff workflow outside Inn-Flow" }],

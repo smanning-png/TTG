@@ -107,6 +107,17 @@ for (const [brand, industry] of [["Ace Hardware", "Retail"], ["Subway #441", "Fo
     }
   }
 }
+const openingOptionIds = new Set(readContext('getResponseOptions("opening")').map(option => option.id));
+for (const simpleId of ["interested", "who_are_you", "too_busy", "callback_no", "not_interested", "happy_with_current", "decision_maker_no"]) {
+  if (!openingOptionIds.has(simpleId)) {
+    throw new Error(`Opening permission response options are missing ${simpleId}.`);
+  }
+}
+for (const prematurePainId of ["pain_payroll", "pain_scheduling", "pain_hiring", "pain_comms", "pain_compliance"]) {
+  if (openingOptionIds.has(prematurePainId)) {
+    throw new Error("Opening permission question should not show pain options before the prospect hears the short version.");
+  }
+}
 
 const aceBrandProof = sandbox.buildOpeningInstant({
   brand: "Ace Hardware",
@@ -310,6 +321,21 @@ for (const painId of ["competitor_cost", "competitor_support", "competitor_gap",
 const innFlowFallback = sandbox.buildFallbackTalkTrack("competitor_innflow", "Inn-Flow handles hotel back office");
 if (!/What parts of the business does Inn-Flow handle/i.test(innFlowFallback) || /Cost or add-ons/i.test(innFlowFallback)) {
   throw new Error("Inn-Flow fallback should ask scope before pain.");
+}
+const innFlowPayrollIds = new Set(readContext('getResponseOptions("innflow_scope_payroll")').map(option => option.id));
+for (const scopeId of ["innflow_outside_hiring", "innflow_outside_comms", "innflow_outside_manager_work", "innflow_property_covered", "innflow_scope_unsure"]) {
+  if (!innFlowPayrollIds.has(scopeId)) {
+    throw new Error(`Inn-Flow payroll-included scope options are missing ${scopeId}.`);
+  }
+}
+for (const prematurePainId of ["competitor_gap", "competitor_cost", "competitor_support", "want_demo"]) {
+  if (innFlowPayrollIds.has(prematurePainId)) {
+    throw new Error("Inn-Flow payroll-included scope question should not show cost/support/demo options before the remaining scope is known.");
+  }
+}
+const innFlowPayrollFallback = sandbox.buildFallbackTalkTrack("innflow_scope_payroll", "Payroll is in Inn-Flow too");
+if (!/what, if anything, still sits outside Inn-Flow/i.test(innFlowPayrollFallback) || /expensive|support|setup is heavy/i.test(innFlowPayrollFallback)) {
+  throw new Error("Inn-Flow payroll-included fallback should ask remaining scope before pain.");
 }
 const innFlowFullSuiteIds = new Set(readContext('getResponseOptions("innflow_scope_whole_platform")').map(option => option.id));
 for (const neutralId of ["innflow_usage_property_team", "innflow_usage_back_office", "innflow_usage_both", "innflow_scope_unsure"]) {
