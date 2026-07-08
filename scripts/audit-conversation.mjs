@@ -125,6 +125,22 @@ if (!holidayProofLine.includes("over 100 Holiday Inn locations") || holidayProof
   throw new Error("Brand-level social proof should use rounded count wording for Holiday Inn.");
 }
 
+for (const randomValue of [0.05, 0.45, 0.85]) {
+  sandbox.Math.random = () => randomValue;
+  const holidayOpening = sandbox.buildOpeningInstant({
+    brand: "holiday inn",
+    industry: "Lodging & Leisure",
+    lead_name: "Sam",
+    num_locs: "1",
+    prospect_role: "owner",
+    known_pain: ""
+  });
+  const spoken = holidayOpening.replace(/\[[^\]]*\]/g, "");
+  if (/reason I(?:'|’)m calling is we help hourly teams/i.test(spoken) || /keep scheduling, time tracking, payroll, and hiring in one app at holiday inn/i.test(spoken)) {
+    throw new Error("Holiday Inn opener should not pitch the feature stack before asking for the 30-second window.");
+  }
+}
+
 const toastPrompt = sandbox.buildNextPrompt("competitor_toast", "We use Toast");
 if (!toastPrompt.includes("Toast") || !toastPrompt.includes("Homebase") || !toastPrompt.includes("cost")) {
   throw new Error("Toast competitor prompt did not include expected competitor guidance.");

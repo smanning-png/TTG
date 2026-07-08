@@ -1229,24 +1229,21 @@ function buildOpeningInstant(info) {
 
   // Research-backed structure:
   // 1) State name/company quickly.
-  // 2) Give a clear reason for the call early.
+  // 2) Use peer or brand-level social proof when available.
   // 3) Respect the interruption with a small, specific 30-second ask.
-  // 4) Use peer or brand-level social proof when available.
+  // 4) Save the feature pitch for after they grant the 30-second window.
   // 5) Never open with "bad time"; it invites the fastest exit.
   const peerContext = peer2 ? `${peer} and ${peer2}` : peer;
   // Use the lead's first name if the SDR entered it, otherwise a clear placeholder.
   const name = (info.lead_name && info.lead_name.trim()) ? info.lead_name.trim() : "[First Name]";
   const proofLine = brandSocialProofLine(brand) || `We work with a lot of ${industry} teams, including ${peerContext}.`;
-  const painContext = known_pain
-    ? `I saw ${known_pain.toLowerCase()} may already be on your radar.`
-    : `We usually help when schedules, time cards, payroll, hiring, or team messages start taking too much of the week.`;
-  const locationContext = num_locs && parseInt(num_locs, 10) >= 2
-    ? ` across your ${brandLocations(brand, num_locs)}`
-    : ` at ${brand}`;
+  const knownPainContext = known_pain
+    ? `I saw ${known_pain.toLowerCase()} may already be on your radar. `
+    : "";
   const variants = [
-    `Hey ${name}, it's [Your Name] with Homebase. ${proofLine} The reason I'm calling is we help hourly teams keep scheduling, time tracking, payroll, and hiring in one app${locationContext}. Can I give you the 30-second version?`,
-    `Hey ${name}, [Your Name] with Homebase. I know I'm an interruption, so I'll keep it tight. ${proofLine} ${painContext} Can I take 30 seconds to explain why we reached out?`,
-    `Hey ${name}, how've you been?\n\n[⏸ Pause, let them answer]\n\nIt's [Your Name] with Homebase. ${proofLine} The quick reason for the call is that owners tell us the weekly team admin pileup gets old fast. Is it fair if I give you the short version?`
+    `Hey ${name}, it's [Your Name] with Homebase. ${proofLine} Can I give you the 30-second version?`,
+    `Hey ${name}, [Your Name] with Homebase. I know I'm an interruption, so I'll keep it tight. ${proofLine} ${knownPainContext}Can I take 30 seconds to explain why we reached out?`,
+    `Hey ${name}, how've you been?\n\n[⏸ Pause, let them answer]\n\nIt's [Your Name] with Homebase. ${proofLine} Is it fair if I give you the short version?`
   ];
   const selected = variants[Math.floor(Math.random() * variants.length)];
 
@@ -1255,7 +1252,7 @@ function buildOpeningInstant(info) {
     tip = `Coaching tip: Give the gatekeeper a clear reason and one simple ask, then stop talking.`;
   } else {
     script = selected;
-    tip = `Coaching tip: Name the reason early, ask for a small 30-second window, and let their answer point you toward pain, timing, or the right contact.`;
+    tip = `Coaching tip: Lead with proof, ask for a small 30-second window, then let their answer point you toward pain, timing, or the right contact.`;
   }
   return `${script}\n\n[${tip}]`;
 }
