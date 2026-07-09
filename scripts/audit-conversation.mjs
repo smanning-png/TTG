@@ -308,6 +308,40 @@ if (!/tomorrow at 10am/i.test(demoFallback) || !/following day at 2pm/i.test(dem
 if (resp.want_demo.some(option => ["wants_info", "price_question"].includes(option.id))) {
   throw new Error("Demo-interest response options should move toward scheduling, not info or pricing gates.");
 }
+const meetingContactIds = {
+  willing: resp.willing_to_meet.map(option => option.id),
+  emailConfirmed: resp.email_confirmed.map(option => option.id),
+  phoneConfirmed: resp.phone_confirmed.map(option => option.id)
+};
+if (meetingContactIds.willing.includes("gives_phone") || !meetingContactIds.willing.includes("gives_email")) {
+  throw new Error("After time is confirmed, the close should ask for invite email first, not phone-or-email.");
+}
+if (!meetingContactIds.emailConfirmed.includes("gives_phone")) {
+  throw new Error("After email is confirmed, the close should ask for direct phone.");
+}
+if (meetingContactIds.phoneConfirmed.length !== 0) {
+  throw new Error("Only phone confirmation after email should be the terminal booked state.");
+}
+const willingPrompt = sandbox.buildNextPrompt("willing_to_meet", "Tomorrow at 10am works");
+const willingFallback = sandbox.buildFallbackTalkTrack("willing_to_meet", "Tomorrow at 10am works");
+const emailConfirmedPrompt = sandbox.buildNextPrompt("email_confirmed", "Yep, that's right");
+const emailConfirmedFallback = sandbox.buildFallbackTalkTrack("email_confirmed", "Yep, that's right");
+const phoneConfirmedFallback = sandbox.buildFallbackTalkTrack("phone_confirmed", "Yep, that's the number");
+if (!/best email/i.test(willingPrompt) || !/best email/i.test(willingFallback) || /email or direct number/i.test(willingFallback)) {
+  throw new Error("Time-confirmed script should ask for the calendar invite email first.");
+}
+if (!/direct phone/i.test(emailConfirmedPrompt) || !/best direct number/i.test(emailConfirmedFallback)) {
+  throw new Error("Email-confirmed script should ask for the direct phone next.");
+}
+if (!/confirmed email/i.test(phoneConfirmedFallback) || !/specialist/i.test(phoneConfirmedFallback)) {
+  throw new Error("Final booked close should mention the confirmed email and product specialist.");
+}
+if (!/phone_confirmed/.test(sandbox.endSummary.toString()) || /email_confirmed[\s\S]*realMeeting/.test(sandbox.endSummary.toString())) {
+  throw new Error("AE handoff should only be considered a real meeting after phone confirmation.");
+}
+if (!/phone_confirmed[\s\S]*markSql\("contact","Best email and direct phone confirmed", true\)/.test(sandbox.handleResponse.toString())) {
+  throw new Error("Phone confirmation should mark email and phone contact info as confirmed.");
+}
 
 const broadStackPhases = ["interested", "give_more", "who_are_you", "after_pitch_yes", "owner_one_location", "locs_two_three", "locs_four_nine", "locs_ten_plus", "locs_unsure"];
 const requiredStackOptions = [

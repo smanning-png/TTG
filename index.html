@@ -1595,8 +1595,9 @@ function phaseLabel(p) {
     timeline_now:"Timeline · immediate", timeline_soon:"Timeline · 1-3mo", timeline_later:"Timeline · later",
     budget_yes:"Budget confirmed", budget_maybe:"Budget likely", budget_no:"No budget",
     wants_info:"Wants info first", willing_to_meet:"Time confirmed",
-    gives_email:"Confirming email", gives_phone:"Confirming number",
-    email_confirmed:"Booked · locked in", email_correction:"Correcting contact",
+    gives_email:"Confirming email", gives_phone:"Confirming phone",
+    email_confirmed:"Email confirmed", email_correction:"Correcting email",
+    phone_confirmed:"Booked · locked in", phone_correction:"Correcting phone",
     competitor_cost:"Objection · competitor cost", competitor_support:"Objection · competitor support",
     competitor_gap:"Objection · competitor gap", competitor_switching:"Objection · switching pain",
     locked_contract:"Objection · contract lock",
@@ -1979,22 +1980,27 @@ const RESP = {
     { id:"willing_to_meet", icon:"ti-calendar-event", label:"Tomorrow at 10am works", sub:"Time confirmed" },
     { id:"willing_to_meet", icon:"ti-calendar-event", label:"Following day at 2pm works", sub:"Time confirmed" },
     { id:"willing_to_meet", icon:"ti-calendar-plus", label:"I can do another time", sub:"Alternate time" },
-    { id:"gives_email", icon:"ti-mail", label:"Gives you their email", sub:"Reads it back to confirm" },
   ],
   willing_to_meet: [
-    { id:"gives_email", icon:"ti-mail", label:"Gives you their email", sub:"Reads it back to confirm" },
-    { id:"gives_phone", icon:"ti-phone", label:"Gives a direct number", sub:"Reads it back to confirm" }
+    { id:"gives_email", icon:"ti-mail", label:"Gives you their email", sub:"Reads it back to confirm" }
   ],
   gives_email: [
-    { id:"email_confirmed", icon:"ti-circle-check", label:"Yep, that's right", sub:"Email confirmed, lock it" },
+    { id:"email_confirmed", icon:"ti-circle-check", label:"Yep, that's right", sub:"Now get phone" },
     { id:"email_correction", icon:"ti-edit", label:"No, it's actually...", sub:"Correct and re-confirm" }
   ],
   gives_phone: [
-    { id:"email_confirmed", icon:"ti-circle-check", label:"Yep, that's the number", sub:"Confirmed, lock it" }
+    { id:"phone_confirmed", icon:"ti-circle-check", label:"Yep, that's the number", sub:"Confirmed, lock it" },
+    { id:"phone_correction", icon:"ti-edit", label:"No, it's actually...", sub:"Correct and re-confirm" }
   ],
-  email_confirmed: [],
+  email_confirmed: [
+    { id:"gives_phone", icon:"ti-phone", label:"Gives a direct number", sub:"Reads it back to confirm" }
+  ],
   email_correction: [
-    { id:"email_confirmed", icon:"ti-circle-check", label:"Yep, that's it now", sub:"Confirmed, lock it" }
+    { id:"email_confirmed", icon:"ti-circle-check", label:"Yep, that's it now", sub:"Now get phone" }
+  ],
+  phone_confirmed: [],
+  phone_correction: [
+    { id:"phone_confirmed", icon:"ti-circle-check", label:"Yep, that's it now", sub:"Confirmed, lock it" }
   ],
   not_now: [
     { id:"timeline_now", icon:"ti-calendar-bolt", label:"Honestly, in a few days or next week", sub:"Near-immediate" },
@@ -2298,10 +2304,12 @@ const FINAL_QUESTION_GUIDANCE = {
   want_demo: "End by asking them to pick between two specific times for a 30-minute call with a product specialist, such as tomorrow at 10am or the following day at 2pm. Keep the close focused on scheduling unless the prospect raises a new objection.",
   price_question: "End by asking how many people would use it, with small, medium, large, or price-only as natural replies.",
   book_meeting: "End by asking them to pick between two specific times for a product specialist call or offer another time that works for them.",
-  willing_to_meet: "End by asking for the best email or direct phone number for the invite.",
+  willing_to_meet: "End by asking for the best email to send the calendar invite. Do not ask for phone in the same question; phone comes after email is confirmed.",
   gives_email: "End by reading the email back and asking if it is correct.",
+  email_confirmed: "End by asking for the best direct phone number in case the product specialist needs to reach them before the call.",
   gives_phone: "End by reading the phone number back and asking if it is correct.",
-  email_correction: "End by reading the corrected contact back and asking if it is right now.",
+  email_correction: "End by reading the corrected email back and asking if it is right now.",
+  phone_correction: "End by reading the corrected phone number back and asking if it is right now.",
   not_now: "End by asking when timing is better: soon, next month or two, end of year, or not a priority.",
   callback_no: "End by asking whether they will review an email later or whether they do not want the follow-up.",
   softens: "End by asking whether they want the quick explanation now or truly need to jump.",
@@ -2505,11 +2513,13 @@ function buildNextPrompt(responseId, responseLabel) {
     budget_maybe:`Budget likely. Frame it low-commitment: a product specialist call to see if it's even a fit. Offer a time.`,
     budget_no:`No budget now. Graceful: offer a one-pager, pin a follow-up a couple months out, get email and read it back.`,
     wants_info:`Wants info first. Mention you can send a one-pager on how ${credibilityPoint}, then ask whether they want a follow-up next week after the email or whether this is not a fit. ${hint}`,
-    willing_to_meet:`Time confirmed, great! Now ask for the best email to send the calendar invite. End with the question asking for their email.`,
+    willing_to_meet:`Time confirmed, great! Now ask for the best email to send the calendar invite. Ask for email only; do not ask for phone in the same line because you will collect phone after the email is confirmed.`,
     gives_email:`Prospect just gave their email. READ IT BACK letter by letter to confirm you got it right ("Perfect, so that's j-o-e-s-m-i-t-h at gmail dot com, did I get that right?"). End on that confirmation question.`,
-    gives_phone:`Prospect gave a direct number. READ IT BACK to confirm ("Got it, so that's 5-5-5, 1-2-3, 4-5-6-7, right?"). End on that confirmation question.`,
-    email_confirmed:`Email/number confirmed. Warmly lock everything in: restate the day and time, say the invite is on its way, and that the specialist will walk through the exact ${brand} setup. Friendly one-line sign-off. No question needed.`,
-    email_correction:`Prospect corrected their contact info. Read the corrected version back once more and ask if it is right now.`
+    email_confirmed:`Email confirmed. Now collect the second required contact field: ask for the best direct phone number in case the product specialist needs to reach them before the call. Do not say the meeting is fully locked yet.`,
+    gives_phone:`Prospect gave a direct number after email was captured. READ IT BACK to confirm ("Got it, so that's 5-5-5, 1-2-3, 4-5-6-7, right?"). End on that confirmation question.`,
+    phone_confirmed:`Email and phone are now confirmed. Warmly lock everything in: restate the day and time, say the invite is on its way to the confirmed email, and that the specialist will walk through the exact ${brand} setup. Friendly one-line sign-off. No question needed.`,
+    email_correction:`Prospect corrected their email. Read the corrected email back once more and ask if it is right now.`,
+    phone_correction:`Prospect corrected their phone number. Read the corrected number back once more and ask if it is right now.`
   };
   const instruction = selectedCompetitor
     ? competitorPromptInstruction(selectedCompetitor, hint)
@@ -2658,15 +2668,17 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     budget_maybe: `${lead}that is enough to take a quick look without overcommitting. Would a product specialist call be worth putting on the calendar?\n[Coaching tip: Lower the ask when budget is not firm.]`,
     budget_no: `${lead}understood, timing and budget have to line up. Should I follow up when budget opens later, or is this not going to happen?\n[Coaching tip: Separate future nurture from a real no.]`,
     pain_compliance: `${lead}that is worth taking seriously. Has compliance created fines or rework, would you want to see how Homebase helps, or is it something to revisit later?\n[Coaching tip: Compliance pain should become either real cost, a demo path, or timing.]`,
-    willing_to_meet: `${lead}perfect, I will send the invite. What is the best email or direct number to use?\n[Coaching tip: Once time is agreed, capture contact info and read it back.]`,
+    willing_to_meet: `${lead}perfect, I will send the invite. What is the best email to send the calendar invite to?\n[Coaching tip: Get the invite email first, then confirm the direct phone number.]`,
     curious_why: `${lead}got it, so you have a process that mostly works. Is payroll taking time but manageable, is it honestly painful, or do you really not need anything here?\n[Coaching tip: Let them tell you whether manual work is tolerable or painful.]`,
     multi_loc_pain: `${lead}with multiple locations, it usually comes down to total staff, payroll complexity, or visibility across properties. Which is the bigger issue: total headcount, payroll, or seeing it across locations?\n[Coaching tip: Multi-location pain needs a specific anchor.]`,
     value_first: `${lead}fair, price only matters if the value is there. Is the main friction payroll, scheduling, hiring and turnover, or would you rather see the whole flow first?\n[Coaching tip: Re-anchor price pressure to the workflow they care about.]`,
     wants_info: `${lead}happy to send something over. I will keep it short and focused on how ${industry} owners use Homebase for scheduling, time tracking, and payroll. Should I follow up next week after you review it, or is this not a fit?\n[Coaching tip: Do not let an info request become a dead end.]`,
     gives_email: `Perfect, let me read that back to make sure I got it right. That is the email you want the invite sent to, right?\n[Coaching tip: Always confirm contact info out loud before you hang up.]`,
+    email_confirmed: `Perfect. And what is the best direct number in case the product specialist needs to reach you before the call?\n[Coaching tip: Email gets the invite there; phone helps prevent no-shows and bad handoffs.]`,
     gives_phone: `Got it, let me read that back so I do not fat-finger it. That is the best number to reach you at, right?\n[Coaching tip: Confirm the number, then restate the next step.]`,
-    email_confirmed: `Perfect, you are all set. I will send the invite over, and the specialist will walk through the exact ${brand} setup with you. Talk soon.\n[Coaching tip: End cleanly once the meeting and contact info are confirmed.]`,
-    email_correction: `Perfect, thanks for catching that. Let me read the corrected version back once more. Did I get it right now?\n[Coaching tip: Confirm the correction once before you close.]`
+    phone_confirmed: `Perfect, you are all set. I will send the invite to the confirmed email, and the specialist will walk through the exact ${brand} setup with you. Talk soon.\n[Coaching tip: End cleanly once the meeting time, email, and phone are all confirmed.]`,
+    email_correction: `Perfect, thanks for catching that. Let me read the corrected email back once more. Did I get it right now?\n[Coaching tip: Confirm the correction once, then collect the phone number.]`,
+    phone_correction: `Perfect, thanks for catching that. Let me read the corrected number back once more. Did I get it right now?\n[Coaching tip: Confirm the correction once before you close.]`
   };
 
   return lines[responseId] || `${lead}that makes sense. The reason I am asking is that owners like ${peer} usually come to Homebase when running the hourly team starts taking too much time across scheduling, time tracking, payroll, or hiring. What part of that is most painful for ${brand} right now?\n${baseTip}`;
@@ -2761,6 +2773,11 @@ const PHASE_ASKS = {
   value_first:    [{ key:"budget", val:"value/ROI framed" }],
   want_demo:      [{ key:"nextstep", val:"product specialist call time offered" }],
   book_meeting:   [{ key:"nextstep", val:"booking in progress" }],
+  willing_to_meet:[{ key:"contact", val:"asked for calendar invite email" }],
+  gives_email:    [{ key:"contact", val:"confirming email" }],
+  email_confirmed:[{ key:"contact", val:"asked for direct phone" }],
+  gives_phone:    [{ key:"contact", val:"confirming phone" }],
+  phone_correction:[{ key:"contact", val:"confirming corrected phone" }],
   wants_info:     [{ key:"contact", val:"asked for email" }],
   gate_name:      [{ key:"contact", val:"getting owner name" }]
 };
@@ -2777,7 +2794,7 @@ function renderCurrent(scriptText, phase) {
   markAskedForPhase(phase);
   const options = getResponseOptions(phase);
   const end = options.length === 0;
-  const win = phase === "email_confirmed" || phase === "callback_yes" || phase === "willing_to_meet" || phase === "email_correction";
+  const win = phase === "phone_confirmed" || phase === "callback_yes";
   const btns = options.map(o =>
     `<button class="resp" onclick="handleResponse('${o.id}','${o.label.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')">
       <i class="ti ${o.icon}" aria-hidden="true"></i>
@@ -2806,7 +2823,7 @@ function endSummary(phase) {
   const painDone = sqlState.pain.status === "done";
   const contactDone = sqlState.contact.status === "done";
   // A booked product specialist call counts as a real meeting; a bare callback does not.
-  const realMeeting = (phase === "email_confirmed" || phase === "email_correction" || phase === "willing_to_meet");
+  const realMeeting = (phase === "phone_confirmed");
   const onlyCallback = (phase === "callback_yes" || phase === "callback_no");
 
   if (realMeeting && painDone) {
@@ -2929,6 +2946,12 @@ async function handleResponse(responseId, label) {
   if (responseId === "operator_not_owner") markAsked("contact","operator, checking decision authority");
   if (["manager_not_dm","wrong_contact"].includes(responseId)) markAsked("contact","not decision maker");
   if (responseId === "willing_to_meet" || responseId === "callback_yes") markSql("nextstep","Next step confirmed", true);
+  if (responseId === "gives_email") markAsked("contact","email captured, confirming spelling");
+  if (responseId === "email_confirmed") markAsked("contact","email confirmed, phone still needed");
+  if (responseId === "email_correction") markAsked("contact","correcting email");
+  if (responseId === "gives_phone") markAsked("contact","phone captured, confirming number");
+  if (responseId === "phone_correction") markAsked("contact","correcting phone");
+  if (responseId === "phone_confirmed") markSql("contact","Best email and direct phone confirmed", true);
   if (responseId === "curious_why") markSql("solution","Manual / spreadsheets", true);
   if (responseId === "tried_before") markSql("solution","Had prior tool", true);
   // Employee-count answers estimate platform users. Company size is location count only.
