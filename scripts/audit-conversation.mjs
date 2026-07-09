@@ -525,6 +525,30 @@ for (const phase of ["size_small", "size_medium", "size_large", "sched_size_smal
     throw new Error(`${phase} should populate Estimated users, not Company size.`);
   }
 }
+for (const phase of ["size_small", "size_medium", "size_large"]) {
+  const ids = new Set(resp[phase].map(option => option.id));
+  for (const required of ["willing_to_meet", "book_meeting", "not_now"]) {
+    if (!ids.has(required)) {
+      throw new Error(`${phase} should move payroll time pain toward a calendar close.`);
+    }
+  }
+  for (const mismatch of ["pain_scheduling", "pain_payroll", "multi_loc_pain"]) {
+    if (ids.has(mismatch)) {
+      throw new Error(`${phase} should not zoom out to more pain after payroll time is quantified.`);
+    }
+  }
+  const prompt = sandbox.buildNextPrompt(phase, phase === "size_small" ? "Just under 10 employees" : "Around 15-30 employees");
+  const fallback = sandbox.buildFallbackTalkTrack(phase, phase);
+  if (!/5\+ hours a month/i.test(prompt) || !/5\+ hours a month/i.test(fallback)) {
+    throw new Error(`${phase} should use the payroll time-savings proof point.`);
+  }
+  if (!/tomorrow at 10am/i.test(fallback) || !/tomorrow at 3pm/i.test(fallback)) {
+    throw new Error(`${phase} should offer tomorrow at 10am or 3pm.`);
+  }
+  if (/what part of that is most painful|scheduling is|bigger drag is scheduling/i.test(prompt + "\n" + fallback)) {
+    throw new Error(`${phase} should stay in the payroll lane instead of reopening discovery.`);
+  }
+}
 for (const phase of ["owner_one_location", "owner_multi_location", "locs_two_three", "locs_four_nine", "locs_ten_plus", "locs_unsure"]) {
   if (sqlSignalMap[phase]?.key !== "size") {
     throw new Error(`${phase} should populate Company size as location count.`);
