@@ -259,7 +259,7 @@ for (const randomValue of [0.05, 0.45, 0.85]) {
 }
 
 const toastPrompt = sandbox.buildNextPrompt("competitor_toast", "We use Toast");
-if (!toastPrompt.includes("Toast") || !/what does Toast handle/i.test(toastPrompt) || /cost, support, switching, or gaps until/i.test(toastPrompt) === false) {
+if (!toastPrompt.includes("Toast") || !/what parts does Toast cover/i.test(toastPrompt) || /cost, support, switching, or gaps until/i.test(toastPrompt) === false) {
   throw new Error("Toast competitor prompt should ask scope before pain.");
 }
 const toastOptionIds = new Set(readContext('getResponseOptions("competitor_toast")').map(option => option.id));
@@ -285,8 +285,11 @@ for (const competitorId of Object.keys(competitorIntel).filter(id => id !== "com
 }
 
 const competitorFallback = sandbox.buildFallbackTalkTrack("competitor_connecteam", "We use Connecteam");
-if (!competitorFallback.includes("Connecteam") || !/What does Connecteam handle/i.test(competitorFallback) || /owners still compare/i.test(competitorFallback)) {
+if (!competitorFallback.includes("Connecteam") || !/What parts does Connecteam cover/i.test(competitorFallback) || /owners still compare/i.test(competitorFallback)) {
   throw new Error("Connecteam fallback should ask scope before comparison/pain.");
+}
+if (/POS or department tools|finance or reporting/i.test(competitorFallback)) {
+  throw new Error("Generic competitor fallback should keep the scope question short.");
 }
 
 const demoPrompt = sandbox.buildNextPrompt("want_demo", "I'd like to see it");

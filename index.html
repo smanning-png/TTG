@@ -1135,7 +1135,7 @@ function competitorPromptInstruction(competitor, hint) {
   if (competitor.name === "Inn-Flow") {
     return `Prospect says they use Inn-Flow. This only identifies the current system; it does NOT mean they have a problem with it yet. Acknowledge neutrally and ask this exact type of scope question: ${competitor.ask} Do not ask about cost, support, switching, or gaps until they first explain what Inn-Flow handles. ${hint}`;
   }
-  return `Prospect says they use ${competitor.name}. This only identifies the current system; it does NOT mean they have a problem with it yet. Acknowledge neutrally and ask ONE scope question: what does ${competitor.name} handle for them today, such as payroll/HR, scheduling and time, POS or department workflow, finance/reporting, team ops/communication, most of the workflow, or only part of it? Do not ask about cost, support, switching, or gaps until they first explain what ${competitor.name} handles. ${hint}`;
+  return `Prospect says they use ${competitor.name}. This only identifies the current system; it does NOT mean they have a problem with it yet. Acknowledge neutrally and ask ONE short scope question: what parts does ${competitor.name} cover today, such as payroll, scheduling/time, back office, team communication, or most of it? Do not ask about cost, support, switching, or gaps until they first explain what ${competitor.name} handles. ${hint}`;
 }
 
 let sqlState = {};
@@ -1335,7 +1335,7 @@ function buildOpeningInstant(info) {
     },
     {
       mode: "permission",
-      text: `Hey ${name}, [Your Name] with Homebase. I know I'm an interruption, so I'll keep it tight. ${proofLine} ${knownPainContext}Can I take 30 seconds to explain why we reached out?`,
+      text: `Hey ${name}, [Your Name] with Homebase. I know I'm an interruption, so I'll keep it tight. ${proofLine} ${knownPainContext}Can I take 30 seconds to explain why I'm reaching out?`,
       tip: `Coaching tip: Respect the interruption, name the reason, and ask for a small window before pitching.`
     },
     {
@@ -2357,7 +2357,7 @@ function getFinalQuestionGuidance(responseId, options) {
   if (getCompetitorIntel(responseId)) {
     const optionIds = options.map(o => o.id);
     if (optionIds.some(id => id.startsWith("competitor_scope_")) || optionIds.some(id => id.startsWith("innflow_scope_"))) {
-      return "End by asking what the named competitor handles today, so they can answer with neutral scope: payroll/HR, scheduling/time, POS or department tools, finance/reporting, team ops/communication, most of the workflow, or not sure.";
+      return "End by asking what parts the named competitor covers today, so they can answer with neutral scope: payroll, scheduling/time, back office, team communication, most of it, or not sure. Keep the question short.";
     }
     return "End by asking what part of the current setup is worth discussing: cost/add-ons, support, missing workflows, contract timing, switching pain, seeing the difference, or staying put.";
   }
@@ -2556,7 +2556,7 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     if (selectedCompetitor.name === "Inn-Flow") {
       return `${lead}got it, that makes sense. What parts of the business does Inn-Flow handle for you today: accounting and owner reporting, labor scheduling and time, payroll, or the whole back-office suite?\n[Coaching tip: Do not assume pain yet; first separate finance/reporting from the staff workflow.]`;
     }
-    return `${lead}got it, that makes sense. What does ${selectedCompetitor.name} handle for you today: payroll or HR, scheduling and time, POS or department tools, finance or reporting, team communication, or most of the workflow?\n[Coaching tip: Do not assume pain yet; map what the current system covers first.]`;
+    return `${lead}got it, that makes sense. What parts does ${selectedCompetitor.name} cover today: payroll, scheduling and time, back office, team communication, or most of it?\n[Coaching tip: Do not assume pain yet; map what the current system covers first.]`;
   }
 
   const lines = {
