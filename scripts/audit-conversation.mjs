@@ -522,6 +522,11 @@ if (!/building the schedule/i.test(schedulingSizePrompt) || !/callouts/i.test(sc
 if (!resp.sched_size_medium.every(option => option.id.startsWith("schedule_"))) {
   throw new Error("Scheduling size responses should stay in scheduling-specific branches.");
 }
+const schedulingImpactPrompt = sandbox.buildNextPrompt("schedule_impact_hours", "It eats hours every week");
+const schedulingImpactFallback = sandbox.buildFallbackTalkTrack("schedule_impact_hours", "It eats hours every week");
+if (!/50% less time scheduling/i.test(schedulingImpactPrompt) || !/50% less time scheduling/i.test(schedulingImpactFallback)) {
+  throw new Error("Scheduling impact path should use the 50% less time scheduling proof point.");
+}
 
 for (const phase of ["size_small", "size_medium", "size_large", "sched_size_small", "sched_size_medium", "sched_size_large"]) {
   if (sqlSignalMap[phase]?.key !== "impact") {
@@ -542,7 +547,7 @@ for (const phase of ["size_small", "size_medium", "size_large"]) {
   }
   const prompt = sandbox.buildNextPrompt(phase, phase === "size_small" ? "Just under 10 employees" : "Around 15-30 employees");
   const fallback = sandbox.buildFallbackTalkTrack(phase, phase);
-  if (!/5\+ hours a month/i.test(prompt) || !/5\+ hours a month/i.test(fallback)) {
+  if (!/83% saved payroll time/i.test(prompt) || !/83% of customers saved payroll time/i.test(fallback)) {
     throw new Error(`${phase} should use the payroll time-savings proof point.`);
   }
   if (!/tomorrow at 10am/i.test(fallback) || !/tomorrow at 3pm/i.test(fallback)) {
@@ -551,6 +556,14 @@ for (const phase of ["size_small", "size_medium", "size_large"]) {
   if (/what part of that is most painful|scheduling is|bigger drag is scheduling/i.test(prompt + "\n" + fallback)) {
     throw new Error(`${phase} should stay in the payroll lane instead of reopening discovery.`);
   }
+}
+const softensFallback = sandbox.buildFallbackTalkTrack("softens", "Well, what's it about?");
+const callbackNoFallback = sandbox.buildFallbackTalkTrack("callback_no", "Just email me something");
+if (!/82% of customers report less stress/i.test(softensFallback)) {
+  throw new Error("Quick-explanation path should be able to use the less-stress proof point.");
+}
+if (!/four in five customers would recommend/i.test(callbackNoFallback)) {
+  throw new Error("Info-follow-up path should be able to use the recommendation proof point.");
 }
 for (const phase of ["owner_one_location", "owner_multi_location", "locs_two_three", "locs_four_nine", "locs_ten_plus", "locs_unsure"]) {
   if (sqlSignalMap[phase]?.key !== "size") {
