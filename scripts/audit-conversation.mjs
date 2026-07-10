@@ -559,11 +559,41 @@ for (const phase of ["size_small", "size_medium", "size_large"]) {
 }
 const softensFallback = sandbox.buildFallbackTalkTrack("softens", "Well, what's it about?");
 const callbackNoFallback = sandbox.buildFallbackTalkTrack("callback_no", "Just email me something");
+const manualFallback = sandbox.buildFallbackTalkTrack("curious_why", "Manual process works");
+const notInterestedFallback = sandbox.buildFallbackTalkTrack("not_interested", "We're not interested");
+const happyCurrentFallback = sandbox.buildFallbackTalkTrack("happy_with_current", "We already have a system");
+const switchingFallback = sandbox.buildFallbackTalkTrack("competitor_switching", "Switching sounds painful");
+const lockedContractFallback = sandbox.buildFallbackTalkTrack("locked_contract", "We're locked in right now");
+const valueFirstFallback = sandbox.buildFallbackTalkTrack("value_first", "Just tell me the price");
 if (!/82% of customers report less stress/i.test(softensFallback)) {
   throw new Error("Quick-explanation path should be able to use the less-stress proof point.");
 }
 if (!/four in five customers would recommend/i.test(callbackNoFallback)) {
   throw new Error("Info-follow-up path should be able to use the recommendation proof point.");
+}
+if (!/82% of customers report less stress/i.test(manualFallback) || !/82% of customers report less stress/i.test(notInterestedFallback)) {
+  throw new Error("Manual/status-quo objections should use the less-stress customer sentiment.");
+}
+if (!/Four in five customers would recommend/i.test(happyCurrentFallback) || !/four in five customers would recommend/i.test(lockedContractFallback)) {
+  throw new Error("Current-provider and contract objections should use the recommendation sentiment.");
+}
+if (!/82% report less stress/i.test(switchingFallback)) {
+  throw new Error("Switching hesitation should use the less-stress ROI sentiment.");
+}
+if (!/83% saved payroll time/i.test(valueFirstFallback)) {
+  throw new Error("Value-first objection should use a concrete payroll-time ROI proof point.");
+}
+sandbox.Math.random = () => 0.65;
+const roiOpening = sandbox.buildOpeningInstant({
+  brand: "Ace Hardware",
+  industry: "Retail",
+  lead_name: "Maria",
+  num_locs: "1",
+  prospect_role: "owner",
+  known_pain: ""
+});
+if (!/82% report less stress/i.test(roiOpening)) {
+  throw new Error("Opening rotation should include a less-stress ROI proof point.");
 }
 for (const phase of ["owner_one_location", "owner_multi_location", "locs_two_three", "locs_four_nine", "locs_ten_plus", "locs_unsure"]) {
   if (sqlSignalMap[phase]?.key !== "size") {
