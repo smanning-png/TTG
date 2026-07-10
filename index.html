@@ -184,6 +184,64 @@ body.calling .shell { margin-top: 1.25rem; }
 .quickstart .btn-primary { width: auto; padding: 11px 22px; white-space: nowrap; margin-top: 22px; }
 @media (max-width: 620px) { .quickstart { grid-template-columns: 1fr; } .quickstart .btn-primary { width: 100%; } }
 
+.quick-battlecards {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line-soft);
+}
+.quick-battle-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 0.7rem;
+}
+.quick-battle-head .lbl { margin-bottom: 0; }
+.quick-battle-note { font-size: 11.5px; color: var(--ink-faint); font-weight: 600; }
+.battle-tile-grid { display: flex; gap: 7px; flex-wrap: wrap; }
+.battle-tile {
+  appearance: none; border: 1px solid var(--line); background: #fff; color: var(--ink);
+  border-radius: 8px; padding: 7px 9px; min-height: 34px;
+  font-family: inherit; font-size: 12px; font-weight: 800; letter-spacing: -0.01em;
+  display: inline-flex; align-items: center; gap: 6px;
+  cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.12s;
+}
+.battle-tile i { font-size: 14px; color: var(--purple-haze); }
+.battle-tile:hover { background: var(--haze-tint); border-color: rgba(126,61,212,0.45); transform: translateY(-1px); }
+.battle-tile.active { background: var(--deep-purple); color: #fff; border-color: var(--deep-purple); }
+.battle-tile.active i { color: var(--yellowcard); }
+.battle-detail {
+  display: none;
+  margin-top: 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--haze-tint);
+  padding: 1rem;
+}
+.battle-detail.on { display: block; }
+.battle-detail-head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+  margin-bottom: 0.85rem;
+}
+.battle-detail-title { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+.battle-detail-sub { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-top: 2px; line-height: 1.45; }
+.battle-close {
+  border: none; background: #fff; color: var(--purple-haze); border-radius: 8px;
+  width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.battle-close i { font-size: 16px; }
+.battle-detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.battle-detail-section {
+  background: #fff; border: 1px solid var(--line-soft); border-radius: 8px;
+  padding: 0.85rem; min-width: 0;
+}
+.battle-detail-section h3 {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--purple-haze); margin-bottom: 0.45rem;
+}
+.battle-detail-section p,
+.battle-detail-section li { font-size: 12.5px; line-height: 1.5; color: var(--ink-soft); font-weight: 600; }
+.battle-detail-section ul { padding-left: 1rem; display: grid; gap: 0.35rem; }
+@media (max-width: 760px) { .battle-detail-grid { grid-template-columns: 1fr; } }
+
 /* ===== COLLAPSED RECAP BAR (during a live call) ===== */
 .recap {
   display: none; align-items: center; gap: 14px; flex-wrap: wrap;
@@ -450,6 +508,15 @@ body.calling .recap { display: flex; }
       <button class="btn-primary" id="gen-btn" onclick="startCall()">
         <i class="ti ti-player-play" aria-hidden="true"></i>Start call
       </button>
+    </div>
+
+    <div class="quick-battlecards" id="quick-battlecards">
+      <div class="quick-battle-head">
+        <p class="lbl"><i class="ti ti-cards" aria-hidden="true" style="font-size:14px;"></i> Quick competitor battlecards</p>
+        <span class="quick-battle-note">Tap one for discovery questions and where we win</span>
+      </div>
+      <div class="battle-tile-grid" id="battlecard-tiles"></div>
+      <div class="battle-detail" id="battlecard-detail"></div>
     </div>
 
     <hr class="rule" />
@@ -1118,6 +1185,107 @@ const COMPETITOR_INTEL = {
     caution:"SurePayroll can be low-cost. Win on capability and time saved, not price alone."
   }
 };
+
+const QUICK_BATTLECARD_IDS = [
+  "competitor_adp",
+  "competitor_paychex",
+  "competitor_gusto",
+  "competitor_quickbooks",
+  "competitor_square",
+  "competitor_toast",
+  "competitor_hotschedules",
+  "competitor_7shifts",
+  "competitor_connecteam",
+  "competitor_innflow",
+  "competitor_hcm_hotel",
+  "competitor_hotel_ops"
+];
+
+let activeBattlecardId = null;
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function quickBattlecardQuestions(intel) {
+  const name = intel.name || "their current tool";
+  const questions = [intel.ask];
+  if (/ADP|Paychex|Gusto|QuickBooks|Square|Paylocity|Paycor|UKG|SurePayroll/i.test(name)) {
+    questions.push("How are hours getting from schedules or timecards into payroll today?");
+    questions.push("What still takes manager time before payroll can run?");
+  } else if (/Toast|7shifts|HotSchedules|Fourth/i.test(name)) {
+    questions.push("Is that covering the whole team, or mainly one department or workflow?");
+    questions.push("Where do payroll, hiring, or team messages live today?");
+  } else if (/Inn-Flow|Actabl|M3|Quore|hotelkit|ALICE|UniFocus|Harri/i.test(name)) {
+    questions.push("Is the property team using it day to day, or is it mostly back-office?");
+    questions.push("What handles schedules, time clocks, payroll, hiring, and team communication?");
+  } else {
+    questions.push("What still sits outside that tool today?");
+    questions.push("Where does the team still do manual work?");
+  }
+  return questions;
+}
+
+function renderQuickBattlecards() {
+  const tileRoot = document.getElementById("battlecard-tiles");
+  if (!tileRoot) return;
+  tileRoot.innerHTML = QUICK_BATTLECARD_IDS
+    .map(id => {
+      const intel = COMPETITOR_INTEL[id];
+      if (!intel) return "";
+      const active = id === activeBattlecardId ? " active" : "";
+      const expanded = id === activeBattlecardId ? "true" : "false";
+      return `<button type="button" class="battle-tile${active}" onclick="selectQuickBattlecard('${id}')" aria-expanded="${expanded}">
+        <i class="ti ti-tool" aria-hidden="true"></i>${escapeHtml(intel.name)}
+      </button>`;
+    })
+    .join("");
+}
+
+function selectQuickBattlecard(id) {
+  const detail = document.getElementById("battlecard-detail");
+  const intel = COMPETITOR_INTEL[id];
+  if (!detail || !intel) return;
+  activeBattlecardId = activeBattlecardId === id ? null : id;
+  renderQuickBattlecards();
+  if (!activeBattlecardId) {
+    detail.classList.remove("on");
+    detail.innerHTML = "";
+    return;
+  }
+
+  const questions = quickBattlecardQuestions(intel);
+  detail.classList.add("on");
+  detail.innerHTML = `
+    <div class="battle-detail-head">
+      <div>
+        <div class="battle-detail-title">${escapeHtml(intel.name)}</div>
+        <div class="battle-detail-sub">${escapeHtml(intel.wedge)}</div>
+      </div>
+      <button type="button" class="battle-close" onclick="selectQuickBattlecard('${id}')" aria-label="Close ${escapeHtml(intel.name)} battlecard">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="battle-detail-grid">
+      <div class="battle-detail-section">
+        <h3>Ask This</h3>
+        <ul>${questions.map(q => `<li>${escapeHtml(q)}</li>`).join("")}</ul>
+      </div>
+      <div class="battle-detail-section">
+        <h3>Where We Win</h3>
+        <ul>${intel.angles.map(angle => `<li>${escapeHtml(angle)}</li>`).join("")}</ul>
+      </div>
+      <div class="battle-detail-section">
+        <h3>Careful</h3>
+        <p>${escapeHtml(intel.caution)}</p>
+      </div>
+    </div>`;
+}
 
 function getCompetitorIntel(id) {
   return COMPETITOR_INTEL[id] || null;
@@ -3022,6 +3190,7 @@ function resetAll() {
 }
 
 // Run the sign-in gate as soon as the page loads
+renderQuickBattlecards();
 initSdr();
 </script>
 </body>

@@ -63,6 +63,32 @@ if (missingTargets.length || missingGuidance.length) {
   process.exit(1);
 }
 
+const quickBattlecardIds = readContext("QUICK_BATTLECARD_IDS");
+for (const requiredQuickCard of ["competitor_adp", "competitor_paychex", "competitor_gusto", "competitor_toast", "competitor_7shifts", "competitor_connecteam", "competitor_innflow", "competitor_hotel_ops"]) {
+  if (!quickBattlecardIds.includes(requiredQuickCard)) {
+    throw new Error(`Quick battlecard tiles are missing ${requiredQuickCard}.`);
+  }
+}
+for (const id of quickBattlecardIds) {
+  if (!competitorIntel[id]) {
+    throw new Error(`Quick battlecard ${id} has no competitor intel.`);
+  }
+}
+const quickAdpQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_adp)');
+const quickInnFlowQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_innflow)');
+if (!quickAdpQuestions.some(q => /hours getting from schedules or timecards into payroll/i.test(q))) {
+  throw new Error("ADP quick battlecard should include payroll handoff discovery.");
+}
+if (!quickInnFlowQuestions.some(q => /property team using it day to day/i.test(q))) {
+  throw new Error("Inn-Flow quick battlecard should include property-team usage discovery.");
+}
+const quickRenderSource = readContext("selectQuickBattlecard.toString()");
+for (const expectedLabel of ["Ask This", "Where We Win", "Careful"]) {
+  if (!quickRenderSource.includes(expectedLabel)) {
+    throw new Error(`Quick battlecard detail is missing ${expectedLabel}.`);
+  }
+}
+
 readContext(`prospectInfo = {
   brand: "Holiday Inn",
   industry: "Lodging & Leisure",
