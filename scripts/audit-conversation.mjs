@@ -318,6 +318,58 @@ if (/POS or department tools|finance or reporting/i.test(competitorFallback)) {
   throw new Error("Generic competitor fallback should keep the scope question short.");
 }
 
+readContext(`prospectInfo = {
+  brand: "Dairy Queen",
+  industry: "Food & Beverage",
+  lead_name: "Sam",
+  num_locs: "2",
+  prospect_role: "owner",
+  current_solution: "",
+  timeline: "",
+  budget: "",
+  known_pain: ""
+}; sqlState = freshSql(); activeCompetitor = null;`);
+const restaurant7shiftsFallback = sandbox.buildFallbackTalkTrack("competitor_7shifts", "We use 7shifts");
+const restaurant7shiftsPrompt = sandbox.buildNextPrompt("competitor_7shifts", "We use 7shifts");
+if (!/restaurant workflow|tips or POS handoff/i.test(restaurant7shiftsFallback) || /front desk|housekeeping|property workflow|hotel back-office|hotel departments/i.test(restaurant7shiftsFallback)) {
+  throw new Error("Restaurant 7shifts fallback should use restaurant scope, not hotel language.");
+}
+if (!/Food & Beverage brands|tips\/POS handoff|restaurant/i.test(restaurant7shiftsPrompt) || /front desk|housekeeping|PMS|hotel back office/i.test(restaurant7shiftsPrompt)) {
+  throw new Error("Restaurant 7shifts prompt should be explicitly non-hotel.");
+}
+
+readContext(`prospectInfo = {
+  brand: "UPS Store",
+  industry: "Professional Services",
+  lead_name: "Sam",
+  num_locs: "3",
+  prospect_role: "owner",
+  current_solution: "",
+  timeline: "",
+  budget: "",
+  known_pain: ""
+}; sqlState = freshSql(); activeCompetitor = null;`);
+const serviceConnecteamFallback = sandbox.buildFallbackTalkTrack("competitor_connecteam", "We use Connecteam");
+if (!/store workflow|task or shift management|payroll approvals/i.test(serviceConnecteamFallback) || /front desk|housekeeping|property workflow|hotel back-office/i.test(serviceConnecteamFallback)) {
+  throw new Error("Service/retail Connecteam fallback should use store workflow language, not hotel language.");
+}
+
+readContext(`prospectInfo = {
+  brand: "Holiday Inn",
+  industry: "Lodging & Leisure",
+  lead_name: "Sam",
+  num_locs: "2",
+  prospect_role: "owner",
+  current_solution: "",
+  timeline: "",
+  budget: "",
+  known_pain: ""
+}; sqlState = freshSql(); activeCompetitor = null;`);
+const hotelHotSchedulesFallback = sandbox.buildFallbackTalkTrack("competitor_hotschedules", "We use HotSchedules");
+if (!/hotel scheduling|property workflow/i.test(hotelHotSchedulesFallback)) {
+  throw new Error("Hotel HotSchedules fallback should still use hotel/property scope.");
+}
+
 const demoPrompt = sandbox.buildNextPrompt("want_demo", "I'd like to see it");
 const demoFallback = sandbox.buildFallbackTalkTrack("want_demo", "I'd like to see it");
 const weakDemoClose = /(get info first|talk price first|think it over|send the short version|short note first)/i;
@@ -371,6 +423,18 @@ if (!/phone_confirmed/.test(sandbox.endSummary.toString()) || /email_confirmed[\
 if (!/phone_confirmed[\s\S]*markSql\("contact","Best email and direct phone confirmed", true\)/.test(sandbox.handleResponse.toString())) {
   throw new Error("Phone confirmation should mark email and phone contact info as confirmed.");
 }
+
+readContext(`prospectInfo = {
+  brand: "Ace Hardware",
+  industry: "Retail",
+  lead_name: "Maria",
+  num_locs: "3",
+  prospect_role: "owner",
+  current_solution: "",
+  timeline: "",
+  budget: "",
+  known_pain: ""
+}; sqlState = freshSql(); activeCompetitor = null;`);
 
 const broadStackPhases = ["interested", "give_more", "who_are_you", "after_pitch_yes", "owner_one_location", "locs_two_three", "locs_four_nine", "locs_ten_plus", "locs_unsure"];
 const requiredStackOptions = [

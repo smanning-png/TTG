@@ -1307,11 +1307,50 @@ function competitorSummaryList() {
     .join("\n");
 }
 
+function isRestaurantSchedulingCompetitor(competitor) {
+  return !!competitor && /Toast|7shifts|Fourth|HotSchedules/i.test(competitor.name || "");
+}
+
+function isGeneralOpsCompetitor(competitor) {
+  return !!competitor && /Connecteam|When I Work|Deputy|Sling/i.test(competitor.name || "");
+}
+
+function competitorScopeChoices(competitor, info = prospectInfo || {}) {
+  const hospitality = isHospitalityContext(info);
+  const industry = info.industry || "";
+  if (competitor && competitor.name === "Inn-Flow") {
+    return "accounting and owner reporting, labor scheduling and time, payroll, or the whole back-office suite";
+  }
+  if (hospitality) {
+    return "hotel scheduling/time, payroll/HCM, finance or reporting, team communication, department ops, or most of the property workflow";
+  }
+  if (isRestaurantSchedulingCompetitor(competitor) || industry === "Food & Beverage") {
+    return "scheduling and time, tips or POS handoff, payroll, hiring, team communication, or most of the restaurant workflow";
+  }
+  if (industry === "Retail" || industry === "Professional Services" || isGeneralOpsCompetitor(competitor)) {
+    return "scheduling and time, payroll, hiring/onboarding, team communication, task or shift management, or most of the store workflow";
+  }
+  return "payroll, scheduling/time, hiring/onboarding, team communication, task or shift management, or most of the hourly-team workflow";
+}
+
+function competitorScopeCoaching(competitor, info = prospectInfo || {}) {
+  if (isHospitalityContext(info)) {
+    return "Use hotel/property language only because this is a hospitality account.";
+  }
+  if (isRestaurantSchedulingCompetitor(competitor)) {
+    return "For restaurants, keep this around schedules, timecards, tips/POS handoff, payroll, hiring, and manager communication.";
+  }
+  if (isGeneralOpsCompetitor(competitor)) {
+    return "For retail/service teams, keep this around shifts, timecards, payroll approvals, hiring, team messages, and manager follow-up.";
+  }
+  return "Use the prospect's actual industry language and keep the scope question grounded in their day-to-day hourly-team workflow.";
+}
+
 function competitorPromptInstruction(competitor, hint) {
   if (competitor.name === "Inn-Flow") {
     return `Prospect says they use Inn-Flow. This only identifies the current system; it does NOT mean they have a problem with it yet. Acknowledge neutrally and ask this exact type of scope question: ${competitor.ask} Do not ask about cost, support, switching, or gaps until they first explain what Inn-Flow handles. ${hint}`;
   }
-  return `Prospect says they use ${competitor.name}. This only identifies the current system; it does NOT mean they have a problem with it yet. Acknowledge neutrally and ask ONE short scope question: what parts does ${competitor.name} cover today, such as payroll, scheduling/time, back office, team communication, or most of it? Do not ask about cost, support, switching, or gaps until they first explain what ${competitor.name} handles. ${hint}`;
+  return `Prospect says they use ${competitor.name}. This only identifies the current system; it does NOT mean they have a problem with it yet. Acknowledge neutrally and ask ONE short industry-appropriate scope question: what parts does ${competitor.name} cover today, such as ${competitorScopeChoices(competitor)}? ${competitorScopeCoaching(competitor)} Do not ask about cost, support, switching, or gaps until they first explain what ${competitor.name} handles. ${hint}`;
 }
 
 let sqlState = {};
@@ -1591,6 +1630,14 @@ HOTEL / HOSPITALITY MODE (critical for ${info.brand}):
 - If they say scheduling, time, payroll, hiring, employee app, callouts, or team communication, lean in and move toward a product specialist call or workflow comparison.
 - Useful hotel departments to name: front desk, housekeeping, maintenance, breakfast, restaurant/bar if applicable, and admin.
 ` : "";
+  const nonHospitalityCompetitorMode = !hospitality ? `
+NON-HOTEL COMPETITOR MODE (critical for ${info.brand}):
+- This is NOT a hotel account. Do not mention hotels, properties, front desk, housekeeping, PMS, hotel back office, property workflow, or hotel departments.
+- If they name 7shifts, Fourth/HotSchedules, Toast, When I Work, Deputy, Sling, or Connecteam, treat it as a restaurant, retail, service, or general hourly-team workflow unless the brand is explicitly a hotel.
+- For Food & Beverage brands, ask about schedules, timecards, tips/POS handoff, payroll, hiring, and manager communication.
+- For Retail or service brands such as UPS Store, ask about shifts, timecards, payroll approvals, breaks, late arrivals, hiring/onboarding, team messages, and manager follow-up.
+- Before any objection handling, map what the competitor actually covers. A named competitor is current-solution intel, not proof of pain.
+` : "";
 
   return `You are a cold call script assistant for Homebase SDRs calling franchise owners. Homebase is the ALL-IN-ONE app for running an hourly team: scheduling, time tracking, payroll, hiring, team messaging, and HR, all in one place.
 
@@ -1600,6 +1647,7 @@ POSITIONING (critical):
 - Once you find a pain area, go deep there. Payroll is absolutely worth probing for fit, but it is one of several hooks, not the headline.
 - A great pitch is "everything to run your hourly team, in one app", not "we do payroll".
 ${hospitalityPositioning}
+${nonHospitalityCompetitorMode}
 
 BRAND VOICE (follow exactly):
 - Neighborly: write like a person, not a platform. Warm, relatable, plain language. Be a neighbor they can lean on.
@@ -2532,10 +2580,11 @@ const FINAL_QUESTION_GUIDANCE = {
 };
 
 function getFinalQuestionGuidance(responseId, options) {
-  if (getCompetitorIntel(responseId)) {
+  const selectedCompetitor = getCompetitorIntel(responseId);
+  if (selectedCompetitor) {
     const optionIds = options.map(o => o.id);
     if (optionIds.some(id => id.startsWith("competitor_scope_")) || optionIds.some(id => id.startsWith("innflow_scope_"))) {
-      return "End by asking what parts the named competitor covers today, so they can answer with neutral scope: payroll, scheduling/time, back office, team communication, most of it, or not sure. Keep the question short.";
+      return `End by asking what parts ${selectedCompetitor.name} covers today, so they can answer with neutral scope: ${competitorScopeChoices(selectedCompetitor)}. ${competitorScopeCoaching(selectedCompetitor)} Keep the question short.`;
     }
     return "End by asking what part of the current setup is worth discussing: cost/add-ons, support, missing workflows, contract timing, switching pain, seeing the difference, or staying put.";
   }
@@ -2734,7 +2783,7 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     if (selectedCompetitor.name === "Inn-Flow") {
       return `${lead}got it, that makes sense. What parts of the business does Inn-Flow handle for you today: accounting and owner reporting, labor scheduling and time, payroll, or the whole back-office suite?\n[Coaching tip: Do not assume pain yet; first separate finance/reporting from the staff workflow.]`;
     }
-    return `${lead}got it, that makes sense. What parts does ${selectedCompetitor.name} cover today: payroll, scheduling and time, back office, team communication, or most of it?\n[Coaching tip: Do not assume pain yet; map what the current system covers first.]`;
+    return `${lead}got it, that makes sense. What parts does ${selectedCompetitor.name} cover today: ${competitorScopeChoices(selectedCompetitor)}?\n[Coaching tip: Do not assume pain yet; map what the current system covers first. ${competitorScopeCoaching(selectedCompetitor)}]`;
   }
 
   const lines = {
