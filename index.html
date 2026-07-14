@@ -1555,18 +1555,18 @@ function brandLocations(brand, n) {
 
 function commonExistingToolExamples(info) {
   if (isShippingPrintContext(info)) {
-    return "ADP, Paychex, QuickBooks Payroll, QuickBooks Time, Deputy, When I Work, Sling, or Connecteam";
+    return "payroll or timekeeping tools";
   }
   if (isHospitalityContext(info)) {
-    return "Inn-Flow, M3, Actabl, HotSchedules, ADP, Paychex, or brand-mandated hotel systems";
+    return "hotel, payroll, or scheduling tools";
   }
   if ((info && info.industry) === "Food & Beverage") {
-    return "Toast, 7shifts, HotSchedules, ADP, Paychex, Gusto, or QuickBooks";
+    return "POS, payroll, or scheduling tools";
   }
   if ((info && info.industry) === "Retail" || (info && info.industry) === "Professional Services") {
-    return "ADP, Paychex, QuickBooks, Gusto, Deputy, When I Work, Sling, or Connecteam";
+    return "payroll, scheduling, or corporate tools";
   }
-  return "ADP, Paychex, QuickBooks, Gusto, scheduling apps, or corporate tools";
+  return "payroll, scheduling, or corporate tools";
 }
 
 function existingToolsBridge(info) {
@@ -1611,7 +1611,6 @@ function buildOpeningInstant(info) {
   const knownPainContext = known_pain
     ? `I saw ${known_pain.toLowerCase()} may already be on your radar. `
     : "";
-  const existingToolExamples = commonExistingToolExamples(info);
   const stackBridge = existingToolsBridge(info);
   const variants = [
     {
@@ -1626,7 +1625,7 @@ function buildOpeningInstant(info) {
     },
     {
       mode: "permission",
-      text: `Hey ${name}, [Your Name] with Homebase. ${proofLine} I know you may already have tools like ${existingToolExamples} in place. Can I take 30 seconds to explain where we usually fit?`,
+      text: `Hey ${name}, [Your Name] with Homebase. ${proofLine} I know you may already have tools in place. Can I take 30 seconds to explain where we usually fit?`,
       tip: `Coaching tip: Proactively acknowledge existing tools, then earn a short window before positioning Homebase.`
     },
     {
@@ -2712,7 +2711,7 @@ function buildNextPrompt(responseId, responseLabel) {
     nextstep:"a confirmed next step", contact:"their name and contact info"
   }[k])).join(", ")}.` : "All SQL fields covered. Focus on closing the meeting.";
   const stackDiscoveryExamples = shippingPrint
-    ? "ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square/POS, CPA/bookkeeper, corporate tools, spreadsheets, or manual work"
+    ? "payroll/time tools like ADP or QuickBooks Time, scheduling apps, corporate tools, or manual work"
     : hospitality
       ? "hotel back-office suites, labor tools, PMS/finance-adjacent tools, payroll/HCM, scheduling apps, management-company systems, spreadsheets, or manual work"
       : "tools, competitors, corporate systems, spreadsheets, or manual work";
@@ -2750,11 +2749,11 @@ function buildNextPrompt(responseId, responseLabel) {
     manager_not_dm:`They are a manager, not the owner. Be respectful and do not pitch hard. Ask ONE question to get the person who handles scheduling, payroll, and staff-tool decisions, or the best time to reach them. ${hint}`,
     wrong_contact:`They said this is the wrong person. Be gracious. Ask ONE question only: can they point you to who owns the ${brand} location or staff-tool decisions, or should you leave it there. ${hint}`,
     interested:`Prospect gave permission for the short version or asked what it does. One-line all-in-one pitch (${pitchScope}), then ONE broad discovery question about ${discoveryScope}. Don't list features, don't lead with payroll, let them name their current stack or point to the pain. ${hint}`,
-    give_more:`Prospect is open. Two-sentence pitch: ${pitchScope}, built for businesses like ${brand}. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team today, including whether they use ${stackDiscoveryExamples}. ${hint}`,
+    give_more:`Prospect is open. Two-sentence pitch: ${pitchScope}, built for businesses like ${brand}. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team today. If you name examples, keep it subtle and use no more than two, such as ${stackDiscoveryExamples}. ${hint}`,
     too_busy:`Prospect is busy. Respect their time completely. Do NOT dig into pain. Acknowledge it warmly, then ask for a specific better time to call back ("Totally get it, when's a better time to catch you, later today or tomorrow morning?"). Try to lock a day and time and get a direct number or email so you can follow up. ${hint}`,
     not_interested:`Pattern interrupt: "Totally fair, before I let you go, can I ask one quick thing?" If the no sounds like manual process/status quo, lightly frame the ROI reason to compare: ${CUSTOMER_PROOF_POINTS.stress}. Then ask why this feels like a no: manual process works, corporate handles it, tried it before, not relevant, or timing. Do not ask an open pain question here. Under 3 sentences.`,
     no_value:`Prospect doesn't see fit. Use a light ROI frame, not a hard pitch: customers usually compare Homebase to get time back and reduce admin stress. Then ask a low-pressure question about whether any day-to-day team workflow is still taking time: scheduling, covering shifts, time tracking, payroll, or hiring. Don't pitch, just ask. ${hint}`,
-    who_are_you:`They asked what Homebase is, so they're curious, that's good. ${hospitality ? `Use this concise structure: "Great question. ${pitchScope}, and ${credibilityPoint}. What are you using today for managing and paying staff?"` : `Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: ${pitchScope}. Mention that ${credibilityPoint}. End with ONE broad question about ${discoveryScope}, including whether they use ${stackDiscoveryExamples}.`} Keep it conversational, not a feature dump. ${hint}`,
+    who_are_you:`They asked what Homebase is, so they're curious, that's good. ${hospitality ? `Use this concise structure: "Great question. ${pitchScope}, and ${credibilityPoint}. What are you using today for managing and paying staff?"` : `Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: ${pitchScope}. Mention that ${credibilityPoint}. End with ONE broad question about ${discoveryScope}. If you name examples, use no more than two and keep them natural, such as ${stackDiscoveryExamples}.`} Keep it conversational, not a feature dump. ${hint}`,
     happy_with_current:`Respect that they have something in place. If natural, use "${CUSTOMER_PROOF_POINTS.recommend}" as a reason owners still compare options, then ask ONE question: what they're using to run the team today. Just the tool, don't also ask about payroll in the same breath. ${hint}`,
     competitor_other:`They use another tool or Excel. Acknowledge that most owners already have something, then ask ONE question to learn what it actually covers: scheduling/time, payroll too, payroll separate, switching pain, or uncertainty. ${hint}`,
     competitor_cost:`Competitor cost objection. Use the pricing playbook: acknowledge, ask what total they are comparing against, and avoid discounting. If a competitor is known (${currentCompetitor ? currentCompetitor.name : "unknown"}), compare all-in cost, add-ons, year-end fees, support, and time saved. End by asking team size or permission to compare real total cost. ${hint}`,
@@ -2824,7 +2823,7 @@ function buildNextPrompt(responseId, responseLabel) {
     tried_before:`Empathize one sentence. Ask what went sideways. Then set Homebase apart as built for hourly teams like ${brand}. ${hint}`,
     what_system:`They use one tool for scheduling AND payroll already. Do NOT ask whether it handles payroll, they just told you it does. Acknowledge that, then differentiate on a specific angle (built for hourly teams, hours flow straight to payroll with no re-keying, or simpler pricing) and ask what they like or wish was better about their current setup. One question. ${hint}`,
     no_payroll:`Bridge: "That's exactly what most ${industry} owners come to us for. Homebase pulls the hours straight into payroll, so a run takes about five minutes." Then offer a 30-minute call with a product specialist. ${hint}`,
-    after_pitch_yes:`Engaged. ONE broad discovery question into ${discoveryScope}, let them name ${stackDiscoveryExamples}, or a pain area. ${hint}`,
+    after_pitch_yes:`Engaged. ONE broad discovery question into ${discoveryScope}; let them name the tool, corporate process, manual workflow, or pain area. Do not list a bunch of competitors. ${hint}`,
     after_pitch_meh:`Ask one thing: who the right person is, or whether they are not sure. Do not ask for contact details in the same turn.`,
     gate_name:`Got a name. Ask for the direct number or best time to reach them. Warm, non-pushy.`,
     gate_connects:`Exact opening line when the owner picks up, warm, reference you just spoke with someone at ${brand}. ${hint}`,

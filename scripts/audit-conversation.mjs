@@ -284,6 +284,23 @@ for (const randomValue of [0.05, 0.45, 0.85]) {
   }
 }
 
+sandbox.Math.random = () => 0.22;
+const upsOpening = sandbox.buildOpeningInstant({
+  brand: "UPS Store",
+  industry: "Professional Services",
+  lead_name: "Mark",
+  num_locs: "2",
+  prospect_role: "owner",
+  known_pain: ""
+});
+const upsSpokenOpening = upsOpening.replace(/\[[^\]]*\]/g, "");
+if (/ADP|Paychex|QuickBooks|Gusto|Deputy|When I Work|Sling|Connecteam/i.test(upsSpokenOpening)) {
+  throw new Error("UPS Store opener should acknowledge existing tools without listing competitor examples before permission.");
+}
+if (!/already have tools in place/i.test(upsSpokenOpening) || !/30 seconds/i.test(upsSpokenOpening)) {
+  throw new Error("UPS Store existing-tools opener should stay subtle and ask for a 30-second window.");
+}
+
 const toastPrompt = sandbox.buildNextPrompt("competitor_toast", "We use Toast");
 if (!toastPrompt.includes("Toast") || !/what parts does Toast cover/i.test(toastPrompt) || /cost, support, switching, or gaps until/i.test(toastPrompt) === false) {
   throw new Error("Toast competitor prompt should ask scope before pain.");
