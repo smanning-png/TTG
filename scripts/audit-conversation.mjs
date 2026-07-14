@@ -64,7 +64,7 @@ if (missingTargets.length || missingGuidance.length) {
 }
 
 const quickBattlecardIds = readContext("QUICK_BATTLECARD_IDS");
-for (const requiredQuickCard of ["competitor_adp", "competitor_paychex", "competitor_gusto", "competitor_toast", "competitor_7shifts", "competitor_connecteam", "competitor_innflow", "competitor_hotel_ops"]) {
+for (const requiredQuickCard of ["competitor_adp", "competitor_paychex", "competitor_gusto", "competitor_quickbooks_time", "competitor_toast", "competitor_7shifts", "competitor_connecteam", "competitor_innflow", "competitor_hotel_ops"]) {
   if (!quickBattlecardIds.includes(requiredQuickCard)) {
     throw new Error(`Quick battlecard tiles are missing ${requiredQuickCard}.`);
   }
@@ -461,6 +461,39 @@ for (const phase of broadStackPhases) {
 const broadStackPrompt = sandbox.buildNextPrompt("interested", "Yeah, what does it do?");
 if (!broadStackPrompt.includes("Toast handles POS / some team tools") || !broadStackPrompt.includes("Gusto handles payroll")) {
   throw new Error("Broad discovery prompt is missing competitor/current-stack response labels.");
+}
+
+readContext(`prospectInfo = {
+  brand: "UPS Store",
+  industry: "Professional Services",
+  lead_name: "Maria",
+  num_locs: "3",
+  prospect_role: "owner",
+  current_solution: "",
+  timeline: "",
+  budget: "",
+  known_pain: ""
+}; sqlState = freshSql(); activeCompetitor = null;`);
+const upsStackIds = new Set(readContext('getResponseOptions("interested")').map(option => option.id));
+for (const required of ["competitor_adp", "competitor_paychex", "competitor_quickbooks", "competitor_quickbooks_time", "competitor_wheniwork_deputy_sling", "competitor_connecteam", "franchise_hq"]) {
+  if (!upsStackIds.has(required)) {
+    throw new Error(`UPS Store current-stack options are missing ${required}.`);
+  }
+}
+if (upsStackIds.has("competitor_toast") || upsStackIds.has("competitor_7shifts") || upsStackIds.has("competitor_hotschedules")) {
+  throw new Error("UPS Store current-stack options should not default to restaurant scheduling tools.");
+}
+const upsPrompt = sandbox.buildNextPrompt("interested", "Yeah, what does it do?");
+if (!/QuickBooks Time\/TSheets/i.test(upsPrompt) || !/shipping, rates, print, POS, and accounting tools/i.test(upsPrompt)) {
+  throw new Error("UPS Store prompt should include UPS-relevant competitors and existing-software positioning.");
+}
+const upsFallback = sandbox.buildFallbackTalkTrack("who_are_you", "What is Homebase?");
+if (!/shipping, rates, print, POS, and accounting tools/i.test(upsFallback) || !/employee side/i.test(upsFallback)) {
+  throw new Error("UPS Store fallback should position Homebase around existing shipping/print/accounting tools.");
+}
+const upsBridge = readContext('existingToolsBridge({brand:"UPS Store", industry:"Professional Services"})');
+if (!/shipping, rates, printing, POS, or accounting/i.test(upsBridge) || !/scheduling, timecards, payroll/i.test(upsBridge)) {
+  throw new Error("UPS Store opening bridge should proactively address existing tools.");
 }
 
 const accorIndustry = readContext('detectIndustry("Accor").industry');

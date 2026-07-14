@@ -759,6 +759,18 @@ function isHospitalityContext(info = prospectInfo) {
   return (info && info.industry === "Lodging & Leisure") || isHospitalityBrand(info && info.brand);
 }
 
+const SHIPPING_PRINT_BRAND_HINTS = [
+  "ups store", "the ups store", "postal annex", "postnet", "pak mail", "mail boxes etc",
+  "fedex office", "shipping", "pack and ship", "mailbox", "mailboxes", "postal",
+  "print", "printing", "copy", "copies", "sign", "signs"
+];
+
+function isShippingPrintContext(info = prospectInfo) {
+  const key = normalizeBrandKey(info && info.brand);
+  if (!key) return false;
+  return SHIPPING_PRINT_BRAND_HINTS.some(hint => brandKeyContainsPhrase(key, normalizeBrandKey(hint)));
+}
+
 // Keyword fallback for brands not in our known-franchisee data
 const INDUSTRY_KEYWORDS = [
   { kw: ["salon","spa","barber","nails","lash","brow","wax","tan","sauna","massage","hair","beauty","fitness","gym","yoga","pilates","crossfit","cycle","wellness","chiropractic","therapy","med spa","medspa"], industry: "Health & Fitness" },
@@ -939,9 +951,11 @@ const CURRENT_STACK_RESPONSE_OPTIONS = [
   { id:"competitor_adp", icon:"ti-receipt", label:"ADP handles payroll", sub:"Payroll incumbent" },
   { id:"competitor_paychex", icon:"ti-receipt", label:"Paychex handles payroll", sub:"Payroll incumbent" },
   { id:"competitor_quickbooks", icon:"ti-calculator", label:"QuickBooks handles payroll", sub:"Accounting-led payroll" },
+  { id:"competitor_quickbooks_time", icon:"ti-clock", label:"QuickBooks Time handles timecards", sub:"Time tracking / TSheets" },
   { id:"competitor_square", icon:"ti-square", label:"Square handles POS / payroll", sub:"POS-tied payroll" },
   { id:"competitor_7shifts", icon:"ti-calendar-time", label:"7shifts handles scheduling", sub:"Restaurant scheduling" },
   { id:"competitor_hotschedules", icon:"ti-calendar-stats", label:"HotSchedules handles scheduling", sub:"Workforce scheduling" },
+  { id:"competitor_wheniwork_deputy_sling", icon:"ti-calendar-time", label:"When I Work / Deputy / Sling schedules", sub:"Scheduling / time app" },
   { id:"competitor_connecteam", icon:"ti-apps", label:"Connecteam handles team comms / ops", sub:"Ops / comms app" },
   { id:"competitor_cpa", icon:"ti-calculator", label:"Our CPA / bookkeeper handles payroll", sub:"Accountant / bookkeeper" },
   { id:"competitor_other", icon:"ti-layout-grid", label:"Different tools for each piece", sub:"Mixed stack" },
@@ -950,6 +964,25 @@ const CURRENT_STACK_RESPONSE_OPTIONS = [
   { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is the problem", sub:"Pain surfaces" },
   { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is our headache", sub:"Pain surfaces" },
   { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring is tough right now", sub:"Pain surfaces" },
+  { id:"decision_maker_no", icon:"ti-user-question", label:"Someone else handles that", sub:"Wrong contact" },
+  { id:"not_interested", icon:"ti-x", label:"We're covered, thanks", sub:"Status quo" }
+];
+
+const SHIPPING_PRINT_STACK_RESPONSE_OPTIONS = [
+  { id:"competitor_adp", icon:"ti-receipt", label:"ADP handles payroll / time", sub:"Payroll / time" },
+  { id:"competitor_paychex", icon:"ti-receipt", label:"Paychex handles payroll / time", sub:"Payroll / time" },
+  { id:"competitor_quickbooks", icon:"ti-calculator", label:"QuickBooks handles payroll", sub:"Accounting-led payroll" },
+  { id:"competitor_quickbooks_time", icon:"ti-clock", label:"QuickBooks Time handles timecards", sub:"Time tracking / TSheets" },
+  { id:"competitor_gusto", icon:"ti-receipt", label:"Gusto handles payroll / HR", sub:"Payroll / HR" },
+  { id:"competitor_wheniwork_deputy_sling", icon:"ti-calendar-time", label:"Deputy / When I Work / Sling schedules", sub:"Scheduling / time app" },
+  { id:"competitor_connecteam", icon:"ti-apps", label:"Connecteam handles team comms / ops", sub:"Ops / comms app" },
+  { id:"competitor_square", icon:"ti-square", label:"Square or POS handles payroll", sub:"POS-tied payroll" },
+  { id:"competitor_cpa", icon:"ti-calculator", label:"Our CPA / bookkeeper handles payroll", sub:"Accountant / bookkeeper" },
+  { id:"franchise_hq", icon:"ti-building", label:"UPS / corporate tools cover some of it", sub:"Brand-provided tools" },
+  { id:"competitor_other", icon:"ti-layout-grid", label:"Different tools for each piece", sub:"Mixed stack" },
+  { id:"curious_why", icon:"ti-file-spreadsheet", label:"Excel, paper, texts, and manual work", sub:"Manual process" },
+  { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is our headache", sub:"Pain surfaces" },
+  { id:"pain_payroll", icon:"ti-receipt", label:"Payroll or timecards are the problem", sub:"Pain surfaces" },
   { id:"decision_maker_no", icon:"ti-user-question", label:"Someone else handles that", sub:"Wrong contact" },
   { id:"not_interested", icon:"ti-x", label:"We're covered, thanks", sub:"Status quo" }
 ];
@@ -1055,6 +1088,14 @@ const COMPETITOR_INTEL = {
     ask:"Are you using QuickBooks mainly for accounting, or are schedules and time cards living there too?",
     angles:["Do not attack the accounting relationship", "Ask about manual time sync, edits before payroll, and multi-location reporting", "Position Homebase alongside QBO, not as an accounting replacement"],
     caution:"QuickBooks is familiar and sticky. Respect that familiarity and focus on hourly operations."
+  },
+  competitor_quickbooks_time: {
+    name:"QuickBooks Time / TSheets",
+    aliases:["quickbooks time", "tsheets", "t sheets", "qb time"],
+    wedge:"keeping QuickBooks for accounting while Homebase gives store teams scheduling, time clocks, payroll, hiring, and messages in one hourly-team workflow",
+    ask:"Is QuickBooks Time just capturing hours, or is it also handling schedules, payroll approvals, hiring, and team communication?",
+    angles:["Respect QuickBooks for accounting and time tracking", "Ask whether schedules, breaks, PTO, edits, and approvals still take manager follow-up", "Position Homebase as the employee workflow around payroll, not an accounting replacement"],
+    caution:"QuickBooks Time can be sticky when the owner or bookkeeper lives in QuickBooks. Win by finding the manager workflow around timecards and payroll, not by attacking accounting."
   },
   competitor_square: {
     name:"Square Payroll",
@@ -1191,6 +1232,7 @@ const QUICK_BATTLECARD_IDS = [
   "competitor_paychex",
   "competitor_gusto",
   "competitor_quickbooks",
+  "competitor_quickbooks_time",
   "competitor_square",
   "competitor_toast",
   "competitor_hotschedules",
@@ -1312,7 +1354,7 @@ function isRestaurantSchedulingCompetitor(competitor) {
 }
 
 function isGeneralOpsCompetitor(competitor) {
-  return !!competitor && /Connecteam|When I Work|Deputy|Sling/i.test(competitor.name || "");
+  return !!competitor && /Connecteam|When I Work|Deputy|Sling|QuickBooks Time|TSheets/i.test(competitor.name || "");
 }
 
 function competitorScopeChoices(competitor, info = prospectInfo || {}) {
@@ -1511,6 +1553,33 @@ function brandLocations(brand, n) {
   return `${n} ${b} locations`;
 }
 
+function commonExistingToolExamples(info) {
+  if (isShippingPrintContext(info)) {
+    return "ADP, Paychex, QuickBooks Payroll, QuickBooks Time, Deputy, When I Work, Sling, or Connecteam";
+  }
+  if (isHospitalityContext(info)) {
+    return "Inn-Flow, M3, Actabl, HotSchedules, ADP, Paychex, or brand-mandated hotel systems";
+  }
+  if ((info && info.industry) === "Food & Beverage") {
+    return "Toast, 7shifts, HotSchedules, ADP, Paychex, Gusto, or QuickBooks";
+  }
+  if ((info && info.industry) === "Retail" || (info && info.industry) === "Professional Services") {
+    return "ADP, Paychex, QuickBooks, Gusto, Deputy, When I Work, Sling, or Connecteam";
+  }
+  return "ADP, Paychex, QuickBooks, Gusto, scheduling apps, or corporate tools";
+}
+
+function existingToolsBridge(info) {
+  const brand = (info && info.brand) || "businesses like yours";
+  if (isShippingPrintContext(info)) {
+    return `A lot of ${brand} owners already have systems for shipping, rates, printing, POS, or accounting, and that is fine. Homebase usually fits around those; the gap we help with is scheduling, timecards, payroll, hiring, and team messages.`;
+  }
+  if (isHospitalityContext(info)) {
+    return `A lot of ${brand || "hotel"} operators already have systems for PMS, rates, inventory, accounting, or property ops, and that is fine. Homebase usually fits around those; the gap we help with is managing and paying the hourly team.`;
+  }
+  return `A lot of owners already have tools in place, and that is fine. Homebase usually fits around the existing stack; the gap we help with is scheduling, timecards, payroll, hiring, and team messages.`;
+}
+
 function buildOpeningInstant(info) {
   const { brand, industry, num_locs, prospect_role, known_pain } = info;
   const proof = getProof(industry, brand);
@@ -1542,6 +1611,8 @@ function buildOpeningInstant(info) {
   const knownPainContext = known_pain
     ? `I saw ${known_pain.toLowerCase()} may already be on your radar. `
     : "";
+  const existingToolExamples = commonExistingToolExamples(info);
+  const stackBridge = existingToolsBridge(info);
   const variants = [
     {
       mode: "permission",
@@ -1552,6 +1623,11 @@ function buildOpeningInstant(info) {
       mode: "permission",
       text: `Hey ${name}, [Your Name] with Homebase. I know I'm an interruption, so I'll keep it tight. ${proofLine} ${knownPainContext}Can I take 30 seconds to explain why I'm reaching out?`,
       tip: `Coaching tip: Respect the interruption, name the reason, and ask for a small window before pitching.`
+    },
+    {
+      mode: "permission",
+      text: `Hey ${name}, [Your Name] with Homebase. ${proofLine} I know you may already have tools like ${existingToolExamples} in place. Can I take 30 seconds to explain where we usually fit?`,
+      tip: `Coaching tip: Proactively acknowledge existing tools, then earn a short window before positioning Homebase.`
     },
     {
       mode: "permission",
@@ -1567,6 +1643,11 @@ function buildOpeningInstant(info) {
       mode: "discovery",
       text: `Hey ${name}, [Your Name] with Homebase. I know this call is out of the blue.\n\nWe've been talking with quite a few ${ownerGroup} lately, and I was curious how you're handling the people side of the business these days. Things like schedules, payroll, hiring, and team communication. Have you found a process that works, or is it still a bit more manual than you'd like?`,
       tip: `Coaching tip: Sound like research, not a pitch; let them describe the current process.`
+    },
+    {
+      mode: "discovery",
+      text: `Hey ${name}, [Your Name] with Homebase. ${stackBridge}\n\nAre the employee-side pieces pretty buttoned up today, or is any of that still taking more time than it should?`,
+      tip: `Coaching tip: Separate their existing operating systems from the employee workflow, then ask about fit without assuming pain.`
     },
     {
       mode: "discovery",
@@ -1638,6 +1719,14 @@ NON-HOTEL COMPETITOR MODE (critical for ${info.brand}):
 - For Retail or service brands such as UPS Store, ask about shifts, timecards, payroll approvals, breaks, late arrivals, hiring/onboarding, team messages, and manager follow-up.
 - Before any objection handling, map what the competitor actually covers. A named competitor is current-solution intel, not proof of pain.
 ` : "";
+  const shippingPrintPositioning = isShippingPrintContext(info) ? `
+UPS STORE / SHIPPING-PRINT MODE (critical for ${info.brand}):
+- Assume they may already have software for shipping, rates, print orders, mailboxes, POS, inventory, accounting, or corporate/franchisor workflows.
+- Do not imply Homebase replaces shipping, rate-shopping, package tracking, print production, mailbox, POS, inventory, or accounting tools.
+- Say Homebase usually fits around those existing systems and focuses on managing and paying the hourly team: schedules, timecards, payroll, hiring, onboarding, team messages, breaks, late arrivals, PTO, and manager approvals.
+- Common tools they may mention: ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square, a CPA/bookkeeper, or corporate/franchisor-provided tools.
+- Early credibility line to use naturally: "A lot of UPS Store owners already have tools for shipping, rates, printing, POS, or accounting. We fit around those; the part we usually help with is managing and paying the team."
+` : "";
 
   return `You are a cold call script assistant for Homebase SDRs calling franchise owners. Homebase is the ALL-IN-ONE app for running an hourly team: scheduling, time tracking, payroll, hiring, team messaging, and HR, all in one place.
 
@@ -1648,6 +1737,7 @@ POSITIONING (critical):
 - A great pitch is "everything to run your hourly team, in one app", not "we do payroll".
 ${hospitalityPositioning}
 ${nonHospitalityCompetitorMode}
+${shippingPrintPositioning}
 
 BRAND VOICE (follow exactly):
 - Neighborly: write like a person, not a platform. Warm, relatable, plain language. Be a neighbor they can lean on.
@@ -1902,7 +1992,9 @@ const RESP = {
     { id:"competitor_adp", icon:"ti-tool", label:"We use ADP", sub:"Payroll incumbent" },
     { id:"competitor_paychex", icon:"ti-tool", label:"We use Paychex", sub:"Payroll incumbent" },
     { id:"competitor_quickbooks", icon:"ti-tool", label:"We use QuickBooks Payroll", sub:"Accounting-led payroll" },
+    { id:"competitor_quickbooks_time", icon:"ti-clock", label:"We use QuickBooks Time", sub:"Time tracking / TSheets" },
     { id:"competitor_square", icon:"ti-tool", label:"We use Square Payroll", sub:"POS-tied payroll" },
+    { id:"competitor_wheniwork_deputy_sling", icon:"ti-calendar-time", label:"We use Deputy / When I Work / Sling", sub:"Scheduling / time app" },
     { id:"competitor_toast", icon:"ti-tools-kitchen-2", label:"We use Toast", sub:"Restaurant POS / team tools" },
     { id:"competitor_hotschedules", icon:"ti-calendar-stats", label:"We use HotSchedules", sub:"Scheduling / workforce" },
     { id:"competitor_7shifts", icon:"ti-calendar-time", label:"We use 7shifts", sub:"Restaurant scheduling" },
@@ -1916,6 +2008,7 @@ const RESP = {
   competitor_adp: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_paychex: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_quickbooks: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
+  competitor_quickbooks_time: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_square: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_toast: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_hotschedules: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
@@ -2407,6 +2500,7 @@ const STACK_DISCOVERY_PHASES = new Set([
 function getResponseOptions(phase) {
   if (phase === "opening" && currentOpeningMode === "discovery") return OPENING_DISCOVERY_RESPONSE_OPTIONS;
   if (phase === "opening" && currentOpeningMode === "gatekeeper") return OPENING_GATEKEEPER_RESPONSE_OPTIONS;
+  if (STACK_DISCOVERY_PHASES.has(phase) && isShippingPrintContext()) return SHIPPING_PRINT_STACK_RESPONSE_OPTIONS;
   if (STACK_DISCOVERY_PHASES.has(phase) && isHospitalityContext()) return HOSPITALITY_STACK_RESPONSE_OPTIONS;
   return RESP[phase] || [];
 }
@@ -2588,6 +2682,9 @@ function getFinalQuestionGuidance(responseId, options) {
     }
     return "End by asking what part of the current setup is worth discussing: cost/add-ons, support, missing workflows, contract timing, switching pain, seeing the difference, or staying put.";
   }
+  if (STACK_DISCOVERY_PHASES.has(responseId) && isShippingPrintContext()) {
+    return "End by asking what they use today for scheduling, timecards, payroll, hiring, and team communication. This should let them answer with ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square/POS, CPA/bookkeeper, corporate/franchisor tools, manual work, pain area, wrong contact, or status quo.";
+  }
   if (STACK_DISCOVERY_PHASES.has(responseId) && isHospitalityContext()) {
     return "End by asking: What are you using today for managing and paying staff? This should let them answer with a hotel suite, labor tool, finance system, payroll/HCM, scheduling app, ops tool, management-company system, manual process, pain area, or status quo.";
   }
@@ -2599,6 +2696,7 @@ function getFinalQuestionGuidance(responseId, options) {
 function buildNextPrompt(responseId, responseLabel) {
   const { brand, industry } = prospectInfo;
   const hospitality = isHospitalityContext(prospectInfo);
+  const shippingPrint = isShippingPrintContext(prospectInfo);
   const proof = getProof(industry, brand);
   const peer = proof.peers[0];
   const brandProof = getBrandSocialProof(brand);
@@ -2613,15 +2711,21 @@ function buildNextPrompt(responseId, responseLabel) {
     budget:"whether budget exists", solution:"what they currently use", impact:"estimated users: employees plus owner/admin users",
     nextstep:"a confirmed next step", contact:"their name and contact info"
   }[k])).join(", ")}.` : "All SQL fields covered. Focus on closing the meeting.";
-  const stackDiscoveryExamples = hospitality
-    ? "hotel back-office suites, labor tools, PMS/finance-adjacent tools, payroll/HCM, scheduling apps, management-company systems, spreadsheets, or manual work"
-    : "tools, competitors, corporate systems, spreadsheets, or manual work";
-  const discoveryScope = hospitality
-    ? `what they use today for managing and paying staff`
-    : `how they run the team at ${brand} day to day`;
-  const pitchScope = hospitality
-    ? `Homebase is the property-level people workflow for hotels, so schedules, time clocks, payroll, hiring, and team communication all live in one place`
-    : `Homebase is everything to run an hourly team in one app`;
+  const stackDiscoveryExamples = shippingPrint
+    ? "ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square/POS, CPA/bookkeeper, corporate tools, spreadsheets, or manual work"
+    : hospitality
+      ? "hotel back-office suites, labor tools, PMS/finance-adjacent tools, payroll/HCM, scheduling apps, management-company systems, spreadsheets, or manual work"
+      : "tools, competitors, corporate systems, spreadsheets, or manual work";
+  const discoveryScope = shippingPrint
+    ? `what they use today for scheduling, timecards, payroll, hiring, and team communication at ${brand}`
+    : hospitality
+      ? `what they use today for managing and paying staff`
+      : `how they run the team at ${brand} day to day`;
+  const pitchScope = shippingPrint
+    ? `Homebase fits around the shipping, rates, print, POS, and accounting tools ${brand} may already use, and helps with scheduling, timecards, payroll, hiring, and team messages`
+    : hospitality
+      ? `Homebase is the property-level people workflow for hotels, so schedules, time clocks, payroll, hiring, and team communication all live in one place`
+      : `Homebase is everything to run an hourly team in one app`;
 
   // The prospect will answer by tapping one of these buttons. The script's closing
   // question MUST be answerable by these options, so the rep never asks something the
@@ -2763,13 +2867,18 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
   const brand = info.brand || "your team";
   const industry = info.industry || "franchise";
   const hospitality = isHospitalityContext(info);
+  const shippingPrint = isShippingPrintContext(info);
   const industryLabel = hospitality ? "hotel" : industry;
   const peopleWorkflow = hospitality
     ? "schedules, time clocks, payroll, hiring, and team communication"
-    : "scheduling, time tracking, payroll, hiring, and team messages";
-  const currentStackQuestion = hospitality
-    ? `What are you using today for managing and paying staff, or is one part of that the headache?`
-    : `How are you handling those pieces at ${brand} today: one system, a few different tools, corporate tools, manual work, or one painful area?`;
+    : shippingPrint
+      ? "schedules, timecards, payroll, hiring, and team messages"
+      : "scheduling, time tracking, payroll, hiring, and team messages";
+  const currentStackQuestion = shippingPrint
+    ? `What are you using today for the employee side: ADP, Paychex, QuickBooks, Deputy, When I Work, Connecteam, corporate tools, manual work, or something else?`
+    : hospitality
+      ? `What are you using today for managing and paying staff, or is one part of that the headache?`
+      : `How are you handling those pieces at ${brand} today: one system, a few different tools, corporate tools, manual work, or one painful area?`;
   const proof = getProof(industry, brand);
   const peer = proof.peers[0] || "similar owners";
   const brandProof = getBrandSocialProof(brand);
@@ -2798,19 +2907,27 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     operator_not_owner: `${lead}got it, thanks for clarifying. Are you involved in decisions around scheduling, payroll, and staff tools, or does the owner handle those?\n[Coaching tip: Qualify influence before pitching.]`,
     manager_not_dm: `${lead}got it, I appreciate that. Who usually owns decisions around scheduling, payroll, and staff tools for this location?\n[Coaching tip: Route to the decision maker instead of forcing the pitch.]`,
     wrong_contact: `${lead}thanks for telling me. Do you know who owns the ${brand} location or staff-tool decisions, or should I leave it there?\n[Coaching tip: Keep this gracious and make one routing ask.]`,
-    interested: hospitality
+    interested: shippingPrint
+      ? `${lead}absolutely. A lot of ${brand} owners already have systems for shipping, rates, printing, POS, or accounting. Homebase fits around those and helps with ${peopleWorkflow}. ${currentStackQuestion}\n${baseTip}`
+      : hospitality
       ? `${lead}absolutely. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
       : `${lead}absolutely. Homebase helps ${industryLabel} owners run ${peopleWorkflow} in one place, and ${proofRef} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
-    give_more: hospitality
+    give_more: shippingPrint
+      ? `${lead}totally. Homebase is not trying to replace the shipping, rates, print, POS, or accounting tools you already use. We usually help with the employee side: ${peopleWorkflow}. ${currentStackQuestion}\n${baseTip}`
+      : hospitality
       ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
       : `${lead}totally. The simplest way to think about Homebase is one app for the hourly team, from schedules and clock-ins through payroll, hiring, and team communication, so managers are not piecing five tools together. ${currentStackQuestion}\n${baseTip}`,
     too_busy: `${lead}completely get it, I caught you in the middle of the day. I do think this could be useful for ${brand}, so when is a better time to catch you, later today or tomorrow morning?\n[Coaching tip: Respect the interruption, then trade for a specific callback time.]`,
     not_interested: `${lead}totally fair, before I let you go, can I ask one quick thing? The reason I ask is 82% of customers report less stress with Homebase, so I am curious if this is a no because your manual process works, corporate handles it, you tried something before, it is not relevant, or timing is just off?\n[Coaching tip: Use one proof point, then diagnose the brush-off.]`,
     no_value: `${lead}totally fair. Usually the value is time and stress back, not software for software's sake. Is it mainly that the team is small, corporate already handles HR, or this just is not the right time?\n[Coaching tip: Let them name why it feels irrelevant before you decide whether there is a path.]`,
-    who_are_you: hospitality
+    who_are_you: shippingPrint
+      ? `${lead}great question. Homebase fits around the shipping, rates, print, POS, and accounting tools ${brand} may already use, and helps with ${peopleWorkflow}. ${currentStackQuestion}\n${baseTip}`
+      : hospitality
       ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
       : `${lead}yeah, of course. We are Homebase, the all-in-one app for hourly teams, ${peopleWorkflow}, and owners like ${peer} use us to simplify the week. ${currentStackQuestion}\n${baseTip}`,
-    happy_with_current: `${lead}that makes sense, most owners we talk to have something in place already. Four in five customers would recommend Homebase, so it can still be worth a quick compare. What are you using today to handle ${hospitality ? "hotel scheduling, time clocks, payroll, hiring, and team communication" : "scheduling, time tracking, and payroll"}?\n${baseTip}`,
+    happy_with_current: shippingPrint
+      ? `${lead}that makes sense, most ${brand} owners already have a few tools in place. We are not trying to replace shipping, rates, print, POS, or accounting; we usually compare the employee side. What are you using today for schedules, timecards, payroll, hiring, and team messages?\n${baseTip}`
+      : `${lead}that makes sense, most owners we talk to have something in place already. Four in five customers would recommend Homebase, so it can still be worth a quick compare. What are you using today to handle ${hospitality ? "hotel scheduling, time clocks, payroll, hiring, and team communication" : "scheduling, time tracking, and payroll"}?\n${baseTip}`,
     competitor_other: `${lead}got it, most owners already have a tool somewhere in the process. Does it mainly cover scheduling and time, payroll too, is payroll separate, is switching the concern, or are you not sure yet?\n${baseTip}`,
     competitor_cost: `${lead}totally fair, price only matters once we know the real total. With ${currentCompetitor ? currentCompetitor.name : "your current setup"}, the useful comparison is base price, add-ons, year-end fees, and time spent fixing payroll or schedules. How many hourly employees would we be comparing for ${brand}?\n[Coaching tip: Treat price as a value and fit question, not a discount fight.]`,
     competitor_support: `${lead}I hear you, support frustration gets old fast when payroll or schedules are on the line. Is support the main issue, or are there workflow gaps too, like payroll, scheduling, onboarding, or team messages?\n[Coaching tip: Acknowledge the frustration, then explore whether the issue is isolated or bigger.]`,
