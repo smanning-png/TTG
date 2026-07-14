@@ -1074,7 +1074,7 @@ const COMPETITOR_INTEL = {
     caution:"ADP is credible for complex payroll. Do not fight that; test whether the prospect actually needs that much complexity."
   },
   competitor_paychex: {
-    name:"Paychex Payroll",
+    name:"Paychex",
     aliases:["paychex"],
     wedge:"predictable payroll cost, right-sized tools for smaller hourly teams, and a cleaner path from schedule to timecard to payroll",
     ask:"Is Paychex mainly running payroll for you, or are scheduling, timecards, hiring, and team communication in Paychex too?",
@@ -1357,6 +1357,10 @@ function isGeneralOpsCompetitor(competitor) {
   return !!competitor && /Connecteam|When I Work|Deputy|Sling|QuickBooks Time|TSheets/i.test(competitor.name || "");
 }
 
+function isPayrollHcmCompetitor(competitor) {
+  return !!competitor && /ADP|Paychex|Gusto|Paylocity|Paycor|UKG/i.test(competitor.name || "");
+}
+
 function competitorScopeChoices(competitor, info = prospectInfo || {}) {
   const hospitality = isHospitalityContext(info);
   const industry = info.industry || "";
@@ -1365,6 +1369,9 @@ function competitorScopeChoices(competitor, info = prospectInfo || {}) {
   }
   if (hospitality) {
     return "hotel scheduling/time, payroll/HCM, finance or reporting, team communication, department ops, or most of the property workflow";
+  }
+  if (isPayrollHcmCompetitor(competitor)) {
+    return "scheduling, time tracking, payroll, and team communications";
   }
   if (isRestaurantSchedulingCompetitor(competitor) || industry === "Food & Beverage") {
     return "scheduling and time, tips or POS handoff, payroll, hiring, team communication, or most of the restaurant workflow";

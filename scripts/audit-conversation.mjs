@@ -385,6 +385,13 @@ const serviceConnecteamFallback = sandbox.buildFallbackTalkTrack("competitor_con
 if (!/store workflow|task or shift management|payroll approvals/i.test(serviceConnecteamFallback) || /front desk|housekeeping|property workflow|hotel back-office/i.test(serviceConnecteamFallback)) {
   throw new Error("Service/retail Connecteam fallback should use store workflow language, not hotel language.");
 }
+const servicePaychexFallback = sandbox.buildFallbackTalkTrack("competitor_paychex", "We use Paychex");
+if (/Paychex Payroll|hiring\/onboarding|task or shift management|most of the store workflow/i.test(servicePaychexFallback)) {
+  throw new Error("Paychex fallback should use the short Paychex name and concise scope language.");
+}
+if (!/What parts does Paychex cover today: scheduling, time tracking, payroll, and team communications\?/i.test(servicePaychexFallback)) {
+  throw new Error("Paychex fallback should ask the shortened scope question.");
+}
 
 readContext(`prospectInfo = {
   brand: "Holiday Inn",
