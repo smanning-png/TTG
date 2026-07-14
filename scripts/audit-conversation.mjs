@@ -747,9 +747,23 @@ if (!/82% of customers report less stress/i.test(softensFallback)) {
 if (!/four in five customers would recommend/i.test(callbackNoFallback)) {
   throw new Error("Info-follow-up path should be able to use the recommendation proof point.");
 }
-if (!/82% of customers report less stress/i.test(manualFallback) || !/82% of customers report less stress/i.test(notInterestedFallback)) {
-  throw new Error("Manual/status-quo objections should use the less-stress customer sentiment.");
+if (!/82% of customers report less stress/i.test(notInterestedFallback)) {
+  throw new Error("Initial brush-off objection should be able to use the less-stress customer sentiment.");
 }
+if (/82% of customers report less stress/i.test(manualFallback)) {
+  throw new Error("Manual/status-quo follow-up should not repeat the less-stress customer sentiment by default.");
+}
+readContext(`currentScriptText = ${JSON.stringify(notInterestedFallback)};`);
+const manualAfterProofFallback = sandbox.buildFallbackTalkTrack("curious_why", "We do it manually, it works");
+const noAfterProofFallback = sandbox.buildFallbackTalkTrack("not_interested", "We're not interested");
+const manualAfterProofPrompt = sandbox.buildNextPrompt("curious_why", "We do it manually, it works");
+if (/82% of customers report less stress|83% saved payroll time|50% less time scheduling|four in five customers would recommend/i.test(manualAfterProofFallback + "\n" + noAfterProofFallback)) {
+  throw new Error("Fallback scripts should not repeat customer proof stats right after a stat was used.");
+}
+if (!/Do NOT use a customer proof stat/i.test(manualAfterProofPrompt)) {
+  throw new Error("AI prompt should prevent customer proof stat repetition after a stat was just used.");
+}
+readContext(`currentScriptText = "";`);
 if (!/Four in five customers would recommend/i.test(happyCurrentFallback) || !/four in five customers would recommend/i.test(lockedContractFallback)) {
   throw new Error("Current-provider and contract objections should use the recommendation sentiment.");
 }

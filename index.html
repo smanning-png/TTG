@@ -731,6 +731,28 @@ const CUSTOMER_PROOF_POINTS = {
   scheduling: "customers spend 50% less time scheduling per week"
 };
 
+const CUSTOMER_PROOF_PATTERNS = [
+  { key: "stress", re: /82%\s+(?:of customers\s+)?report less stress/i },
+  { key: "payroll", re: /83%\s+saved payroll time/i },
+  { key: "recommend", re: /(?:4 in 5|four in five)\s+(?:customers\s+)?would recommend/i },
+  { key: "scheduling", re: /50%\s+less time scheduling/i }
+];
+
+function customerProofKeysInText(text) {
+  return CUSTOMER_PROOF_PATTERNS
+    .filter(p => p.re.test(text || ""))
+    .map(p => p.key);
+}
+
+function previousSellerUsedCustomerProof() {
+  return customerProofKeysInText(currentScriptText).length > 0;
+}
+
+function customerProofRepeatGuidance() {
+  if (!previousSellerUsedCustomerProof()) return "";
+  return "- The immediately previous seller line already used a customer proof stat. Do NOT use another customer proof stat in this turn; acknowledge their answer and ask the next useful question instead.";
+}
+
 const HOTEL_BRAND_HINTS = [
   "hotel", "hotels", "inn", "suites", "resort", "resorts", "lodge", "motel", "hospitality",
   "holiday inn", "holiday inn express", "ihg", "best western", "accor", "accorhotels", "ibis", "novotel",
@@ -1784,6 +1806,8 @@ SOCIAL PROOF:
 - ${proof.payroll} of those use Homebase Payroll
 - Customer proof points from the Homebase customer base: ${CUSTOMER_PROOF_POINTS.stress}; ${CUSTOMER_PROOF_POINTS.payroll}; ${CUSTOMER_PROOF_POINTS.recommend}; ${CUSTOMER_PROOF_POINTS.scheduling}.
 - Use at most one customer proof point per turn. Match the stat to the topic: payroll time for payroll pain, scheduling time for scheduling pain, less stress or recommend for broad credibility.
+- Do not repeat a customer proof point that appeared in the prior seller turn. If a stat was just used, skip stats this turn and move the conversation forward.
+${customerProofRepeatGuidance()}
 
 COMPETITOR BATTLECARDS:
 ${competitorSummaryList()}
@@ -2764,7 +2788,9 @@ function buildNextPrompt(responseId, responseLabel) {
     interested:`Prospect gave permission for the short version or asked what it does. One-line all-in-one pitch (${pitchScope}), then ONE broad discovery question about ${discoveryScope}. Don't list features, don't lead with payroll, let them name their current stack or point to the pain. ${hint}`,
     give_more:`Prospect is open. Two-sentence pitch: ${pitchScope}, built for businesses like ${brand}. Mention that ${credibilityPoint}. End with ONE broad question about how they run the team today. If you name examples, keep it subtle and use no more than two, such as ${stackDiscoveryExamples}. ${hint}`,
     too_busy:`Prospect is busy. Respect their time completely. Do NOT dig into pain. Acknowledge it warmly, then ask for a specific better time to call back ("Totally get it, when's a better time to catch you, later today or tomorrow morning?"). Try to lock a day and time and get a direct number or email so you can follow up. ${hint}`,
-    not_interested:`Pattern interrupt: "Totally fair, before I let you go, can I ask one quick thing?" If the no sounds like manual process/status quo, lightly frame the ROI reason to compare: ${CUSTOMER_PROOF_POINTS.stress}. Then ask why this feels like a no: manual process works, corporate handles it, tried it before, not relevant, or timing. Do not ask an open pain question here. Under 3 sentences.`,
+    not_interested: previousSellerUsedCustomerProof()
+      ? `Pattern interrupt: "Totally fair, before I let you go, can I ask one quick thing?" Do NOT use a customer proof stat because the previous seller line already used one. Ask why this feels like a no: manual process works, corporate handles it, tried it before, not relevant, or timing. Do not ask an open pain question here. Under 3 sentences.`
+      : `Pattern interrupt: "Totally fair, before I let you go, can I ask one quick thing?" If the no sounds like manual process/status quo, lightly frame the ROI reason to compare: ${CUSTOMER_PROOF_POINTS.stress}. Then ask why this feels like a no: manual process works, corporate handles it, tried it before, not relevant, or timing. Do not ask an open pain question here. Under 3 sentences.`,
     no_value:`Prospect doesn't see fit. Use a light ROI frame, not a hard pitch: customers usually compare Homebase to get time back and reduce admin stress. Then ask a low-pressure question about whether any day-to-day team workflow is still taking time: scheduling, covering shifts, time tracking, payroll, or hiring. Don't pitch, just ask. ${hint}`,
     who_are_you:`They asked what Homebase is, so they're curious, that's good. ${hospitality ? `Use this concise structure: "Great question. ${pitchScope}, and ${credibilityPoint}. What are you using today for managing and paying staff?"` : `Start with a warm, brief acknowledgment ("Great question!" or "Yeah, of course!"), then in one easy sentence: ${pitchScope}. Mention that ${credibilityPoint}. End with ONE broad question about ${discoveryScope}. If you name examples, use no more than two and keep them natural, such as ${stackDiscoveryExamples}.`} Keep it conversational, not a feature dump. ${hint}`,
     happy_with_current:`Respect that they have something in place. If natural, use "${CUSTOMER_PROOF_POINTS.recommend}" as a reason owners still compare options, then ask ONE question: what they're using to run the team today. Just the tool, don't also ask about payroll in the same breath. ${hint}`,
@@ -2831,7 +2857,9 @@ function buildNextPrompt(responseId, responseLabel) {
     callback_yes:`Lock it in: confirm the exact day and time you'll call back, then ask ONE thing, the best direct number or email to reach them. (You'll read it back next turn.)`,
     callback_no:`Agree graciously, mention you can send a short note on how ${credibilityPoint}, then ask whether they will review it later or whether they do not want the follow-up. Do not ask for a meeting in the same turn.`,
     softens:`Quick two-sentence pitch, then ask whether they want the quick explanation now or truly need to jump. ${hint}`,
-    curious_why:`Manual process/status quo path. Lightly frame the ROI reason to compare with exactly ONE best-fit proof point: ${CUSTOMER_PROOF_POINTS.payroll} if payroll is the topic, ${CUSTOMER_PROOF_POINTS.scheduling} if scheduling is the topic, or ${CUSTOMER_PROOF_POINTS.stress} if the pain is broad admin burden. Then ask what their routine actually looks like at ${brand}. Don't hard pitch, uncover whether the manual work is tolerable or painful. ${hint}`,
+    curious_why: previousSellerUsedCustomerProof()
+      ? `Manual process/status quo path. Do NOT use a customer proof stat because the previous seller line already used one. Acknowledge that their process mostly works, then ask one next question to learn whether the manual work is tolerable or actually costing time. ${hint}`
+      : `Manual process/status quo path. Lightly frame the ROI reason to compare with exactly ONE best-fit proof point: ${CUSTOMER_PROOF_POINTS.payroll} if payroll is the topic, ${CUSTOMER_PROOF_POINTS.scheduling} if scheduling is the topic, or ${CUSTOMER_PROOF_POINTS.stress} if the pain is broad admin burden. Then ask what their routine actually looks like at ${brand}. Don't hard pitch, uncover whether the manual work is tolerable or painful. ${hint}`,
     franchise_hq:`Ask "Does corporate actually run your payroll for you, or is that still on your plate?" Most owners run their own. One question.`,
     tried_before:`Empathize one sentence. Ask what went sideways. Then set Homebase apart as built for hourly teams like ${brand}. ${hint}`,
     what_system:`They use one tool for scheduling AND payroll already. Do NOT ask whether it handles payroll, they just told you it does. Acknowledge that, then differentiate on a specific angle (built for hourly teams, hours flow straight to payroll with no re-keying, or simpler pricing) and ask what they like or wish was better about their current setup. One question. ${hint}`,
@@ -2931,7 +2959,9 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
       ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
       : `${lead}totally. The simplest way to think about Homebase is one app for the hourly team, from schedules and clock-ins through payroll, hiring, and team communication, so managers are not piecing five tools together. ${currentStackQuestion}\n${baseTip}`,
     too_busy: `${lead}completely get it, I caught you in the middle of the day. I do think this could be useful for ${brand}, so when is a better time to catch you, later today or tomorrow morning?\n[Coaching tip: Respect the interruption, then trade for a specific callback time.]`,
-    not_interested: `${lead}totally fair, before I let you go, can I ask one quick thing? The reason I ask is 82% of customers report less stress with Homebase, so I am curious if this is a no because your manual process works, corporate handles it, you tried something before, it is not relevant, or timing is just off?\n[Coaching tip: Use one proof point, then diagnose the brush-off.]`,
+    not_interested: previousSellerUsedCustomerProof()
+      ? `${lead}totally fair, before I let you go, can I ask one quick thing? Is this a no because your manual process works, corporate handles it, you tried something before, it is not relevant, or timing is just off?\n[Coaching tip: Do not repeat a proof point; diagnose the brush-off.]`
+      : `${lead}totally fair, before I let you go, can I ask one quick thing? The reason I ask is 82% of customers report less stress with Homebase, so I am curious if this is a no because your manual process works, corporate handles it, you tried something before, it is not relevant, or timing is just off?\n[Coaching tip: Use one proof point, then diagnose the brush-off.]`,
     no_value: `${lead}totally fair. Usually the value is time and stress back, not software for software's sake. Is it mainly that the team is small, corporate already handles HR, or this just is not the right time?\n[Coaching tip: Let them name why it feels irrelevant before you decide whether there is a path.]`,
     who_are_you: shippingPrint
       ? `${lead}great question. Homebase fits around the shipping, rates, print, POS, and accounting tools ${brand} may already use, and helps with ${peopleWorkflow}. ${currentStackQuestion}\n${baseTip}`
@@ -3027,7 +3057,7 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     budget_no: `${lead}understood, timing and budget have to line up. Should I follow up when budget opens later, or is this not going to happen?\n[Coaching tip: Separate future nurture from a real no.]`,
     pain_compliance: `${lead}that is worth taking seriously. Has compliance created fines or rework, would you want to see how Homebase helps, or is it something to revisit later?\n[Coaching tip: Compliance pain should become either real cost, a demo path, or timing.]`,
     willing_to_meet: `${lead}perfect, I will send the invite. What is the best email to send the calendar invite to?\n[Coaching tip: Get the invite email first, then confirm the direct phone number.]`,
-    curious_why: `${lead}got it, so you have a process that mostly works. The reason owners still compare is that 82% of customers report less stress with Homebase. Is payroll taking time but manageable, is it honestly painful, or do you really not need anything here?\n[Coaching tip: Let them tell you whether manual work is tolerable or painful.]`,
+    curious_why: `${lead}got it, so you have a process that mostly works. Is payroll taking time but manageable, is it honestly painful, or do you really not need anything here?\n[Coaching tip: Do not repeat a proof point; let them tell you whether manual work is tolerable or painful.]`,
     multi_loc_pain: `${lead}with multiple locations, it usually comes down to total staff, payroll complexity, or visibility across properties. Which is the bigger issue: total headcount, payroll, or seeing it across locations?\n[Coaching tip: Multi-location pain needs a specific anchor.]`,
     value_first: `${lead}fair, price only matters if the value is there. The value usually shows up as time back, and 83% saved payroll time after switching to Homebase Payroll. Is the main friction payroll, scheduling, hiring and turnover, or would you rather see the whole flow first?\n[Coaching tip: Re-anchor price pressure to the workflow they care about.]`,
     wants_info: `${lead}happy to send something over. I will keep it short and focused on how ${industry} owners use Homebase for scheduling, time tracking, and payroll. Should I follow up next week after you review it, or is this not a fit?\n[Coaching tip: Do not let an info request become a dead end.]`,
