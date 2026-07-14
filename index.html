@@ -951,6 +951,15 @@ const COMPETITOR_SCOPE_RESPONSE_OPTIONS = [
   { id:"competitor_scope_unsure", icon:"ti-help", label:"Not sure / someone else owns it", sub:"Ownership unclear" }
 ];
 
+const CPA_SCOPE_RESPONSE_OPTIONS = [
+  { id:"cpa_taxes_only", icon:"ti-file-dollar", label:"They mostly file taxes / books", sub:"Tax and accounting lane" },
+  { id:"cpa_manual_hours", icon:"ti-file-spreadsheet", label:"We send hours manually", sub:"Manual payroll prep" },
+  { id:"cpa_runs_payroll", icon:"ti-receipt", label:"They run payroll too", sub:"Payroll handled by CPA" },
+  { id:"cpa_employee_changes", icon:"ti-user-edit", label:"Changes and questions slow us down", sub:"Employee admin friction" },
+  { id:"want_demo", icon:"ti-screen-share", label:"Worth seeing the workflow", sub:"Specialist call" },
+  { id:"not_interested", icon:"ti-x", label:"It works fine, we trust them", sub:"Status quo" }
+];
+
 const TEAM_COMMS_METHOD_RESPONSE_OPTIONS = [
   { id:"comms_group_texts", icon:"ti-message", label:"Group texts or WhatsApp", sub:"Current method" },
   { id:"comms_posted_notes", icon:"ti-notes", label:"Posted notes or printed schedules", sub:"Current method" },
@@ -1160,12 +1169,12 @@ const COMPETITOR_INTEL = {
     caution:"Connecteam is broad and flexible. Win where the prospect wants payroll and hourly operations in one purpose-built workflow."
   },
   competitor_cpa: {
-    name:"CPA / accountant",
-    aliases:["cpa", "accountant", "bookkeeper", "accounting firm"],
-    wedge:"let the CPA keep the books while Homebase handles hourly payroll, onboarding, scheduling, time tracking, and faster day-to-day support",
-    ask:"What does your CPA handle today: payroll taxes only, or onboarding, time cards, direct deposit, and employee questions too?",
-    angles:["Do not attack the CPA relationship", "Probe response time during tax season and manual onboarding", "Position Homebase as the payroll system that can still work alongside their trusted accountant"],
-    caution:"This is emotional because of trust. Be respectful and position alongside the CPA."
+    name:"CPA / bookkeeper",
+    aliases:["cpa", "accountant", "bookkeeper", "accounting firm", "tax person", "tax accountant"],
+    wedge:"keep the trusted accountant for books and tax advice while Homebase cleans up the hourly-team workflow before payroll: schedules, timecards, onboarding, employee changes, and payroll-ready hours",
+    ask:"What does your CPA handle today: mainly books and tax filing, or are they also collecting hours, running payroll, onboarding employees, and fielding staff questions?",
+    angles:["Respect the relationship first; the CPA may be a trusted advisor", "Find the owner or manager prep work before payroll: timecards, edits, new hires, direct deposit, questions, and approvals", "Position Homebase as the system of record for the hourly team that can give the CPA cleaner payroll/accounting outputs"],
+    caution:"Do not attack the CPA. The win is not replacing trust; it is reducing the manual work and delays around payroll while the CPA keeps the accounting lane."
   },
   competitor_innflow: {
     name:"Inn-Flow",
@@ -1256,6 +1265,7 @@ const QUICK_BATTLECARD_IDS = [
   "competitor_quickbooks",
   "competitor_quickbooks_time",
   "competitor_square",
+  "competitor_cpa",
   "competitor_toast",
   "competitor_hotschedules",
   "competitor_7shifts",
@@ -1280,7 +1290,10 @@ function escapeHtml(value) {
 function quickBattlecardQuestions(intel) {
   const name = intel.name || "their current tool";
   const questions = [intel.ask];
-  if (/ADP|Paychex|Gusto|QuickBooks|Square|Paylocity|Paycor|UKG|SurePayroll/i.test(name)) {
+  if (/CPA|bookkeeper|accountant/i.test(name)) {
+    questions.push("What do you still prep before it gets to them: timecards, edits, new hires, or approvals?");
+    questions.push("If they keep doing the books, would it help if payroll hours were cleaner before they got involved?");
+  } else if (/ADP|Paychex|Gusto|QuickBooks|Square|Paylocity|Paycor|UKG|SurePayroll/i.test(name)) {
     questions.push("How are hours getting from schedules or timecards into payroll today?");
     questions.push("What still takes manager time before payroll can run?");
   } else if (/Toast|7shifts|HotSchedules|Fourth|When I Work|Deputy|Sling/i.test(name)) {
@@ -1971,7 +1984,11 @@ function phaseLabel(p) {
     competitor_scope_finance_reporting:"Competitor scope · finance/reporting",
     competitor_scope_comms_ops:"Competitor scope · comms/ops",
     competitor_scope_all_in_one:"Competitor scope · broad platform",
-    competitor_scope_unsure:"Competitor scope · ownership unclear"
+    competitor_scope_unsure:"Competitor scope · ownership unclear",
+    cpa_taxes_only:"CPA scope · books/taxes",
+    cpa_manual_hours:"CPA scope · manual hours",
+    cpa_runs_payroll:"CPA scope · payroll handled",
+    cpa_employee_changes:"CPA scope · employee admin"
   };
   return m[p] || "Continuing the call";
 }
@@ -2050,7 +2067,7 @@ const RESP = {
   competitor_hotschedules: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_7shifts: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_connecteam: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
-  competitor_cpa: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
+  competitor_cpa: CPA_SCOPE_RESPONSE_OPTIONS,
   competitor_innflow: INNFLOW_SCOPE_RESPONSE_OPTIONS,
   competitor_actabl: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_m3: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
@@ -2167,6 +2184,29 @@ const RESP = {
     { id:"no_payroll", icon:"ti-x", label:"Payroll is separate", sub:"Payroll gap" },
     { id:"competitor_gap", icon:"ti-puzzle", label:"It doesn't cover the full flow", sub:"Workflow gap" },
     { id:"not_interested", icon:"ti-x", label:"It works fine for us", sub:"Status quo" }
+  ],
+  cpa_taxes_only: [
+    { id:"workflow_payroll_separate", icon:"ti-receipt-off", label:"Payroll is separate from the CPA", sub:"Payroll ownership" },
+    { id:"cpa_manual_hours", icon:"ti-file-spreadsheet", label:"We still prep the hours", sub:"Manual prep" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Cleaner handoff sounds useful", sub:"Specialist call" },
+    { id:"not_interested", icon:"ti-x", label:"We're fine with the setup", sub:"Status quo" }
+  ],
+  cpa_manual_hours: [
+    { id:"quantify_time", icon:"ti-hourglass", label:"It takes a few hours", sub:"Time impact" },
+    { id:"errors_confirmed", icon:"ti-alert-circle", label:"Mistakes happen sometimes", sub:"Payroll accuracy" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Show me the cleaner handoff", sub:"Specialist call" },
+    { id:"not_interested", icon:"ti-x", label:"It's manageable", sub:"Status quo" }
+  ],
+  cpa_runs_payroll: [
+    { id:"cpa_manual_hours", icon:"ti-file-spreadsheet", label:"We still send them hours", sub:"Manual handoff" },
+    { id:"cpa_employee_changes", icon:"ti-user-edit", label:"Changes/questions slow us down", sub:"Employee admin" },
+    { id:"not_interested", icon:"ti-x", label:"They handle it smoothly", sub:"Status quo" },
+    { id:"want_demo", icon:"ti-screen-share", label:"Worth comparing the workflow", sub:"Specialist call" }
+  ],
+  cpa_employee_changes: [
+    { id:"want_demo", icon:"ti-screen-share", label:"Worth seeing onboarding/payroll", sub:"Specialist call" },
+    { id:"quantify_time", icon:"ti-hourglass", label:"It eats time every pay period", sub:"Time impact" },
+    { id:"not_interested", icon:"ti-x", label:"It's not a big issue", sub:"Status quo" }
   ],
   competitor_scope_all_in_one: [
     { id:"competitor_gap", icon:"ti-puzzle", label:"Some work still sits outside it", sub:"Workflow gap" },
@@ -2585,6 +2625,10 @@ const SQL_SIGNAL_MAP = {
   innflow_usage_back_office:{key:"solution",val:"Inn-Flow mostly ownership/controller workflow"},
   innflow_usage_both:{key:"solution",val:"Inn-Flow used by property and back office"},
   innflow_scope_unsure:{key:"solution",val:"Inn-Flow scope unclear / management company owned"},
+  cpa_taxes_only:{key:"solution",val:"CPA / bookkeeper: books and taxes"},
+  cpa_manual_hours:{key:"solution",val:"CPA handoff: manual hours prep"},
+  cpa_runs_payroll:{key:"solution",val:"CPA / bookkeeper runs payroll"},
+  cpa_employee_changes:{key:"solution",val:"CPA handoff: employee admin friction"},
   competitor_scope_payroll_hr:{key:"solution",val:"Competitor handles payroll / HR"},
   competitor_scope_scheduling_time:{key:"solution",val:"Competitor handles scheduling / time"},
   competitor_scope_pos_ops:{key:"solution",val:"Competitor handles POS / department ops"},
@@ -2618,6 +2662,10 @@ const FINAL_QUESTION_GUIDANCE = {
   competitor_support: "End by asking whether support pain makes them open to a look, whether there are broader gaps, whether it is not urgent, or whether the current tool is fine.",
   competitor_gap: "End by asking which workflow still sits outside their current tool: payroll, scheduling, hiring/onboarding, team communication, or multiple workflows.",
   competitor_switching: "End by asking whether they want migration info, a specialist to map it, renewal timing, or whether switching is not worth it.",
+  cpa_taxes_only: "End by asking what handles payroll and the hourly-team workflow if the CPA mainly owns books and taxes.",
+  cpa_manual_hours: "End by asking whether the manual handoff takes time, creates errors, is worth seeing cleaner, or is manageable.",
+  cpa_runs_payroll: "End by asking whether they still send hours manually, employee changes slow things down, the CPA handles it smoothly, or comparing the workflow is worthwhile.",
+  cpa_employee_changes: "End by asking whether seeing onboarding/payroll is worthwhile, whether it eats time each pay period, or whether it is not a big issue.",
   innflow_scope_accounting: "End by asking what handles the staff workflow today: separate tools, manual work, Inn-Flow labor too, or another person owns it.",
   innflow_scope_labor: "End by asking whether payroll is separate, payroll is also in Inn-Flow, there are gaps, or it works fine.",
   innflow_scope_payroll: "End by asking what, if anything, sits outside Inn-Flow for the property team: hiring/onboarding, team communication, manager side work, nothing, or not sure.",
@@ -2818,6 +2866,10 @@ function buildNextPrompt(responseId, responseLabel) {
     competitor_scope_comms_ops:`They clarified ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles team ops or communication. Do NOT assume pain. Ask ONE neutral follow-up about whether scheduling, time, and payroll are also there or handled separately. ${hint}`,
     competitor_scope_all_in_one:`They clarified ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles most of the workflow. Do NOT assume pain. Acknowledge that it sounds fairly complete, then ask ONE question that can be answered by: working well enough, coverage gap, cost, support/setup, or satisfied. ${hint}`,
     competitor_scope_unsure:`They are not sure what ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles or someone else owns it. Do not pitch hard. Ask ONE routing question: who owns scheduling, payroll, and staff systems. ${hint}`,
+    cpa_taxes_only:`They said the CPA/bookkeeper mainly handles books or tax filing. Respect that lane. Ask ONE neutral question about what handles payroll, schedules, timecards, onboarding, and employee questions today. ${hint}`,
+    cpa_manual_hours:`They said they still prep or send hours manually. This is real workflow friction. Ask ONE impact question about whether it takes a few hours, creates mistakes, is worth seeing a cleaner handoff, or is manageable. Do not attack the CPA. ${hint}`,
+    cpa_runs_payroll:`They said the CPA/bookkeeper runs payroll too. Respect the trust. Ask ONE scope question: do they still send hours manually, do employee changes/questions slow things down, does the CPA handle it smoothly, or is it worth comparing the workflow. ${hint}`,
+    cpa_employee_changes:`They said employee changes or questions slow things down. Connect Homebase to onboarding, employee records, timecards, and payroll-ready hours. Ask whether it is worth seeing with a product specialist or whether it is not a big issue. ${hint}`,
     locked_contract:`Contract lock objection. Do not fight the contract. Use the customer proof as a reason to plan ahead, not rip anything out today: ${CUSTOMER_PROOF_POINTS.recommend}. Ask when renewal comes up and what they would change if the contract were not in the way. ${hint}`,
     named_tool:`They just named their current tool. Acknowledge it warmly. IF payroll ownership hasn't already come up earlier in the conversation, ask ONE simple follow-up: does that tool also handle their payroll, or is payroll separate? But if they've ALREADY told you who runs payroll (for example they said they run it themselves, or corporate covers it), do NOT ask again, instead acknowledge what you know and ask a different one-question follow-up that moves toward a product specialist call. ${hint}`,
     not_sure:`They're not sure whether their tool runs payroll. No problem, that's common. Gently note that a lot of owners are surprised their scheduling tool doesn't actually run payroll, and offer that the quickest way to sort it out is a quick product specialist call. ${hint}`,
@@ -2933,6 +2985,9 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     if (selectedCompetitor.name === "Inn-Flow") {
       return `${lead}got it, that makes sense. What parts of the business does Inn-Flow handle for you today: accounting and owner reporting, labor scheduling and time, payroll, or the whole back-office suite?\n[Coaching tip: Do not assume pain yet; first separate finance/reporting from the staff workflow.]`;
     }
+    if (selectedCompetitor.name === "CPA / bookkeeper") {
+      return `${lead}got it, that makes sense. A trusted CPA is valuable, so I would not suggest replacing that relationship. What do they handle today: mainly books and tax filing, or are they also collecting hours, running payroll, onboarding employees, and fielding staff questions?\n[Coaching tip: Respect the accountant first; map what work still happens before payroll.]`;
+    }
     return `${lead}got it, that makes sense. What parts does ${selectedCompetitor.name} cover today: ${competitorScopeChoices(selectedCompetitor)}?\n[Coaching tip: Do not assume pain yet; map what the current system covers first. ${competitorScopeCoaching(selectedCompetitor)}]`;
   }
 
@@ -2995,6 +3050,10 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     competitor_scope_comms_ops: `${lead}got it, so team ops or communication is covered. Are scheduling, time tracking, and payroll in that same system too, or separate?\n[Coaching tip: Map the edges of the tool before you position Homebase.]`,
     competitor_scope_all_in_one: `${lead}that sounds pretty complete. Is it working well enough, or is the issue coverage, cost, support, or setup?\n[Coaching tip: If they say it works, respect it; if they name an issue, then go deeper.]`,
     competitor_scope_unsure: `${lead}no worries. Who would know what handles scheduling, payroll, and staff systems for the business?\n[Coaching tip: Route to the system owner instead of forcing a pitch.]`,
+    cpa_taxes_only: `${lead}got it, so the CPA is mostly in the books and tax lane. What handles payroll and the hourly team day to day: schedules, timecards, onboarding, and employee questions?\n[Coaching tip: Respect the CPA relationship and look for the workflow around it.]`,
+    cpa_manual_hours: `${lead}got it, so you are still pulling the hours together before they get to the CPA. Does that take a few hours, create mistakes sometimes, feel worth cleaning up, or is it manageable today?\n[Coaching tip: The wedge is the handoff before payroll, not the accountant.]`,
+    cpa_runs_payroll: `${lead}that makes sense, a lot of owners trust their CPA for payroll. Do you still send them hours manually, do employee changes and questions slow things down, or do they handle it pretty smoothly?\n[Coaching tip: Keep the trust intact while mapping the owner-side work.]`,
+    cpa_employee_changes: `${lead}that is exactly the kind of admin Homebase can clean up: new hires, employee details, timecards, and payroll-ready hours in one place. Is it worth seeing that workflow with a product specialist, or is it not a big issue?\n[Coaching tip: Employee admin friction is enough to move toward a specialist call.]`,
     locked_contract: `${lead}that makes sense, no one wants to rip something out mid-contract. Since four in five customers would recommend Homebase, it may be worth planning before renewal. When does that come up: soon, in a few months, or closer to year-end?\n[Coaching tip: Turn contract lock into a renewal-timing conversation.]`,
     named_tool: `${lead}got it, that is helpful context. Does that tool also handle payroll for you, is payroll separate, or are you not totally sure?\n[Coaching tip: Confirm payroll ownership before comparing workflows.]`,
     pain_payroll: `${lead}that is exactly the kind of thing we help with. When payroll is messy, it usually means hours are being checked, copied, or corrected by hand before payday. How long does payroll usually take you each pay period?\n[Coaching tip: Expand the pain before you pitch the fix.]`,
@@ -3133,6 +3192,10 @@ const PHASE_ASKS = {
   innflow_usage_back_office: [{ key:"solution", val:"asked staff workflow outside Inn-Flow" }],
   innflow_usage_both: [{ key:"solution", val:"asked Inn-Flow shared workflow fit" }],
   innflow_scope_unsure: [{ key:"contact", val:"asked system owner" }],
+  cpa_taxes_only: [{ key:"solution", val:"asked payroll ownership outside CPA" }],
+  cpa_manual_hours: [{ key:"pain", val:"asked manual CPA handoff impact" }],
+  cpa_runs_payroll: [{ key:"solution", val:"asked CPA payroll handoff scope" }],
+  cpa_employee_changes: [{ key:"pain", val:"asked employee admin impact" }],
   competitor_scope_payroll_hr: [{ key:"solution", val:"asked scheduling / time ownership" }],
   competitor_scope_scheduling_time: [{ key:"solution", val:"asked payroll / hiring ownership" }],
   competitor_scope_pos_ops: [{ key:"solution", val:"asked staff workflow ownership" }],

@@ -64,7 +64,7 @@ if (missingTargets.length || missingGuidance.length) {
 }
 
 const quickBattlecardIds = readContext("QUICK_BATTLECARD_IDS");
-for (const requiredQuickCard of ["competitor_adp", "competitor_paychex", "competitor_gusto", "competitor_quickbooks_time", "competitor_toast", "competitor_7shifts", "competitor_connecteam", "competitor_innflow", "competitor_hotel_ops"]) {
+for (const requiredQuickCard of ["competitor_adp", "competitor_paychex", "competitor_gusto", "competitor_quickbooks_time", "competitor_cpa", "competitor_toast", "competitor_7shifts", "competitor_connecteam", "competitor_innflow", "competitor_hotel_ops"]) {
   if (!quickBattlecardIds.includes(requiredQuickCard)) {
     throw new Error(`Quick battlecard tiles are missing ${requiredQuickCard}.`);
   }
@@ -75,9 +75,13 @@ for (const id of quickBattlecardIds) {
   }
 }
 const quickAdpQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_adp)');
+const quickCpaQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_cpa)');
 const quickInnFlowQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_innflow)');
 if (!quickAdpQuestions.some(q => /hours getting from schedules or timecards into payroll/i.test(q))) {
   throw new Error("ADP quick battlecard should include payroll handoff discovery.");
+}
+if (!quickCpaQuestions.some(q => /prep before it gets to them/i.test(q)) || !quickCpaQuestions.some(q => /books/i.test(q) && /payroll hours/i.test(q))) {
+  throw new Error("CPA quick battlecard should include accountant-specific handoff discovery.");
 }
 if (!quickInnFlowQuestions.some(q => /property team using it day to day/i.test(q))) {
   throw new Error("Inn-Flow quick battlecard should include property-team usage discovery.");
@@ -332,7 +336,7 @@ for (const painId of ["competitor_cost", "competitor_support", "competitor_gap",
   }
 }
 
-for (const competitorId of Object.keys(competitorIntel).filter(id => id !== "competitor_innflow")) {
+for (const competitorId of Object.keys(competitorIntel).filter(id => !["competitor_innflow", "competitor_cpa"].includes(id))) {
   const ids = new Set(readContext(`getResponseOptions("${competitorId}")`).map(option => option.id));
   if (!ids.has("competitor_scope_payroll_hr") || !ids.has("competitor_scope_unsure")) {
     throw new Error(`${competitorId} should use neutral scope options first.`);
@@ -348,6 +352,24 @@ if (!competitorFallback.includes("Connecteam") || !/What parts does Connecteam c
 }
 if (/POS or department tools|finance or reporting/i.test(competitorFallback)) {
   throw new Error("Generic competitor fallback should keep the scope question short.");
+}
+
+const cpaOptionIds = new Set(readContext('getResponseOptions("competitor_cpa")').map(option => option.id));
+for (const required of ["cpa_taxes_only", "cpa_manual_hours", "cpa_runs_payroll", "cpa_employee_changes"]) {
+  if (!cpaOptionIds.has(required)) {
+    throw new Error(`CPA competitor path should include ${required}.`);
+  }
+}
+if (cpaOptionIds.has("competitor_scope_payroll_hr") || cpaOptionIds.has("competitor_cost")) {
+  throw new Error("CPA competitor path should not use generic software competitor options.");
+}
+const cpaFallback = sandbox.buildFallbackTalkTrack("competitor_cpa", "Our CPA handles it");
+if (!/trusted CPA is valuable/i.test(cpaFallback) || !/books and tax filing/i.test(cpaFallback) || /replace/i.test(cpaFallback.replace(/not suggest replacing/i, ""))) {
+  throw new Error("CPA fallback should respect the accountant relationship and map scope.");
+}
+const cpaManualFallback = sandbox.buildFallbackTalkTrack("cpa_manual_hours", "We still prep the hours");
+if (!/before they get to the CPA/i.test(cpaManualFallback) || !/handoff before payroll, not the accountant/i.test(cpaManualFallback)) {
+  throw new Error("CPA manual-hours fallback should focus on handoff friction, not attacking the accountant.");
 }
 
 const payrollScopeFallback = sandbox.buildFallbackTalkTrack("competitor_scope_payroll_hr", "Payroll / HR");
