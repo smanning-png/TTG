@@ -1580,6 +1580,12 @@ function existingToolsBridge(info) {
   return `A lot of owners already have tools in place, and that is fine. Homebase usually fits around the existing stack; the gap we help with is scheduling, timecards, payroll, hiring, and team messages.`;
 }
 
+function ownerProofPhrase(peer) {
+  const p = (peer || "").trim();
+  if (!p) return "owners like you";
+  return `${p} owners`;
+}
+
 function buildOpeningInstant(info) {
   const { brand, industry, num_locs, prospect_role, known_pain } = info;
   const proof = getProof(industry, brand);
@@ -2874,14 +2880,15 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
       ? "schedules, timecards, payroll, hiring, and team messages"
       : "scheduling, time tracking, payroll, hiring, and team messages";
   const currentStackQuestion = shippingPrint
-    ? `What are you using today for the employee side: ADP, Paychex, QuickBooks, Deputy, When I Work, Connecteam, corporate tools, manual work, or something else?`
+    ? `How are you handling those pieces at ${brand} today: one system, a few different tools, or doing everything manually?`
     : hospitality
       ? `What are you using today for managing and paying staff, or is one part of that the headache?`
-      : `How are you handling those pieces at ${brand} today: one system, a few different tools, corporate tools, manual work, or one painful area?`;
+      : `How are you handling those pieces at ${brand} today: one system, a few different tools, or doing everything manually?`;
   const proof = getProof(industry, brand);
   const peer = proof.peers[0] || "similar owners";
   const brandProof = getBrandSocialProof(brand);
   const proofRef = brandProof ? brandSocialProofLocationRef(brandProof) : `${peer} owners`;
+  const peerOwnerRef = ownerProofPhrase(peer);
   const lead = info.lead_name ? `${info.lead_name}, ` : "";
   const baseTip = "[Coaching tip: Keep it calm, ask one question, and move toward pain or a booked next step.]";
   const selectedCompetitor = getCompetitorIntel(responseId);
@@ -2923,7 +2930,7 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
       ? `${lead}great question. Homebase fits around the shipping, rates, print, POS, and accounting tools ${brand} may already use, and helps with ${peopleWorkflow}. ${currentStackQuestion}\n${baseTip}`
       : hospitality
       ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
-      : `${lead}yeah, of course. We are Homebase, the all-in-one app for hourly teams, ${peopleWorkflow}, and owners like ${peer} use us to simplify the week. ${currentStackQuestion}\n${baseTip}`,
+      : `${lead}yeah, of course. We are Homebase, the all-in-one app for hourly teams, ${peopleWorkflow}, and ${peerOwnerRef} use us to simplify the week. ${currentStackQuestion}\n${baseTip}`,
     happy_with_current: shippingPrint
       ? `${lead}that makes sense, most ${brand} owners already have a few tools in place. We are not trying to replace shipping, rates, print, POS, or accounting; we usually compare the employee side. What are you using today for schedules, timecards, payroll, hiring, and team messages?\n${baseTip}`
       : `${lead}that makes sense, most owners we talk to have something in place already. Four in five customers would recommend Homebase, so it can still be worth a quick compare. What are you using today to handle ${hospitality ? "hotel scheduling, time clocks, payroll, hiring, and team communication" : "scheduling, time tracking, and payroll"}?\n${baseTip}`,
@@ -3025,7 +3032,7 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     phone_correction: `Perfect, thanks for catching that. Let me read the corrected number back once more. Did I get it right now?\n[Coaching tip: Confirm the correction once before you close.]`
   };
 
-  return lines[responseId] || `${lead}that makes sense. The reason I am asking is that owners like ${peer} usually come to Homebase when running the hourly team starts taking too much time across scheduling, time tracking, payroll, or hiring. What part of that is most painful for ${brand} right now?\n${baseTip}`;
+  return lines[responseId] || `${lead}that makes sense. The reason I am asking is that ${peerOwnerRef} usually come to Homebase when running the hourly team starts taking too much time across scheduling, time tracking, payroll, or hiring. What part of that is most painful for ${brand} right now?\n${baseTip}`;
 }
 
 function fmtScript(text) {

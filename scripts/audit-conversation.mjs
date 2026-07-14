@@ -505,8 +505,14 @@ if (!/QuickBooks Time\/TSheets/i.test(upsPrompt) || !/shipping, rates, print, PO
   throw new Error("UPS Store prompt should include UPS-relevant competitors and existing-software positioning.");
 }
 const upsFallback = sandbox.buildFallbackTalkTrack("who_are_you", "What is Homebase?");
-if (!/shipping, rates, print, POS, and accounting tools/i.test(upsFallback) || !/employee side/i.test(upsFallback)) {
+if (!/shipping, rates, print, POS, and accounting tools/i.test(upsFallback) || !/schedules, timecards, payroll, hiring, and team messages/i.test(upsFallback)) {
   throw new Error("UPS Store fallback should position Homebase around existing shipping/print/accounting tools.");
+}
+if (/owners like UPS Store/i.test(upsFallback) || /corporate tools, manual work, or one painful area/i.test(upsFallback)) {
+  throw new Error("UPS Store fallback should avoid awkward owner phrasing and overlong current-stack menus.");
+}
+if (!/one system, a few different tools, or doing everything manually/i.test(upsFallback)) {
+  throw new Error("UPS Store fallback should use the shortened stack question.");
 }
 const upsBridge = readContext('existingToolsBridge({brand:"UPS Store", industry:"Professional Services"})');
 if (!/shipping, rates, printing, POS, or accounting/i.test(upsBridge) || !/scheduling, timecards, payroll/i.test(upsBridge)) {
