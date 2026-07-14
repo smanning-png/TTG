@@ -300,6 +300,21 @@ if (/ADP|Paychex|QuickBooks|Gusto|Deputy|When I Work|Sling|Connecteam/i.test(ups
 if (!/already have tools in place/i.test(upsSpokenOpening) || !/30 seconds/i.test(upsSpokenOpening)) {
   throw new Error("UPS Store existing-tools opener should stay subtle and ask for a 30-second window.");
 }
+sandbox.Math.random = () => 0.95;
+const sanityCheckOpening = sandbox.buildOpeningInstant({
+  brand: "UPS Store",
+  industry: "Professional Services",
+  lead_name: "Mike",
+  num_locs: "2",
+  prospect_role: "owner",
+  known_pain: ""
+});
+if (!/Can I grab 30 seconds to sanity-check something with you\?/i.test(sanityCheckOpening) || !/\[⏸ Pause, let them answer\]/.test(sanityCheckOpening)) {
+  throw new Error("Two-camp opener should ask for 30 seconds and pause before the context.");
+}
+if (/Can I sanity-check something with you\?/i.test(sanityCheckOpening)) {
+  throw new Error("Two-camp opener should not use the old abrupt sanity-check question.");
+}
 
 const toastPrompt = sandbox.buildNextPrompt("competitor_toast", "We use Toast");
 if (!toastPrompt.includes("Toast") || !/what parts does Toast cover/i.test(toastPrompt) || /cost, support, switching, or gaps until/i.test(toastPrompt) === false) {
