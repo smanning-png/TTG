@@ -1004,6 +1004,8 @@ const SHIPPING_PRINT_STACK_RESPONSE_OPTIONS = [
   { id:"competitor_paychex", icon:"ti-receipt", label:"Paychex handles payroll / time", sub:"Payroll / time" },
   { id:"competitor_quickbooks", icon:"ti-calculator", label:"QuickBooks handles payroll", sub:"Accounting-led payroll" },
   { id:"competitor_quickbooks_time", icon:"ti-clock", label:"QuickBooks Time handles timecards", sub:"Time tracking / TSheets" },
+  { id:"competitor_webtimeclock", icon:"ti-clock-hour-4", label:"Webtimeclock handles time punches", sub:"UPS time clock" },
+  { id:"competitor_mpos", icon:"ti-device-cash-register", label:"MPOS handles clock-ins", sub:"UPS register time clock" },
   { id:"competitor_gusto", icon:"ti-receipt", label:"Gusto handles payroll / HR", sub:"Payroll / HR" },
   { id:"competitor_wheniwork_deputy_sling", icon:"ti-calendar-time", label:"Deputy / When I Work / Sling schedules", sub:"Scheduling / time app" },
   { id:"competitor_connecteam", icon:"ti-apps", label:"Connecteam handles team comms / ops", sub:"Ops / comms app" },
@@ -1127,6 +1129,22 @@ const COMPETITOR_INTEL = {
     ask:"Is QuickBooks Time just capturing hours, or is it also handling schedules, payroll approvals, hiring, and team communication?",
     angles:["Respect QuickBooks for accounting and time tracking", "Ask whether schedules, breaks, PTO, edits, and approvals still take manager follow-up", "Position Homebase as the employee workflow around payroll, not an accounting replacement"],
     caution:"QuickBooks Time can be sticky when the owner or bookkeeper lives in QuickBooks. Win by finding the manager workflow around timecards and payroll, not by attacking accounting."
+  },
+  competitor_webtimeclock: {
+    name:"Webtimeclock",
+    aliases:["webtimeclock", "web timeclock", "web time clock", "webtime clock"],
+    wedge:"respecting Webtimeclock as a familiar UPS Store time clock while comparing the fuller employee workflow: schedules, breaks, edits, approvals, payroll-ready hours, hiring, and team messages",
+    ask:"Is Webtimeclock mainly capturing clock-ins and outs, or is it also handling schedules, breaks, timecard approvals, payroll handoff, hiring, and team communication?",
+    angles:["Acknowledge it is tailored to UPS Store time-clock needs", "Ask what still happens around the punch: schedules, edits, missed punches, breaks, approvals, payroll export, and manager follow-up", "Position Homebase as the broader hourly-team workflow that can fit around UPS shipping, print, POS, and accounting systems"],
+    caution:"Do not frame this as replacing UPS Store operating systems. The comparison is whether a standalone time clock is enough for the employee workflow."
+  },
+  competitor_mpos: {
+    name:"MPOS",
+    aliases:["mpos", "managed point of sale", "managed pos", "ups mpos", "ups store mpos", "register time clock", "pos time clock"],
+    wedge:"respecting the official register time clock while showing where Homebase can own the employee workflow outside POS: schedules, timecard cleanup, approvals, payroll-ready hours, hiring, and team messages",
+    ask:"Is MPOS mainly where employees clock in at the register, or does it also handle schedules, timecard approvals, payroll handoff, hiring, and team communication?",
+    angles:["Respect MPOS as the official store register and POS lane", "Separate POS clock-ins from the owner/manager work around schedules, edits, breaks, approvals, and payroll", "Position Homebase as complementary to the register: employee workflow before payroll, not shipping or sales transactions"],
+    caution:"Do not suggest replacing the official POS/register system. Keep the conversation on timecards, payroll prep, scheduling, and employee admin."
   },
   competitor_square: {
     name:"Square Payroll",
@@ -1264,6 +1282,8 @@ const QUICK_BATTLECARD_IDS = [
   "competitor_gusto",
   "competitor_quickbooks",
   "competitor_quickbooks_time",
+  "competitor_webtimeclock",
+  "competitor_mpos",
   "competitor_square",
   "competitor_cpa",
   "competitor_toast",
@@ -1290,7 +1310,10 @@ function escapeHtml(value) {
 function quickBattlecardQuestions(intel) {
   const name = intel.name || "their current tool";
   const questions = [intel.ask];
-  if (/CPA|bookkeeper|accountant/i.test(name)) {
+  if (/Webtimeclock|MPOS|Managed Point of Sale/i.test(name)) {
+    questions.push("What still happens outside it: schedules, edits, missed punches, breaks, approvals, or payroll handoff?");
+    questions.push("How do those hours get reviewed and turned into payroll today?");
+  } else if (/CPA|bookkeeper|accountant/i.test(name)) {
     questions.push("What do you still prep before it gets to them: timecards, edits, new hires, or approvals?");
     questions.push("If they keep doing the books, would it help if payroll hours were cleaner before they got involved?");
   } else if (/ADP|Paychex|Gusto|QuickBooks|Square|Paylocity|Paycor|UKG|SurePayroll/i.test(name)) {
@@ -1396,11 +1419,18 @@ function isPayrollHcmCompetitor(competitor) {
   return !!competitor && /ADP|Paychex|Gusto|Paylocity|Paycor|UKG/i.test(competitor.name || "");
 }
 
+function isUpsTimeClockCompetitor(competitor) {
+  return !!competitor && /Webtimeclock|MPOS|Managed Point of Sale/i.test(competitor.name || "");
+}
+
 function competitorScopeChoices(competitor, info = prospectInfo || {}) {
   const hospitality = isHospitalityContext(info);
   const industry = info.industry || "";
   if (competitor && competitor.name === "Inn-Flow") {
     return "accounting and owner reporting, labor scheduling and time, payroll, or the whole back-office suite";
+  }
+  if (isUpsTimeClockCompetitor(competitor)) {
+    return "clock-ins, schedules, breaks and edits, approvals, payroll handoff, or employee communication";
   }
   if (hospitality) {
     return "hotel scheduling/time, payroll/HCM, finance or reporting, team communication, department ops, or most of the property workflow";
@@ -1426,6 +1456,9 @@ function competitorScopeCoaching(competitor, info = prospectInfo || {}) {
   }
   if (isGeneralOpsCompetitor(competitor)) {
     return "For retail/service teams, keep this around shifts, timecards, payroll approvals, hiring, team messages, and manager follow-up.";
+  }
+  if (isUpsTimeClockCompetitor(competitor)) {
+    return "For UPS Store teams, respect the time-clock or register lane; compare schedules, edits, approvals, payroll handoff, and employee communication.";
   }
   return "Use the prospect's actual industry language and keep the scope question grounded in their day-to-day hourly-team workflow.";
 }
@@ -1771,7 +1804,7 @@ UPS STORE / SHIPPING-PRINT MODE (critical for ${info.brand}):
 - Assume they may already have software for shipping, rates, print orders, mailboxes, POS, inventory, accounting, or corporate/franchisor workflows.
 - Do not imply Homebase replaces shipping, rate-shopping, package tracking, print production, mailbox, POS, inventory, or accounting tools.
 - Say Homebase usually fits around those existing systems and focuses on managing and paying the hourly team: schedules, timecards, payroll, hiring, onboarding, team messages, breaks, late arrivals, PTO, and manager approvals.
-- Common tools they may mention: ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square, a CPA/bookkeeper, or corporate/franchisor-provided tools.
+- Common tools they may mention: Webtimeclock, MPOS/Managed Point of Sale, ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square, a CPA/bookkeeper, or corporate/franchisor-provided tools.
 - Early credibility line to use naturally: "A lot of UPS Store owners already have tools for shipping, rates, printing, POS, or accounting. We fit around those; the part we usually help with is managing and paying the team."
 ` : "";
 
@@ -2062,6 +2095,8 @@ const RESP = {
   competitor_paychex: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_quickbooks: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_quickbooks_time: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
+  competitor_webtimeclock: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
+  competitor_mpos: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_square: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_toast: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_hotschedules: COMPETITOR_SCOPE_RESPONSE_OPTIONS,

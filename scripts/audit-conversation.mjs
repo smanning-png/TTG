@@ -64,7 +64,7 @@ if (missingTargets.length || missingGuidance.length) {
 }
 
 const quickBattlecardIds = readContext("QUICK_BATTLECARD_IDS");
-for (const requiredQuickCard of ["competitor_adp", "competitor_paychex", "competitor_gusto", "competitor_quickbooks_time", "competitor_cpa", "competitor_toast", "competitor_7shifts", "competitor_connecteam", "competitor_innflow", "competitor_hotel_ops"]) {
+for (const requiredQuickCard of ["competitor_adp", "competitor_paychex", "competitor_gusto", "competitor_quickbooks_time", "competitor_webtimeclock", "competitor_mpos", "competitor_cpa", "competitor_toast", "competitor_7shifts", "competitor_connecteam", "competitor_innflow", "competitor_hotel_ops"]) {
   if (!quickBattlecardIds.includes(requiredQuickCard)) {
     throw new Error(`Quick battlecard tiles are missing ${requiredQuickCard}.`);
   }
@@ -75,10 +75,18 @@ for (const id of quickBattlecardIds) {
   }
 }
 const quickAdpQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_adp)');
+const quickWebtimeclockQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_webtimeclock)');
+const quickMposQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_mpos)');
 const quickCpaQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_cpa)');
 const quickInnFlowQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_innflow)');
 if (!quickAdpQuestions.some(q => /hours getting from schedules or timecards into payroll/i.test(q))) {
   throw new Error("ADP quick battlecard should include payroll handoff discovery.");
+}
+if (!quickWebtimeclockQuestions.some(q => /schedules, edits, missed punches, breaks, approvals, or payroll handoff/i.test(q))) {
+  throw new Error("Webtimeclock quick battlecard should include UPS time-clock handoff discovery.");
+}
+if (!quickMposQuestions.some(q => /hours get reviewed and turned into payroll/i.test(q))) {
+  throw new Error("MPOS quick battlecard should include POS time-clock payroll handoff discovery.");
 }
 if (!quickCpaQuestions.some(q => /prep before it gets to them/i.test(q)) || !quickCpaQuestions.some(q => /books/i.test(q) && /payroll hours/i.test(q))) {
   throw new Error("CPA quick battlecard should include accountant-specific handoff discovery.");
@@ -544,7 +552,7 @@ readContext(`prospectInfo = {
   known_pain: ""
 }; sqlState = freshSql(); activeCompetitor = null;`);
 const upsStackIds = new Set(readContext('getResponseOptions("interested")').map(option => option.id));
-for (const required of ["competitor_adp", "competitor_paychex", "competitor_quickbooks", "competitor_quickbooks_time", "competitor_wheniwork_deputy_sling", "competitor_connecteam", "franchise_hq"]) {
+for (const required of ["competitor_adp", "competitor_paychex", "competitor_quickbooks", "competitor_quickbooks_time", "competitor_webtimeclock", "competitor_mpos", "competitor_wheniwork_deputy_sling", "competitor_connecteam", "franchise_hq"]) {
   if (!upsStackIds.has(required)) {
     throw new Error(`UPS Store current-stack options are missing ${required}.`);
   }
@@ -555,6 +563,17 @@ if (upsStackIds.has("competitor_toast") || upsStackIds.has("competitor_7shifts")
 const upsPrompt = sandbox.buildNextPrompt("interested", "Yeah, what does it do?");
 if (!/QuickBooks Time\/TSheets/i.test(upsPrompt) || !/shipping, rates, print, POS, and accounting tools/i.test(upsPrompt)) {
   throw new Error("UPS Store prompt should include UPS-relevant competitors and existing-software positioning.");
+}
+const webtimeclockFallback = sandbox.buildFallbackTalkTrack("competitor_webtimeclock", "Webtimeclock handles time punches");
+const mposFallback = sandbox.buildFallbackTalkTrack("competitor_mpos", "MPOS handles clock-ins");
+if (!/What parts does Webtimeclock cover today: clock-ins, schedules, breaks and edits, approvals, payroll handoff, or employee communication\?/i.test(webtimeclockFallback)) {
+  throw new Error("Webtimeclock fallback should ask a UPS time-clock scope question.");
+}
+if (!/What parts does MPOS cover today: clock-ins, schedules, breaks and edits, approvals, payroll handoff, or employee communication\?/i.test(mposFallback)) {
+  throw new Error("MPOS fallback should ask a UPS POS time-clock scope question.");
+}
+if (/replace.*POS|replace.*register|shipping transactions/i.test(mposFallback)) {
+  throw new Error("MPOS fallback should not imply replacing the register/POS system.");
 }
 const upsFallback = sandbox.buildFallbackTalkTrack("who_are_you", "What is Homebase?");
 if (!/shipping, rates, print, POS, and accounting tools/i.test(upsFallback) || !/schedules, timecards, payroll, hiring, and team messages/i.test(upsFallback)) {
