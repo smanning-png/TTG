@@ -523,10 +523,10 @@ const upsFallback = sandbox.buildFallbackTalkTrack("who_are_you", "What is Homeb
 if (!/shipping, rates, print, POS, and accounting tools/i.test(upsFallback) || !/schedules, timecards, payroll, hiring, and team messages/i.test(upsFallback)) {
   throw new Error("UPS Store fallback should position Homebase around existing shipping/print/accounting tools.");
 }
-if (/owners like UPS Store/i.test(upsFallback) || /corporate tools, manual work, or one painful area/i.test(upsFallback)) {
+if (/owners like UPS Store/i.test(upsFallback) || /corporate tools, manual work, or one painful area/i.test(upsFallback) || /doing everything manually/i.test(upsFallback)) {
   throw new Error("UPS Store fallback should avoid awkward owner phrasing and overlong current-stack menus.");
 }
-if (!/one system, a few different tools, or doing everything manually/i.test(upsFallback)) {
+if (!/one system, a few different tools, or manual work/i.test(upsFallback)) {
   throw new Error("UPS Store fallback should use the shortened stack question.");
 }
 const upsBridge = readContext('existingToolsBridge({brand:"UPS Store", industry:"Professional Services"})');

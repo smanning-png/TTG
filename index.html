@@ -1738,7 +1738,7 @@ UPS STORE / SHIPPING-PRINT MODE (critical for ${info.brand}):
 POSITIONING (critical):
 - Homebase is NOT a payroll company. It is the all-in-one app for running an hourly team. Payroll is ONE part of it, alongside scheduling, time tracking, hiring, and team messaging.
 - Do not lead with payroll as if it's all we do. Open broad about how they run their team, then discover which areas hurt (could be scheduling, time tracking, hiring, payroll, or several).
-- Once you find a pain area, go deep there. Payroll is absolutely worth probing for fit, but it is one of several hooks, not the headline.
+- Once you find a specific issue, go deep there. Payroll is absolutely worth probing for fit, but it is one of several hooks, not the headline.
 - A great pitch is "everything to run your hourly team, in one app", not "we do payroll".
 ${hospitalityPositioning}
 ${nonHospitalityCompetitorMode}
@@ -2566,7 +2566,7 @@ const SQL_SIGNAL_MAP = {
 const FINAL_QUESTION_GUIDANCE = {
   opening: "End by asking permission for the 30-second version after naming the reason for the call. The only natural answers are yes, what is this, busy, send info, not interested, already covered, wrong person, or take a message.",
   owner_check: "End by asking whether they own or operate the business/location you are calling about. The only natural answers are yes one location, yes multiple locations, operator but not owner, manager not owner, or wrong person.",
-  owner_one_location: "End by asking what they use today for the hourly team workflow so they can answer with a named tool, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
+  owner_one_location: "End by asking what they use today for the hourly team workflow so they can answer with a named tool, manual process, corporate-provided system, wrong contact, or status quo.",
   owner_multi_location: "End by asking whether they have 2-3, 4-9, 10+ locations, or are not sure of the exact count.",
   locs_two_three: "End by asking what they use today across the locations for the hourly team workflow.",
   locs_four_nine: "End by asking what they use today across the group for the hourly team workflow.",
@@ -2575,12 +2575,12 @@ const FINAL_QUESTION_GUIDANCE = {
   operator_not_owner: "End by asking whether they help decide staff tools or whether the owner handles those decisions.",
   manager_not_dm: "End by asking who owns decisions around scheduling, payroll, and staff tools.",
   wrong_contact: "End by asking whether they can point you to the right person or whether you should leave it there.",
-  interested: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
-  give_more: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
+  interested: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, wrong contact, or status quo.",
+  give_more: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, wrong contact, or status quo.",
   too_busy: "End by asking what they want next: a specific callback time, a short email, a 30-second explanation now, or no more calls.",
   not_interested: "End by asking one low-pressure diagnosis question that can uncover manual work, corporate ownership, a bad past experience, no fit, or bad timing.",
   no_value: "End by asking what makes it feel irrelevant: team size, corporate handling HR, or timing.",
-  who_are_you: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
+  who_are_you: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, wrong contact, or status quo.",
   happy_with_current: "End by asking what they use today and whether it is their own tool or provided by the franchisor.",
   competitor_other: "End by asking whether the tool mainly handles scheduling/time, payroll too, payroll separately, switching pain, or uncertainty.",
   competitor_cost: "End by asking for team size or permission to compare the real all-in total.",
@@ -2644,7 +2644,7 @@ const FINAL_QUESTION_GUIDANCE = {
   tried_before: "End by asking what happened before: clunky/no payroll, bad enough to avoid, or curious what is different.",
   what_system: "End by asking what they want to compare: the differentiator, payroll friction, or whether they are fully happy.",
   no_payroll: "End by asking whether payroll takes a few hours, creates errors, or is worth seeing.",
-  after_pitch_yes: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, pain area, wrong contact, or status quo.",
+  after_pitch_yes: "End by asking how they handle the hourly team today so they can answer with a named tool, competitor, manual process, corporate-provided system, wrong contact, or status quo.",
   after_pitch_meh: "End by asking who the right person is or whether they are not sure.",
   gate_name: "End by asking whether they can transfer you or when the owner is best reached.",
   gate_connects: "End with the owner-opening permission question.",
@@ -2688,10 +2688,10 @@ function getFinalQuestionGuidance(responseId, options) {
     return "End by asking what part of the current setup is worth discussing: cost/add-ons, support, missing workflows, contract timing, switching pain, seeing the difference, or staying put.";
   }
   if (STACK_DISCOVERY_PHASES.has(responseId) && isShippingPrintContext()) {
-    return "End by asking what they use today for scheduling, timecards, payroll, hiring, and team communication. This should let them answer with ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square/POS, CPA/bookkeeper, corporate/franchisor tools, manual work, pain area, wrong contact, or status quo.";
+    return "End by asking what they use today for scheduling, timecards, payroll, hiring, and team communication. This should let them answer with ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square/POS, CPA/bookkeeper, corporate/franchisor tools, manual work, wrong contact, or status quo.";
   }
   if (STACK_DISCOVERY_PHASES.has(responseId) && isHospitalityContext()) {
-    return "End by asking: What are you using today for managing and paying staff? This should let them answer with a hotel suite, labor tool, finance system, payroll/HCM, scheduling app, ops tool, management-company system, manual process, pain area, or status quo.";
+    return "End by asking: What are you using today for managing and paying staff? This should let them answer with a hotel suite, labor tool, finance system, payroll/HCM, scheduling app, ops tool, management-company system, manual process, or status quo.";
   }
   if (FINAL_QUESTION_GUIDANCE[responseId]) return FINAL_QUESTION_GUIDANCE[responseId];
   const labels = options.map(o => o.label).join(", ");
@@ -2829,7 +2829,7 @@ function buildNextPrompt(responseId, responseLabel) {
     tried_before:`Empathize one sentence. Ask what went sideways. Then set Homebase apart as built for hourly teams like ${brand}. ${hint}`,
     what_system:`They use one tool for scheduling AND payroll already. Do NOT ask whether it handles payroll, they just told you it does. Acknowledge that, then differentiate on a specific angle (built for hourly teams, hours flow straight to payroll with no re-keying, or simpler pricing) and ask what they like or wish was better about their current setup. One question. ${hint}`,
     no_payroll:`Bridge: "That's exactly what most ${industry} owners come to us for. Homebase pulls the hours straight into payroll, so a run takes about five minutes." Then offer a 30-minute call with a product specialist. ${hint}`,
-    after_pitch_yes:`Engaged. ONE broad discovery question into ${discoveryScope}; let them name the tool, corporate process, manual workflow, or pain area. Do not list a bunch of competitors. ${hint}`,
+    after_pitch_yes:`Engaged. ONE broad discovery question into ${discoveryScope}; let them name the tool, corporate process, or manual workflow. Do not list a bunch of competitors. ${hint}`,
     after_pitch_meh:`Ask one thing: who the right person is, or whether they are not sure. Do not ask for contact details in the same turn.`,
     gate_name:`Got a name. Ask for the direct number or best time to reach them. Warm, non-pushy.`,
     gate_connects:`Exact opening line when the owner picks up, warm, reference you just spoke with someone at ${brand}. ${hint}`,
@@ -2880,10 +2880,10 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
       ? "schedules, timecards, payroll, hiring, and team messages"
       : "scheduling, time tracking, payroll, hiring, and team messages";
   const currentStackQuestion = shippingPrint
-    ? `How are you handling those pieces at ${brand} today: one system, a few different tools, or doing everything manually?`
+    ? `How are you handling those pieces at ${brand} today: one system, a few different tools, or manual work?`
     : hospitality
       ? `What are you using today for managing and paying staff, or is one part of that the headache?`
-      : `How are you handling those pieces at ${brand} today: one system, a few different tools, or doing everything manually?`;
+      : `How are you handling those pieces at ${brand} today: one system, a few different tools, or manual work?`;
   const proof = getProof(industry, brand);
   const peer = proof.peers[0] || "similar owners";
   const brandProof = getBrandSocialProof(brand);
