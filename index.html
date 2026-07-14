@@ -2785,7 +2785,7 @@ function buildNextPrompt(responseId, responseLabel) {
     innflow_usage_back_office:`They said Inn-Flow is mostly ownership/controller/back-office workflow. Respect that. Ask ONE neutral question about what handles staff scheduling, time clocks, payroll, hiring, and team communication today. ${hint}`,
     innflow_usage_both:`They said both property and back-office teams use Inn-Flow. Acknowledge that it sounds broad. Ask ONE question about whether it works well enough or whether any team workflow is still clunky/separate. ${hint}`,
     innflow_scope_unsure:`They are not sure what Inn-Flow handles because management company or someone else owns it. Do not pitch hard. Ask ONE routing question: who owns scheduling, payroll, and staff systems for the property. ${hint}`,
-    competitor_scope_payroll_hr:`They clarified ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles payroll or HR. Do NOT assume pain. Ask ONE neutral follow-up about what handles scheduling, time tracking, and hours before payroll: same tool, separate tool, or manual process. ${hint}`,
+    competitor_scope_payroll_hr:`They clarified ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles payroll or HR. Do NOT assume pain. Ask ONE neutral follow-up about what handles scheduling, time tracking, and hours before payroll: same tool, separate tool, or whether they do those manually. ${hint}`,
     competitor_scope_scheduling_time:`They clarified ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles scheduling and time. Do NOT assume pain. Ask ONE neutral follow-up about whether payroll, hiring, and team communication live there too or are handled elsewhere. ${hint}`,
     competitor_scope_pos_ops:`They clarified ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles POS or department workflow. Do NOT assume pain. Ask ONE neutral follow-up about whether staff management and payroll are also in that system or separate. ${hint}`,
     competitor_scope_finance_reporting:`They clarified ${currentCompetitor ? currentCompetitor.name : "the competitor"} handles finance, reporting, or back office. Do NOT assume pain. Respect that lane, then ask ONE neutral question about what handles schedules, time clocks, payroll, hiring, and team communication. ${hint}`,
@@ -2887,10 +2887,10 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
       ? "schedules, timecards, payroll, hiring, and team messages"
       : "scheduling, time tracking, payroll, hiring, and team messages";
   const currentStackQuestion = shippingPrint
-    ? `How are you handling those pieces at ${brand} today: one system, a few different tools, or manual work?`
+    ? `How are you handling those pieces at ${brand} today: one system, a few different tools, or are you doing those manually?`
     : hospitality
       ? `What are you using today for managing and paying staff, or is one part of that the headache?`
-      : `How are you handling those pieces at ${brand} today: one system, a few different tools, or manual work?`;
+      : `How are you handling those pieces at ${brand} today: one system, a few different tools, or are you doing those manually?`;
   const proof = getProof(industry, brand);
   const peer = proof.peers[0] || "similar owners";
   const brandProof = getBrandSocialProof(brand);
@@ -2958,7 +2958,7 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     innflow_usage_back_office: `${lead}got it, so Inn-Flow is more of the ownership and controller workflow. What handles the staff side today: schedules, time clocks, payroll, hiring, and team communication?\n[Coaching tip: Respect the back-office lane, then map the property team's people workflow.]`,
     innflow_usage_both: `${lead}got it, so both sides are using it. Is the team workflow working well enough, or are any pieces still clunky or separate?\n[Coaching tip: If they say it works, respect it; if they name a gap, go one layer deeper.]`,
     innflow_scope_unsure: `${lead}no worries, that is common when the management company owns the system. Who would know what handles scheduling, payroll, and staff tools for the property?\n[Coaching tip: Route to the system owner instead of forcing a pitch.]`,
-    competitor_scope_payroll_hr: `${lead}got it, so ${currentCompetitor ? currentCompetitor.name : "that tool"} is covering payroll or HR. What handles schedules, time clocks, and hours before payroll: that same tool, another system, or a manual process?\n[Coaching tip: Keep mapping the workflow before you diagnose pain.]`,
+    competitor_scope_payroll_hr: `${lead}got it, so ${currentCompetitor ? currentCompetitor.name : "that tool"} is covering payroll or HR. What handles schedules, time clocks, and hours before payroll: that same tool, another system, or are you doing those manually?\n[Coaching tip: Keep mapping the workflow before you diagnose pain.]`,
     competitor_scope_scheduling_time: `${lead}got it, so scheduling and time are in there. Does payroll and hiring live in that same workflow too, or are those handled somewhere else?\n[Coaching tip: Do not assume pain; find what is connected and what is separate.]`,
     competitor_scope_pos_ops: `${lead}got it, so it is more tied to POS or a department workflow. Does it also handle staff scheduling, time, and payroll, or are those separate?\n[Coaching tip: Separate POS/department tools from the people workflow.]`,
     competitor_scope_finance_reporting: `${lead}that makes sense, that sounds more like finance or reporting. What handles the staff side today: schedules, time clocks, payroll, hiring, and team communication?\n[Coaching tip: Respect the finance lane before looking for staff workflow.]`,

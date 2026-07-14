@@ -350,6 +350,14 @@ if (/POS or department tools|finance or reporting/i.test(competitorFallback)) {
   throw new Error("Generic competitor fallback should keep the scope question short.");
 }
 
+const payrollScopeFallback = sandbox.buildFallbackTalkTrack("competitor_scope_payroll_hr", "Payroll / HR");
+if (/or a manual process|or manual work|doing everything manually/i.test(payrollScopeFallback)) {
+  throw new Error("Payroll scope follow-up should use natural manual-work phrasing.");
+}
+if (!/or are you doing those manually/i.test(payrollScopeFallback)) {
+  throw new Error("Payroll scope follow-up should ask whether they are doing those manually.");
+}
+
 readContext(`prospectInfo = {
   brand: "Dairy Queen",
   industry: "Food & Beverage",
@@ -530,10 +538,10 @@ const upsFallback = sandbox.buildFallbackTalkTrack("who_are_you", "What is Homeb
 if (!/shipping, rates, print, POS, and accounting tools/i.test(upsFallback) || !/schedules, timecards, payroll, hiring, and team messages/i.test(upsFallback)) {
   throw new Error("UPS Store fallback should position Homebase around existing shipping/print/accounting tools.");
 }
-if (/owners like UPS Store/i.test(upsFallback) || /corporate tools, manual work, or one painful area/i.test(upsFallback) || /doing everything manually/i.test(upsFallback)) {
+if (/owners like UPS Store/i.test(upsFallback) || /corporate tools, manual work, or one painful area/i.test(upsFallback) || /doing everything manually/i.test(upsFallback) || /or manual work/i.test(upsFallback)) {
   throw new Error("UPS Store fallback should avoid awkward owner phrasing and overlong current-stack menus.");
 }
-if (!/one system, a few different tools, or manual work/i.test(upsFallback)) {
+if (!/one system, a few different tools, or are you doing those manually/i.test(upsFallback)) {
   throw new Error("UPS Store fallback should use the shortened stack question.");
 }
 const upsBridge = readContext('existingToolsBridge({brand:"UPS Store", industry:"Professional Services"})');
