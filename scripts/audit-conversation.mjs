@@ -100,6 +100,11 @@ for (const expectedLabel of ["Ask This", "Where We Win", "Careful"]) {
     throw new Error(`Quick battlecard detail is missing ${expectedLabel}.`);
   }
 }
+for (const expectedAeLabel of ["Pricing Model", "Current Promo", "AE Leverage"]) {
+  if (!quickRenderSource.includes(expectedAeLabel)) {
+    throw new Error(`AE battlecard detail is missing ${expectedAeLabel}.`);
+  }
+}
 
 const roleLabels = readContext("ROLE_LABELS");
 for (const role of ["sdr", "ae", "cs"]) {
@@ -120,6 +125,22 @@ for (const stage of ["new", "connect", "consult", "closing"]) {
     throw new Error(`AE pipeline checklist is missing ${stage} stage gates.`);
   }
 }
+const aePricingIntel = readContext("AE_PRICING_INTEL");
+for (const requiredAeCard of ["competitor_gusto", "competitor_quickbooks", "competitor_square", "competitor_toast", "competitor_wheniwork_deputy_sling", "competitor_connecteam"]) {
+  const card = aePricingIntel[requiredAeCard];
+  if (!card?.pricing || !card?.promo || !card?.leverage) {
+    throw new Error(`AE pricing intel is incomplete for ${requiredAeCard}.`);
+  }
+}
+if (!/50% off for 3 months/i.test(aePricingIntel.competitor_quickbooks.promo)) {
+  throw new Error("QuickBooks AE pricing intel should include the current 50% off promotion.");
+}
+if (!/free for up to 10 users/i.test(aePricingIntel.competitor_connecteam.pricing) || !/14-day free trial/i.test(aePricingIntel.competitor_connecteam.promo)) {
+  throw new Error("Connecteam AE pricing intel should include free-plan and trial details.");
+}
+if (!/detectIndustry/.test(sandbox.autoDetectAeBusinessType.toString())) {
+  throw new Error("AE business type auto-fill should reuse brand industry detection.");
+}
 const aeBlitzScript = sandbox.buildAeTalkTrack({
   mode: "blitz",
   contactName: "Jordan",
@@ -131,6 +152,19 @@ const aeBlitzScript = sandbox.buildAeTalkTrack({
 });
 if (!/Homebase for scheduling and ADP for payroll/i.test(aeBlitzScript) || !/How are you running payroll today/i.test(aeBlitzScript) || !/product specialist call/i.test(aeBlitzScript)) {
   throw new Error("AE blitz talk track should use account context, payroll discovery, and a product specialist next step.");
+}
+const aeBrandOnlyScript = sandbox.buildAeTalkTrack({
+  mode: "blitz",
+  contactName: "Jordan",
+  accountName: "",
+  brandName: "Dairy Queen",
+  businessType: "",
+  context: "",
+  checked: [],
+  missing: ["Current solution"]
+});
+if (!/Food & Beverage owners/i.test(aeBrandOnlyScript)) {
+  throw new Error("AE talk track should infer business type from brand when business type is blank.");
 }
 const aePipelineScript = sandbox.buildAeTalkTrack({
   mode: "pipeline",

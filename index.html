@@ -244,7 +244,7 @@ body[data-role="cs"] .role-view-cs { display: block; }
   cursor: pointer; flex-shrink: 0;
 }
 .battle-close i { font-size: 16px; }
-.battle-detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.battle-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 .battle-detail-section {
   background: #fff; border: 1px solid var(--line-soft); border-radius: 8px;
   padding: 0.85rem; min-width: 0;
@@ -280,11 +280,19 @@ body[data-role="cs"] .role-view-cs { display: block; }
 .ae-output { display: none; margin-top: 1rem; }
 .ae-output.on { display: block; }
 .ae-output .script { font-size: 16px; line-height: 1.65; }
+.ae-result-layout { display: grid; grid-template-columns: 1fr 280px; gap: 1.25rem; align-items: start; }
+.ae-qualification-card {
+  background: var(--deep-purple); color: #fff; border-radius: var(--r-xl); padding: 1.25rem;
+  position: sticky; top: 1.25rem; overflow: hidden;
+}
+.ae-qualification-card .sql-title { color: var(--purple-rain); }
+.ae-qualification-card .sql-num { font-size: 32px; }
+.ae-qualification-card .sql-note { font-size: 10.5px; }
 .placeholder-card {
   text-align: left; background: linear-gradient(180deg, #fff, var(--haze-tint));
 }
 .placeholder-card p { font-size: 14px; color: var(--ink-soft); line-height: 1.6; font-weight: 500; max-width: 680px; }
-@media (max-width: 720px) { .check-grid, .role-choice-grid { grid-template-columns: 1fr; } }
+@media (max-width: 720px) { .check-grid, .role-choice-grid, .ae-result-layout { grid-template-columns: 1fr; } }
 
 /* ===== COLLAPSED RECAP BAR (during a live call) ===== */
 .recap {
@@ -647,11 +655,16 @@ body.calling .recap { display: flex; }
       </div>
       <div class="field">
         <label>Business / account</label>
-        <input type="text" id="ae_account_name" placeholder="e.g. Sunny Cafe" autocomplete="off" />
+        <input type="text" id="ae_account_name" placeholder="e.g. Sunny Cafe" oninput="autoDetectAeBusinessType()" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label>Brand / chain</label>
+        <input type="text" id="ae_brand" placeholder="e.g. Dairy Queen" oninput="autoDetectAeBusinessType()" autocomplete="off" />
       </div>
       <div class="field">
         <label>Business type</label>
-        <input type="text" id="ae_business_type" placeholder="e.g. restaurant, salon, retail" autocomplete="off" />
+        <input type="text" id="ae_business_type" placeholder="e.g. Food & Beverage" oninput="onAeBusinessTypeManual()" autocomplete="off" />
+        <span class="detect-hint" id="ae-detect-hint"></span>
       </div>
     </div>
     <div class="grid3 ae-pipeline-only" style="display:none;">
@@ -682,14 +695,36 @@ body.calling .recap { display: flex; }
       <label id="ae-context-label">Known context</label>
       <input type="text" id="ae_context" placeholder="e.g. uses Homebase for scheduling, payroll still with ADP" autocomplete="off" />
     </div>
+    <div class="quick-battlecards" id="ae-quick-battlecards">
+      <div class="quick-battle-head">
+        <p class="lbl"><i class="ti ti-cards" aria-hidden="true" style="font-size:14px;"></i> AE competitor battlecards</p>
+        <span class="quick-battle-note">Pricing, promos, discovery, and leverage for active opps</span>
+      </div>
+      <div class="battle-tile-grid" id="ae-battlecard-tiles"></div>
+      <div class="battle-detail" id="ae-battlecard-detail"></div>
+    </div>
     <p class="lbl" id="ae-checklist-title"><i class="ti ti-checklist" aria-hidden="true" style="font-size:14px;"></i> Blitz qualification checks</p>
     <div class="check-grid" id="ae-checklist"></div>
     <button class="btn-primary" id="ae-generate-btn" onclick="generateAeTalkTrack()">
       <i class="ti ti-sparkles" aria-hidden="true"></i>Generate AE talk track
     </button>
     <div class="ae-output" id="ae-output">
-      <p class="lbl" style="margin-top:0.7rem;"><i class="ti ti-quote" aria-hidden="true" style="font-size:14px;"></i> Your script</p>
-      <div class="script" id="ae-script"></div>
+      <div class="ae-result-layout">
+        <div>
+          <p class="lbl" style="margin-top:0.7rem;"><i class="ti ti-quote" aria-hidden="true" style="font-size:14px;"></i> Your script</p>
+          <div class="script" id="ae-script"></div>
+        </div>
+        <div class="ae-qualification-card">
+          <div class="sql-card-glow"></div>
+          <div class="sql-head">
+            <div class="sql-title" id="ae-result-title">AE qualification</div>
+            <div class="sql-num" id="ae-result-count">0 <span>/ 8</span></div>
+            <div class="sql-track"><div class="sql-fill" id="ae-result-fill" style="width:0%"></div></div>
+          </div>
+          <div id="ae-result-rows"></div>
+          <div class="sql-note" id="ae-result-note">Checked items are confirmed. Unchecked items are what the AE should tighten up on this call.</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -959,6 +994,7 @@ function detectIndustry(brand) {
 }
 
 let industryManuallySet = false;
+let aeBusinessTypeManuallySet = false;
 
 function onIndustryManualChange() {
   const sel = document.getElementById("industry");
@@ -987,6 +1023,35 @@ function autoDetectIndustry() {
     sel.classList.remove("autofilled");
     hint.textContent = "";
     if (!industryManuallySet) sel.value = "";
+  }
+}
+
+function onAeBusinessTypeManual() {
+  const input = document.getElementById("ae_business_type");
+  const hint = document.getElementById("ae-detect-hint");
+  aeBusinessTypeManuallySet = true;
+  input.classList.remove("autofilled");
+  hint.textContent = "";
+}
+
+function autoDetectAeBusinessType() {
+  const brand = document.getElementById("ae_brand")?.value || "";
+  const account = document.getElementById("ae_account_name")?.value || "";
+  const input = document.getElementById("ae_business_type");
+  const hint = document.getElementById("ae-detect-hint");
+  if (!input || !hint) return;
+  if (aeBusinessTypeManuallySet && input.value) return;
+  const result = detectIndustry(brand || account);
+  if (result) {
+    input.value = result.industry;
+    input.classList.add("autofilled");
+    hint.innerHTML = result.exact
+      ? `<i class="ti ti-circle-check" aria-hidden="true"></i> Business type set to ${result.industry}`
+      : `<i class="ti ti-sparkles" aria-hidden="true"></i> Looks like ${result.industry} · change if needed`;
+  } else {
+    input.classList.remove("autofilled");
+    hint.textContent = "";
+    if (!aeBusinessTypeManuallySet) input.value = "";
   }
 }
 
@@ -1423,7 +1488,116 @@ const QUICK_BATTLECARD_IDS = [
   "competitor_hotel_ops"
 ];
 
+const AE_BATTLECARD_IDS = [
+  "competitor_adp",
+  "competitor_paychex",
+  "competitor_gusto",
+  "competitor_quickbooks",
+  "competitor_quickbooks_time",
+  "competitor_square",
+  "competitor_toast",
+  "competitor_hotschedules",
+  "competitor_7shifts",
+  "competitor_wheniwork_deputy_sling",
+  "competitor_connecteam",
+  "competitor_cpa",
+  "competitor_webtimeclock",
+  "competitor_mpos",
+  "competitor_innflow",
+  "competitor_hcm_hotel",
+  "competitor_hotel_ops"
+];
+
+const AE_PRICING_INTEL = {
+  competitor_adp: {
+    pricing:"Quote-based. RUN Powered by ADP is sold in tiers such as Essential, Enhanced, Complete, and HR Pro; exact price is usually sales-quoted.",
+    promo:"No public, always-on promo verified. Push for their current quote, renewal date, add-ons, W-2 fees, time tracking, and HR bundle costs.",
+    leverage:"Ask for the all-in monthly and annual invoice, then compare whether they need enterprise payroll complexity or a simpler hourly-team workflow."
+  },
+  competitor_paychex: {
+    pricing:"Quote-based. Paychex sells Flex Select, Pro, and Enterprise packages, with add-ons for time, attendance, benefits, hiring, and HR support.",
+    promo:"No public, always-on promo verified. The live site pushes 'Get a Quote' / 'Request Pricing,' so current discounts likely depend on the sales quote.",
+    leverage:"Use quote opacity carefully: ask what the payroll package includes and what costs extra before comparing Homebase's simpler schedule-to-payroll flow."
+  },
+  competitor_gusto: {
+    pricing:"Public list: Simple $49/mo + $6/person; Plus $80/mo + $12/person; Premium $180/mo + $22/person; contractor-only $35/mo + $6/person.",
+    promo:"Limited-time contractor-only offer shows $0/mo base for first 6 months, plus $6/person. Verify whether it applies to W-2 payroll buyers.",
+    leverage:"Great payroll brand, but add-ons stack: time & attendance, priority support, HR resources, and faster pay options can increase total cost."
+  },
+  competitor_quickbooks: {
+    pricing:"Payroll/workforce bundles publish monthly base + per-employee pricing; example Workforce Payroll + Essentials lists $125/mo + $6.50/employee/mo.",
+    promo:"Current public offer shows 50% off for 3 months on eligible QuickBooks payroll/workforce bundles.",
+    leverage:"Do not replace accounting. Compare the employee workflow around schedules, timecards, edits, approvals, payroll prep, and team messages."
+  },
+  competitor_quickbooks_time: {
+    pricing:"Usually bought as part of the QuickBooks ecosystem or as a time product tied into payroll/accounting workflows; confirm exact bundle.",
+    promo:"QuickBooks payroll/workforce pages currently advertise 50% off for 3 months on eligible bundles. Verify whether Time is included in their quote.",
+    leverage:"Respect QuickBooks for books. Ask what managers still do outside the accounting system before hours become payroll-ready."
+  },
+  competitor_square: {
+    pricing:"Full-service payroll is public at $35/mo + $6 per person paid; contractor-only is $6/person paid.",
+    promo:"No public payroll promo verified. Square does emphasize no long-term commitment and simple onboarding.",
+    leverage:"Square is simple and POS-sticky. Win where scheduling depth, hiring, team communication, or non-Square workflows matter."
+  },
+  competitor_toast: {
+    pricing:"Flexible / quote-based. Toast says upfront costs include hardware and implementation; Pay-as-You-Go can reduce upfront hardware/install costs via platform rate.",
+    promo:"0% interest financing is available by application and approval. Public page was last updated July 8, 2026.",
+    leverage:"Keep POS out of the fight. Ask whether team management, payroll, hiring, and messaging are easy enough around Toast."
+  },
+  competitor_hotschedules: {
+    pricing:"Usually quote or package-based through Fourth / HotSchedules. Confirm whether they bought scheduling only or a broader workforce suite.",
+    promo:"No public promo verified. Ask for contract term, renewal, implementation, and any module pricing.",
+    leverage:"Respect scheduling strength. Compare payroll handoff, hiring, team comms, and whether the stack is heavier than they need."
+  },
+  competitor_7shifts: {
+    pricing:"Public pricing page currently emphasizes restaurant scheduling, time clocking, payroll, tips, and 'get started free'; verify exact package in quote.",
+    promo:"Free-start / trial motion visible publicly. No specific sitewide discount verified from the accessible pricing page.",
+    leverage:"Strong restaurant scheduler. Win only when they still need easier payroll, hiring, team messages, or a less restaurant-only workflow."
+  },
+  competitor_wheniwork_deputy_sling: {
+    pricing:"When I Work publishes $2.50, $5, and $8/user/mo tiers. Deputy publishes $5, $6.50, and $9/user/mo tiers, plus payroll add-on pricing.",
+    promo:"When I Work advertises 14-day free trial and 6 free months of Rippling for eligible customers. Deputy shows free trials and 30-day trials for add-ons.",
+    leverage:"Their per-user price can look low. Compare the total workflow: payroll, hiring/onboarding, support, add-ons, and whether payroll is native."
+  },
+  competitor_connecteam: {
+    pricing:"Small Business plan is free for up to 10 users. Operations hub starts around $29/mo annually or $35/mo monthly for first 30 users, then per-user add-ons.",
+    promo:"14-day free trial, no credit card. Annual pricing advertises 18% savings. Free-for-life plan for up to 10 users.",
+    leverage:"Great broad team app. Push on payroll-native workflow and whether multiple hubs/add-ons are needed to cover the full employee lifecycle."
+  },
+  competitor_cpa: {
+    pricing:"Varies by accountant: hourly, monthly bookkeeping, per-payroll, or bundled tax/payroll service.",
+    promo:"Not promo-driven. The 'leverage' is owner time: how much prep happens before the CPA can run clean payroll.",
+    leverage:"Do not attack trust. Position Homebase as cleaner schedules, timecards, employee changes, and payroll-ready outputs for the CPA."
+  },
+  competitor_webtimeclock: {
+    pricing:"UPS Store-tailored / niche time-clock pricing is not broadly public. Confirm whether stores pay subscription, franchise-negotiated pricing, or vendor invoice.",
+    promo:"No public promo verified. Ask whether it is bundled through franchise systems or paid separately.",
+    leverage:"Respect UPS Store fit. Compare what happens outside the clock: scheduling, edits, approvals, payroll handoff, hiring, and team messages."
+  },
+  competitor_mpos: {
+    pricing:"Internal / register-system capability rather than a normal workforce subscription. Treat as a built-in time-clock lane, not a software quote.",
+    promo:"No promo. It is tied to the operating system/register environment.",
+    leverage:"Do not suggest replacing MPOS. Position Homebase around people workflow outside the register: schedules, approvals, payroll prep, and comms."
+  },
+  competitor_innflow: {
+    pricing:"Typically quote-based hotel back-office suite pricing; confirm modules for accounting, labor, payroll, reporting, and property workflows.",
+    promo:"No public promo verified. Ask about module scope, renewal, implementation, and whether property teams use it day to day.",
+    leverage:"Do not replace hotel accounting. Compare property-level people workflows: schedules, time, payroll, hiring, and team communication."
+  },
+  competitor_hcm_hotel: {
+    pricing:"Usually quote-based HCM pricing across payroll, HR, benefits, time, and enterprise modules.",
+    promo:"No public promo verified. Ask about contract term, PEPM price, implementation, and support tier.",
+    leverage:"HCM can be too heavy for property-level teams. Compare ease for managers and hourly employees."
+  },
+  competitor_hotel_ops: {
+    pricing:"Hotel operations tools are usually module/portfolio priced. Confirm property count, modules, and whether workforce/payroll is included.",
+    promo:"No public promo verified. Ask whether the tool is owned by ops, ownership, finance, or the property team.",
+    leverage:"Keep PMS/ops intact. Position Homebase for property-level people work, not rooms, rates, maintenance, or owner reporting."
+  }
+};
+
 let activeBattlecardId = null;
+let activeAeBattlecardId = null;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -1459,35 +1633,61 @@ function quickBattlecardQuestions(intel) {
   return questions;
 }
 
-function renderQuickBattlecards() {
-  const tileRoot = document.getElementById("battlecard-tiles");
+function battlecardDom(context) {
+  const isAe = context === "ae";
+  return {
+    ids: isAe ? AE_BATTLECARD_IDS : QUICK_BATTLECARD_IDS,
+    tileRoot: document.getElementById(isAe ? "ae-battlecard-tiles" : "battlecard-tiles"),
+    detail: document.getElementById(isAe ? "ae-battlecard-detail" : "battlecard-detail"),
+    active: isAe ? activeAeBattlecardId : activeBattlecardId
+  };
+}
+
+function renderQuickBattlecards(context = "sdr") {
+  const { ids, tileRoot, active } = battlecardDom(context);
   if (!tileRoot) return;
-  tileRoot.innerHTML = QUICK_BATTLECARD_IDS
+  tileRoot.innerHTML = ids
     .map(id => {
       const intel = COMPETITOR_INTEL[id];
       if (!intel) return "";
-      const active = id === activeBattlecardId ? " active" : "";
-      const expanded = id === activeBattlecardId ? "true" : "false";
-      return `<button type="button" class="battle-tile${active}" onclick="selectQuickBattlecard('${id}')" aria-expanded="${expanded}">
+      const activeClass = id === active ? " active" : "";
+      const expanded = id === active ? "true" : "false";
+      return `<button type="button" class="battle-tile${activeClass}" onclick="selectQuickBattlecard('${id}', '${context}')" aria-expanded="${expanded}">
         <i class="ti ti-tool" aria-hidden="true"></i>${escapeHtml(intel.name)}
       </button>`;
     })
     .join("");
 }
 
-function selectQuickBattlecard(id) {
-  const detail = document.getElementById("battlecard-detail");
+function selectQuickBattlecard(id, context = "sdr") {
+  const { detail } = battlecardDom(context);
   const intel = COMPETITOR_INTEL[id];
   if (!detail || !intel) return;
-  activeBattlecardId = activeBattlecardId === id ? null : id;
-  renderQuickBattlecards();
-  if (!activeBattlecardId) {
+  if (context === "ae") activeAeBattlecardId = activeAeBattlecardId === id ? null : id;
+  else activeBattlecardId = activeBattlecardId === id ? null : id;
+  renderQuickBattlecards(context);
+  const active = context === "ae" ? activeAeBattlecardId : activeBattlecardId;
+  if (!active) {
     detail.classList.remove("on");
     detail.innerHTML = "";
     return;
   }
 
   const questions = quickBattlecardQuestions(intel);
+  const aePricing = AE_PRICING_INTEL[id];
+  const aeSections = context === "ae" && aePricing ? `
+      <div class="battle-detail-section">
+        <h3>Pricing Model</h3>
+        <p>${escapeHtml(aePricing.pricing)}</p>
+      </div>
+      <div class="battle-detail-section">
+        <h3>Current Promo</h3>
+        <p>${escapeHtml(aePricing.promo)}</p>
+      </div>
+      <div class="battle-detail-section">
+        <h3>AE Leverage</h3>
+        <p>${escapeHtml(aePricing.leverage)}</p>
+      </div>` : "";
   detail.classList.add("on");
   detail.innerHTML = `
     <div class="battle-detail-head">
@@ -1495,11 +1695,12 @@ function selectQuickBattlecard(id) {
         <div class="battle-detail-title">${escapeHtml(intel.name)}</div>
         <div class="battle-detail-sub">${escapeHtml(intel.wedge)}</div>
       </div>
-      <button type="button" class="battle-close" onclick="selectQuickBattlecard('${id}')" aria-label="Close ${escapeHtml(intel.name)} battlecard">
+      <button type="button" class="battle-close" onclick="selectQuickBattlecard('${id}', '${context}')" aria-label="Close ${escapeHtml(intel.name)} battlecard">
         <i class="ti ti-x" aria-hidden="true"></i>
       </button>
     </div>
     <div class="battle-detail-grid">
+      ${aeSections}
       <div class="battle-detail-section">
         <h3>Ask This</h3>
         <ul>${questions.map(q => `<li>${escapeHtml(q)}</li>`).join("")}</ul>
@@ -1742,6 +1943,7 @@ function applyRoleView() {
   const tag = document.getElementById("topbar-tag");
   if (tag) tag.textContent = ROLE_LABELS[userRole] || ROLE_LABELS.sdr;
   selectUserRole(userRole);
+  renderQuickBattlecards("ae");
   document.body.classList.remove("calling");
   const heroEyebrow = document.querySelector(".hero-eyebrow");
   const heroTitle = document.querySelector(".hero h1");
@@ -1817,15 +2019,53 @@ function checkedAeLabels() {
   });
 }
 
+function checkedAeKeys() {
+  return Array.from(document.querySelectorAll("[data-ae-check]:checked")).map(input => input.value);
+}
+
 function missingAeLabels() {
   const checked = new Set(Array.from(document.querySelectorAll("[data-ae-check]:checked")).map(input => input.value));
   return aeChecklistFields().filter(field => !checked.has(field.key)).map(field => field.label);
 }
 
+function renderAeResultQualification() {
+  const fields = aeChecklistFields();
+  const checked = new Set(checkedAeKeys());
+  const done = fields.filter(field => checked.has(field.key)).length;
+  const total = fields.length || 1;
+  const title = document.getElementById("ae-result-title");
+  const count = document.getElementById("ae-result-count");
+  const fill = document.getElementById("ae-result-fill");
+  const rows = document.getElementById("ae-result-rows");
+  const note = document.getElementById("ae-result-note");
+  if (!count || !fill || !rows) return;
+  if (title) title.textContent = aeMode === "pipeline" ? "Stage gates" : "AE qualification";
+  count.innerHTML = `${done} <span>/ ${fields.length}</span>`;
+  fill.style.width = `${Math.round((done / total) * 100)}%`;
+  rows.innerHTML = fields.map(field => {
+    const isDone = checked.has(field.key);
+    const isMust = aeMode === "blitz" && ["nextstep", "contact"].includes(field.key);
+    const cls = isDone ? "on" : (isMust ? "must" : "");
+    const v = isDone
+      ? `<span class="v">confirmed</span>`
+      : `<span class="v pending">${escapeHtml(field.hint)}</span>`;
+    return `<div class="sql-row">
+      <div class="sql-dot ${cls}"></div>
+      <div class="sql-txt"><strong>${escapeHtml(field.label)}${isMust ? " ★" : ""}</strong>${v}</div>
+    </div>`;
+  }).join("");
+  if (note) {
+    note.innerHTML = aeMode === "pipeline"
+      ? `Stage gates come from the opportunity cadence logic. Tighten unchecked items before pushing the opp forward.`
+      : `Same qualification fields as the SDR flow. Real handoff still needs a next step <span>+</span> best email and phone.`;
+  }
+}
+
 function buildAeTalkTrack(input) {
   const contact = input.contactName || "there";
-  const account = input.accountName || "your business";
-  const businessType = input.businessType || "business";
+  const account = input.accountName || input.brandName || "your business";
+  const detected = detectIndustry(input.brandName || input.accountName || "");
+  const businessType = input.businessType || detected?.industry || "business";
   const context = input.context || "";
   const checked = input.checked || [];
   const missing = input.missing || [];
@@ -1848,6 +2088,7 @@ function generateAeTalkTrack() {
     stage: document.getElementById("ae_stage")?.value || "new",
     contactName: document.getElementById("ae_contact_name").value.trim(),
     accountName: document.getElementById("ae_account_name").value.trim(),
+    brandName: document.getElementById("ae_brand")?.value.trim() || "",
     businessType: document.getElementById("ae_business_type").value.trim(),
     context: document.getElementById("ae_context").value.trim(),
     checked: checkedAeLabels(),
@@ -1855,6 +2096,7 @@ function generateAeTalkTrack() {
   };
   const script = buildAeTalkTrack(input);
   document.getElementById("ae-script").textContent = script;
+  renderAeResultQualification();
   document.getElementById("ae-output").classList.add("on");
 }
 
