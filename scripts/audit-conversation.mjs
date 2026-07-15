@@ -4,6 +4,12 @@ import vm from "node:vm";
 const html = readFileSync("index.html", "utf8");
 const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
 if (!scriptMatch) throw new Error("No script block found in index.html.");
+if (/id="ae-checklist"|data-ae-check=/.test(html)) {
+  throw new Error("AE stage gates should not appear on the home/setup screen before a talk track is generated.");
+}
+if (!/data-ae-result-check/.test(html)) {
+  throw new Error("AE generated talk track should render interactive stage-gate checks in the right-side panel.");
+}
 
 function fakeElement() {
   return {

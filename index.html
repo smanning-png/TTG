@@ -288,6 +288,10 @@ body[data-role="cs"] .role-view-cs { display: block; }
 .ae-qualification-card .sql-title { color: var(--purple-rain); }
 .ae-qualification-card .sql-num { font-size: 32px; }
 .ae-qualification-card .sql-note { font-size: 10.5px; }
+.ae-gate-check {
+  width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px;
+  accent-color: var(--yellowcard); cursor: pointer;
+}
 .placeholder-card {
   text-align: left; background: linear-gradient(180deg, #fff, var(--haze-tint));
 }
@@ -670,7 +674,7 @@ body.calling .recap { display: flex; }
     <div class="grid3 ae-pipeline-only" style="display:none;">
       <div class="field">
         <label>Opportunity stage</label>
-        <select id="ae_stage" onchange="renderAeChecklist()">
+        <select id="ae_stage" onchange="refreshAeResultQualification()">
           <option value="new">New opp</option>
           <option value="connect">Connect</option>
           <option value="consult">Consult</option>
@@ -703,8 +707,6 @@ body.calling .recap { display: flex; }
       <div class="battle-tile-grid" id="ae-battlecard-tiles"></div>
       <div class="battle-detail" id="ae-battlecard-detail"></div>
     </div>
-    <p class="lbl" id="ae-checklist-title"><i class="ti ti-checklist" aria-hidden="true" style="font-size:14px;"></i> Blitz qualification checks</p>
-    <div class="check-grid" id="ae-checklist"></div>
     <button class="btn-primary" id="ae-generate-btn" onclick="generateAeTalkTrack()">
       <i class="ti ti-sparkles" aria-hidden="true"></i>Generate AE talk track
     </button>
@@ -1899,7 +1901,6 @@ function initSdr() {
   } catch (e) {}
   userRole = ["sdr","ae","cs"].includes(storedRole) ? storedRole : "sdr";
   applyRoleView();
-  renderAeChecklist();
   if (stored) {
     sdrName = stored;
     document.getElementById("signin-overlay").classList.add("hidden");
@@ -1980,10 +1981,7 @@ function setAeMode(mode) {
   document.getElementById("ae-mode-pipeline").classList.toggle("active", aeMode === "pipeline");
   document.querySelectorAll(".ae-pipeline-only").forEach(el => { el.style.display = aeMode === "pipeline" ? "" : "none"; });
   document.getElementById("ae-context-label").textContent = aeMode === "pipeline" ? "Stall / opportunity context" : "Known context";
-  document.getElementById("ae-checklist-title").innerHTML = aeMode === "pipeline"
-    ? `<i class="ti ti-checklist" aria-hidden="true" style="font-size:14px;"></i> Pipeline stage gates`
-    : `<i class="ti ti-checklist" aria-hidden="true" style="font-size:14px;"></i> Blitz qualification checks`;
-  renderAeChecklist();
+  refreshAeResultQualification();
 }
 
 function aeChecklistFields() {
@@ -1994,32 +1992,25 @@ function aeChecklistFields() {
   return AE_BLITZ_QUAL_FIELDS;
 }
 
-function renderAeChecklist() {
-  const root = document.getElementById("ae-checklist");
-  if (!root) return;
-  const fields = aeChecklistFields();
-  root.innerHTML = fields.map(field => `
-    <label class="check-card">
-      <input type="checkbox" value="${escapeHtml(field.key)}" data-ae-check="${escapeHtml(field.key)}" />
-      <span><strong>${escapeHtml(field.label)}</strong><span>${escapeHtml(field.section ? `${field.section}: ${field.hint}` : field.hint)}</span></span>
-    </label>
-  `).join("");
-}
-
 function checkedAeLabels() {
-  return Array.from(document.querySelectorAll("[data-ae-check]:checked")).map(input => {
+  return Array.from(document.querySelectorAll("[data-ae-result-check]:checked")).map(input => {
     const field = aeChecklistFields().find(item => item.key === input.value);
     return field ? field.label : input.value;
   });
 }
 
 function checkedAeKeys() {
-  return Array.from(document.querySelectorAll("[data-ae-check]:checked")).map(input => input.value);
+  return Array.from(document.querySelectorAll("[data-ae-result-check]:checked")).map(input => input.value);
 }
 
 function missingAeLabels() {
-  const checked = new Set(Array.from(document.querySelectorAll("[data-ae-check]:checked")).map(input => input.value));
+  const checked = new Set(checkedAeKeys());
   return aeChecklistFields().filter(field => !checked.has(field.key)).map(field => field.label);
+}
+
+function refreshAeResultQualification() {
+  const output = document.getElementById("ae-output");
+  if (output && output.classList.contains("on")) renderAeResultQualification();
 }
 
 function renderAeResultQualification() {
@@ -2044,7 +2035,7 @@ function renderAeResultQualification() {
       ? `<span class="v">confirmed</span>`
       : `<span class="v pending">${escapeHtml(field.section ? `${field.section}: ${field.hint}` : field.hint)}</span>`;
     return `<div class="sql-row">
-      <div class="sql-dot ${cls}"></div>
+      <input class="ae-gate-check" type="checkbox" value="${escapeHtml(field.key)}" data-ae-result-check="${escapeHtml(field.key)}" onchange="renderAeResultQualification()" ${isDone ? "checked" : ""} aria-label="${escapeHtml(field.label)}" />
       <div class="sql-txt"><strong>${escapeHtml(field.label)}${isMust ? " ★" : ""}</strong>${v}</div>
     </div>`;
   }).join("");
@@ -2085,8 +2076,8 @@ function generateAeTalkTrack() {
     brandName: document.getElementById("ae_brand")?.value.trim() || "",
     businessType: document.getElementById("ae_business_type").value.trim(),
     context: document.getElementById("ae_context").value.trim(),
-    checked: checkedAeLabels(),
-    missing: missingAeLabels()
+    checked: [],
+    missing: aeChecklistFields().map(field => field.label)
   };
   const script = buildAeTalkTrack(input);
   document.getElementById("ae-script").textContent = script;
