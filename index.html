@@ -99,6 +99,18 @@ body {
   background: #fff; color: var(--ink); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
 }
 .signin-input:focus { border-color: var(--purple-haze); box-shadow: 0 0 0 3px var(--haze-tint-2); }
+.role-choice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 0.3rem; }
+.role-choice {
+  appearance: none; border: 1.5px solid var(--line); background: #fff; color: var(--ink);
+  border-radius: 8px; padding: 10px 8px; font-family: inherit; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  transition: border-color 0.15s, background 0.15s, transform 0.12s;
+}
+.role-choice i { color: var(--purple-haze); font-size: 18px; }
+.role-choice strong { font-size: 13px; font-weight: 800; letter-spacing: -0.01em; }
+.role-choice span { font-size: 10px; font-weight: 700; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; }
+.role-choice:hover { transform: translateY(-1px); border-color: rgba(126,61,212,0.45); background: var(--haze-tint); }
+.role-choice.active { border-color: var(--purple-haze); background: var(--haze-tint); box-shadow: 0 0 0 3px var(--haze-tint-2); }
 
 /* ============ HERO ============ */
 .hero {
@@ -154,6 +166,10 @@ body.calling .shell { margin-top: 1.25rem; }
 .card-eyebrow h2 {
   font-size: 13px; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: 0.05em;
 }
+.role-view { display: none; }
+body[data-role="sdr"] .role-view-sdr,
+body[data-role="ae"] .role-view-ae,
+body[data-role="cs"] .role-view-cs { display: block; }
 .pill-req { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #fff; background: var(--purple-haze); padding: 3px 10px; border-radius: var(--r-pill); }
 .pill-opt { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); background: var(--haze-tint); padding: 3px 10px; border-radius: var(--r-pill); }
 
@@ -241,6 +257,34 @@ body.calling .shell { margin-top: 1.25rem; }
 .battle-detail-section li { font-size: 12.5px; line-height: 1.5; color: var(--ink-soft); font-weight: 600; }
 .battle-detail-section ul { padding-left: 1rem; display: grid; gap: 0.35rem; }
 @media (max-width: 760px) { .battle-detail-grid { grid-template-columns: 1fr; } }
+
+/* ============ AE / CS WORKSPACES ============ */
+.mode-toggle {
+  display: inline-flex; gap: 4px; background: var(--haze-tint); border: 1px solid var(--line);
+  border-radius: var(--r-sm); padding: 4px; margin-bottom: 1rem;
+}
+.mode-btn {
+  border: none; border-radius: 7px; background: transparent; color: var(--ink-soft);
+  font-family: inherit; font-size: 12px; font-weight: 800; padding: 8px 12px; cursor: pointer;
+}
+.mode-btn.active { background: #fff; color: var(--purple-haze); box-shadow: 0 3px 12px -10px rgba(30,11,58,0.5); }
+.ae-intro { font-size: 13.5px; color: var(--ink-soft); line-height: 1.55; margin: -0.4rem 0 1rem; max-width: 700px; font-weight: 500; }
+.check-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0.8rem 0 1rem; }
+.check-card {
+  display: flex; align-items: flex-start; gap: 9px; border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px; cursor: pointer; background: #fff;
+}
+.check-card input { margin-top: 2px; accent-color: var(--purple-haze); }
+.check-card strong { display: block; font-size: 12.5px; color: var(--ink); line-height: 1.35; }
+.check-card span { display: block; font-size: 11px; color: var(--ink-faint); line-height: 1.35; margin-top: 2px; font-weight: 600; }
+.ae-output { display: none; margin-top: 1rem; }
+.ae-output.on { display: block; }
+.ae-output .script { font-size: 16px; line-height: 1.65; }
+.placeholder-card {
+  text-align: left; background: linear-gradient(180deg, #fff, var(--haze-tint));
+}
+.placeholder-card p { font-size: 14px; color: var(--ink-soft); line-height: 1.6; font-weight: 500; max-width: 680px; }
+@media (max-width: 720px) { .check-grid, .role-choice-grid { grid-template-columns: 1fr; } }
 
 /* ===== COLLAPSED RECAP BAR (during a live call) ===== */
 .recap {
@@ -442,16 +486,28 @@ body.calling .recap { display: flex; }
 </head>
 <body>
 
-<!-- SDR sign-in gate: shown once per browser session, name persists across calls -->
+<!-- User gate: shown once per browser session, profile persists across calls -->
 <div class="signin-overlay" id="signin-overlay">
   <div class="signin-card">
     <span class="logo" style="font-size:26px;">homebase</span>
     <h2 class="signin-title">Welcome! Let's get you set up.</h2>
-    <p class="signin-sub">Enter your first name once. We'll drop it into every script so you never see "[Your Name]" again today.</p>
+    <p class="signin-sub">Enter your first name and choose your role. We'll tailor the workspace and drop your name into the scripts.</p>
     <label class="signin-label">Your first name</label>
-    <input type="text" id="sdr-name" class="signin-input" placeholder="e.g. Alex" autocomplete="off" onkeydown="if(event.key==='Enter')saveSdrName()" />
-    <button class="btn-primary" style="margin-top:14px;" onclick="saveSdrName()">
-      <i class="ti ti-arrow-right" aria-hidden="true"></i>Start calling
+    <input type="text" id="sdr-name" class="signin-input" placeholder="e.g. Alex" autocomplete="off" onkeydown="if(event.key==='Enter')saveUserProfile()" />
+    <label class="signin-label" style="margin-top:14px;">Role</label>
+    <div class="role-choice-grid" id="role-choice-grid">
+      <button type="button" class="role-choice active" data-role-choice="sdr" onclick="selectUserRole('sdr')">
+        <i class="ti ti-phone-call" aria-hidden="true"></i><strong>SDR</strong><span>Cold calls</span>
+      </button>
+      <button type="button" class="role-choice" data-role-choice="ae" onclick="selectUserRole('ae')">
+        <i class="ti ti-briefcase" aria-hidden="true"></i><strong>AE</strong><span>Pipeline</span>
+      </button>
+      <button type="button" class="role-choice" data-role-choice="cs" onclick="selectUserRole('cs')">
+        <i class="ti ti-heart-handshake" aria-hidden="true"></i><strong>CS</strong><span>Soon</span>
+      </button>
+    </div>
+    <button class="btn-primary" style="margin-top:14px;" onclick="saveUserProfile()">
+      <i class="ti ti-arrow-right" aria-hidden="true"></i>Continue
     </button>
   </div>
 </div>
@@ -461,7 +517,7 @@ body.calling .recap { display: flex; }
   <span class="logo">homebase</span>
   <div style="display:flex; align-items:center; gap:12px; z-index:1;">
     <span class="topbar-id" id="topbar-id" style="display:none;"></span>
-    <span class="topbar-tag">SDR Tool · FF Motion</span>
+    <span class="topbar-tag" id="topbar-tag">SDR Tool · FF Motion</span>
   </div>
 </header>
 
@@ -475,7 +531,7 @@ body.calling .recap { display: flex; }
 </section>
 
 <div class="shell">
-  <div class="card" id="form-card">
+  <div class="card role-view role-view-sdr" id="form-card">
     <div class="card-eyebrow">
       <h2>Who are you calling?</h2>
       <span class="pill-req">Brand + industry required</span>
@@ -572,6 +628,77 @@ body.calling .recap { display: flex; }
       <div class="battle-tile-grid" id="battlecard-tiles"></div>
       <div class="battle-detail" id="battlecard-detail"></div>
     </div>
+  </div>
+
+  <div class="card role-view role-view-ae" id="ae-card">
+    <div class="card-eyebrow">
+      <h2>AE talk track generator</h2>
+      <span class="pill-req">Blitz or pipeline</span>
+    </div>
+    <p class="ae-intro">Use Blitz for fast payroll expansion calls into existing Homebase accounts. Use Pipeline when an open opportunity is stalled and the next move depends on the stage.</p>
+    <div class="mode-toggle" role="tablist" aria-label="AE mode">
+      <button type="button" class="mode-btn active" id="ae-mode-blitz" onclick="setAeMode('blitz')">Blitz mode</button>
+      <button type="button" class="mode-btn" id="ae-mode-pipeline" onclick="setAeMode('pipeline')">Pipeline mode</button>
+    </div>
+    <div class="grid3">
+      <div class="field">
+        <label>Customer first name</label>
+        <input type="text" id="ae_contact_name" placeholder="e.g. Jordan" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label>Business / account</label>
+        <input type="text" id="ae_account_name" placeholder="e.g. Sunny Cafe" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label>Business type</label>
+        <input type="text" id="ae_business_type" placeholder="e.g. restaurant, salon, retail" autocomplete="off" />
+      </div>
+    </div>
+    <div class="grid3 ae-pipeline-only" style="display:none;">
+      <div class="field">
+        <label>Opportunity stage</label>
+        <select id="ae_stage" onchange="renderAeChecklist()">
+          <option value="new">New opp</option>
+          <option value="connect">Connect</option>
+          <option value="consult">Consult</option>
+          <option value="closing">Closing</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Days in stage</label>
+        <input type="number" id="ae_days_in_stage" placeholder="#" min="0" />
+      </div>
+      <div class="field">
+        <label>Next meeting</label>
+        <select id="ae_meeting_status">
+          <option value="">Unknown</option>
+          <option value="none">No future meeting</option>
+          <option value="booked">Future meeting booked</option>
+          <option value="missed">No-show / missed meeting</option>
+        </select>
+      </div>
+    </div>
+    <div class="field full">
+      <label id="ae-context-label">Known context</label>
+      <input type="text" id="ae_context" placeholder="e.g. uses Homebase for scheduling, payroll still with ADP" autocomplete="off" />
+    </div>
+    <p class="lbl" id="ae-checklist-title"><i class="ti ti-checklist" aria-hidden="true" style="font-size:14px;"></i> Blitz qualification checks</p>
+    <div class="check-grid" id="ae-checklist"></div>
+    <button class="btn-primary" id="ae-generate-btn" onclick="generateAeTalkTrack()">
+      <i class="ti ti-sparkles" aria-hidden="true"></i>Generate AE talk track
+    </button>
+    <div class="ae-output" id="ae-output">
+      <p class="lbl" style="margin-top:0.7rem;"><i class="ti ti-quote" aria-hidden="true" style="font-size:14px;"></i> Your script</p>
+      <div class="script" id="ae-script"></div>
+    </div>
+  </div>
+
+  <div class="card role-view role-view-cs placeholder-card" id="cs-card">
+    <div class="card-eyebrow">
+      <h2>CS workspace</h2>
+      <span class="pill-opt">Placeholder</span>
+    </div>
+    <p>CS mode is ready as a role selection, but the workflow is intentionally empty for now. When you are ready, we can add renewal, adoption, save, onboarding, and expansion talk tracks here.</p>
   </div>
 
   <div class="recap" id="recap">
@@ -1491,13 +1618,93 @@ let currentPhase = "opening";
 let prospectInfo = {};
 let currentScriptText = "";
 let sdrName = "";
+let userRole = "sdr";
+let aeMode = "blitz";
 let activeCompetitor = null;
 let currentOpeningMode = "permission";
 
-// ===== SDR sign-in: capture the rep's first name once per browser session =====
+const ROLE_LABELS = {
+  sdr: "SDR Tool · FF Motion",
+  ae: "AE Tool · Blitz + Pipeline",
+  cs: "CS Tool · Coming Soon"
+};
+
+const AE_BLITZ_QUAL_FIELDS = [
+  { key:"pain", label:"Pain / use case", hint:"What problem or payroll trigger is driving the call?" },
+  { key:"timeline", label:"Purchase timeline", hint:"Next payroll run, target first payday, or urgency." },
+  { key:"size", label:"Company size (locations)", hint:"Location count from the account or call." },
+  { key:"budget", label:"Budget signal", hint:"Cost concern, current spend, or willingness to evaluate." },
+  { key:"solution", label:"Current solution", hint:"Payroll provider, inception, accountant, or manual process." },
+  { key:"impact", label:"Estimated users", hint:"Employees plus owner(s) who would use Homebase." },
+  { key:"nextstep", label:"Next step confirmed", hint:"Specific product specialist call or follow-up time." },
+  { key:"contact", label:"Contact info", hint:"Best email and direct phone confirmed." }
+];
+
+const AE_PIPELINE_STAGE_GATES = {
+  new: [
+    { key:"speed", label:"Speed-to-lead attempt completed", hint:"First call made within the fast-response window." },
+    { key:"why_now", label:"Why now identified", hint:"Payroll timing, setup need, or self-serve signal is clear." },
+    { key:"current_process", label:"Current process mapped", hint:"How they run payroll or move hours today." },
+    { key:"decision_maker", label:"Decision maker confirmed", hint:"Owner or operator with authority is known." },
+    { key:"meeting", label:"Next conversation booked", hint:"A specific time is on the calendar." }
+  ],
+  connect: [
+    { key:"live_convo", label:"First real conversation happened", hint:"You connected beyond a voicemail or text." },
+    { key:"pain", label:"Pain or priority confirmed", hint:"They named what is taking time or creating risk." },
+    { key:"timeline", label:"Target payday / timeline known", hint:"The payroll or buying clock is anchored." },
+    { key:"stakeholder", label:"Stakeholder path known", hint:"Who else needs to weigh in is clear." },
+    { key:"next_meeting", label:"Next meeting booked", hint:"Follow-up or product specialist call is scheduled." }
+  ],
+  consult: [
+    { key:"demo", label:"Product specialist call completed", hint:"They have seen the relevant workflow." },
+    { key:"roi", label:"Value case agreed", hint:"Time savings, stress reduction, or risk reduction is explicit." },
+    { key:"fit", label:"Fit / gaps documented", hint:"What Homebase solves and what stays outside is clear." },
+    { key:"decision", label:"Decision process confirmed", hint:"Approver, steps, and date are known." },
+    { key:"mutual_plan", label:"Mutual next step set", hint:"A concrete next step is owned by both sides." }
+  ],
+  closing: [
+    { key:"blocker", label:"Final blocker identified", hint:"Timing, price, stakeholder, setup, or uncertainty." },
+    { key:"approver", label:"Approver aligned", hint:"Owner/finance/operator has what they need." },
+    { key:"start_date", label:"Start date / first payroll target", hint:"The implementation clock is real." },
+    { key:"commercials", label:"Commercials agreed", hint:"Pricing, plan, and scope are understood." },
+    { key:"close_plan", label:"Close plan confirmed", hint:"Decision date or clean pause is agreed." }
+  ]
+};
+
+const AE_STAGE_COPY = {
+  new: {
+    name: "New opp",
+    intent: "connect fast, qualify the business reason, and book the first real conversation",
+    opener: "I saw the payroll setup signal come through and wanted to help while the timing is still fresh."
+  },
+  connect: {
+    name: "Connect",
+    intent: "turn the first conversation into a committed next step",
+    opener: "It was good connecting earlier. I want to make sure we do not lose momentum on getting your team set up."
+  },
+  consult: {
+    name: "Consult",
+    intent: "reinforce the value case and make the decision process easier",
+    opener: "Based on what we already covered, the biggest thing is making the next step easy to evaluate."
+  },
+  closing: {
+    name: "Closing",
+    intent: "remove the last blocker without creating pressure",
+    opener: "I know these decisions can stall when there are a couple of loose ends, so I wanted to simplify where we are."
+  }
+};
+
+// ===== Role gate: capture the rep's first name and workspace once per browser session =====
 function initSdr() {
   let stored = "";
-  try { stored = sessionStorage.getItem("hb_sdr_name") || ""; } catch (e) {}
+  let storedRole = "sdr";
+  try {
+    stored = sessionStorage.getItem("hb_sdr_name") || "";
+    storedRole = sessionStorage.getItem("hb_user_role") || "sdr";
+  } catch (e) {}
+  userRole = ["sdr","ae","cs"].includes(storedRole) ? storedRole : "sdr";
+  applyRoleView();
+  renderAeChecklist();
   if (stored) {
     sdrName = stored;
     document.getElementById("signin-overlay").classList.add("hidden");
@@ -1508,28 +1715,147 @@ function initSdr() {
   }
 }
 
-function saveSdrName() {
+function selectUserRole(role) {
+  userRole = ["sdr","ae","cs"].includes(role) ? role : "sdr";
+  document.querySelectorAll("[data-role-choice]").forEach(btn => {
+    btn.classList.toggle("active", btn.getAttribute("data-role-choice") === userRole);
+  });
+}
+
+function saveUserProfile() {
   const v = document.getElementById("sdr-name").value.trim();
   if (!v) { document.getElementById("sdr-name").focus(); return; }
   sdrName = v;
-  try { sessionStorage.setItem("hb_sdr_name", v); } catch (e) {}
+  try {
+    sessionStorage.setItem("hb_sdr_name", v);
+    sessionStorage.setItem("hb_user_role", userRole);
+  } catch (e) {}
   document.getElementById("signin-overlay").classList.add("hidden");
+  applyRoleView();
   showSdrChip();
+}
+
+function saveSdrName() { saveUserProfile(); }
+
+function applyRoleView() {
+  document.body.dataset.role = userRole;
+  const tag = document.getElementById("topbar-tag");
+  if (tag) tag.textContent = ROLE_LABELS[userRole] || ROLE_LABELS.sdr;
+  selectUserRole(userRole);
+  document.body.classList.remove("calling");
+  const heroEyebrow = document.querySelector(".hero-eyebrow");
+  const heroTitle = document.querySelector(".hero h1");
+  const heroCopy = document.querySelector(".hero p");
+  if (!heroEyebrow || !heroTitle || !heroCopy) return;
+  if (userRole === "ae") {
+    heroEyebrow.innerHTML = `<i class="ti ti-briefcase" aria-hidden="true"></i> AE conversation companion`;
+    heroTitle.innerHTML = `Move the opp<br><span class="accent">forward.</span>`;
+    heroCopy.textContent = "Choose Blitz or Pipeline mode, check what you already know, and generate a concise talk track for the next AE conversation.";
+  } else if (userRole === "cs") {
+    heroEyebrow.innerHTML = `<i class="ti ti-heart-handshake" aria-hidden="true"></i> CS workspace`;
+    heroTitle.innerHTML = `Customer success<br><span class="accent">coming soon.</span>`;
+    heroCopy.textContent = "The CS role is set up as a placeholder so we can add adoption, renewal, save, and expansion flows next.";
+  } else {
+    heroEyebrow.innerHTML = `<i class="ti ti-phone-outgoing" aria-hidden="true"></i> Cold call companion`;
+    heroTitle.innerHTML = `Know exactly<br>what to say <span class="accent">next.</span>`;
+    heroCopy.textContent = "Drop in the brand and industry, get your opening line on the spot, then tap how they respond. We will write the next line while the call is live.";
+  }
 }
 
 function showSdrChip() {
   const chip = document.getElementById("topbar-id");
   chip.style.display = "inline-flex";
-  chip.innerHTML = `<i class="ti ti-user-circle" aria-hidden="true"></i> ${sdrName}`;
-  chip.title = "Click to change your name";
+  chip.innerHTML = `<i class="ti ti-user-circle" aria-hidden="true"></i> ${sdrName} · ${(userRole || "sdr").toUpperCase()}`;
+  chip.title = "Click to change your name or role";
   chip.onclick = changeSdrName;
 }
 
 function changeSdrName() {
   const input = document.getElementById("sdr-name");
   input.value = sdrName;
+  selectUserRole(userRole);
   document.getElementById("signin-overlay").classList.remove("hidden");
   setTimeout(() => { input.focus(); input.select(); }, 100);
+}
+
+function setAeMode(mode) {
+  aeMode = mode === "pipeline" ? "pipeline" : "blitz";
+  document.getElementById("ae-mode-blitz").classList.toggle("active", aeMode === "blitz");
+  document.getElementById("ae-mode-pipeline").classList.toggle("active", aeMode === "pipeline");
+  document.querySelectorAll(".ae-pipeline-only").forEach(el => { el.style.display = aeMode === "pipeline" ? "" : "none"; });
+  document.getElementById("ae-context-label").textContent = aeMode === "pipeline" ? "Stall / opportunity context" : "Known context";
+  document.getElementById("ae-checklist-title").innerHTML = aeMode === "pipeline"
+    ? `<i class="ti ti-checklist" aria-hidden="true" style="font-size:14px;"></i> Pipeline stage gates`
+    : `<i class="ti ti-checklist" aria-hidden="true" style="font-size:14px;"></i> Blitz qualification checks`;
+  renderAeChecklist();
+}
+
+function aeChecklistFields() {
+  if (aeMode === "pipeline") {
+    const stage = document.getElementById("ae_stage")?.value || "new";
+    return AE_PIPELINE_STAGE_GATES[stage] || AE_PIPELINE_STAGE_GATES.new;
+  }
+  return AE_BLITZ_QUAL_FIELDS;
+}
+
+function renderAeChecklist() {
+  const root = document.getElementById("ae-checklist");
+  if (!root) return;
+  const fields = aeChecklistFields();
+  root.innerHTML = fields.map(field => `
+    <label class="check-card">
+      <input type="checkbox" value="${escapeHtml(field.key)}" data-ae-check="${escapeHtml(field.key)}" />
+      <span><strong>${escapeHtml(field.label)}</strong><span>${escapeHtml(field.hint)}</span></span>
+    </label>
+  `).join("");
+}
+
+function checkedAeLabels() {
+  return Array.from(document.querySelectorAll("[data-ae-check]:checked")).map(input => {
+    const field = aeChecklistFields().find(item => item.key === input.value);
+    return field ? field.label : input.value;
+  });
+}
+
+function missingAeLabels() {
+  const checked = new Set(Array.from(document.querySelectorAll("[data-ae-check]:checked")).map(input => input.value));
+  return aeChecklistFields().filter(field => !checked.has(field.key)).map(field => field.label);
+}
+
+function buildAeTalkTrack(input) {
+  const contact = input.contactName || "there";
+  const account = input.accountName || "your business";
+  const businessType = input.businessType || "business";
+  const context = input.context || "";
+  const checked = input.checked || [];
+  const missing = input.missing || [];
+  if (input.mode === "pipeline") {
+    const stage = AE_STAGE_COPY[input.stage] || AE_STAGE_COPY.new;
+    const missingLine = missing.length
+      ? `The main thing I still want to tighten up is ${missing.slice(0, 2).join(" and ").toLowerCase()}.`
+      : "It looks like we have the core stage gates covered, so this is about confirming the next committed step.";
+    return `${contact}, ${stage.opener} ${context ? `I have the note that ${context}. ` : ""}For this ${stage.name} stage, my goal is to ${stage.intent}. ${missingLine}\n\nCan we take 10 minutes today or tomorrow to close that loop and decide whether the next step is setup, a product specialist call, or a clean pause?`;
+  }
+  const knownLine = checked.length ? `I already have ${checked.slice(0, 3).join(", ").toLowerCase()} noted. ` : "";
+  const missingLine = missing.length ? `The one thing I want to confirm is ${missing[0].toLowerCase()}. ` : "";
+  const contextLine = context ? `I was looking at the account and saw ${context}. ` : "";
+  return `Hey ${contact}, it is ${sdrName || "[Your Name]"} from Homebase. ${contextLine}${knownLine}${missingLine}Typically when ${businessType} owners are already using Homebase for scheduling or time tracking, payroll becomes the next place where work gets manual or disconnected.\n\nHow are you running payroll today, and if it is worth comparing, would tomorrow at 10am or 3pm work for a quick product specialist call?`;
+}
+
+function generateAeTalkTrack() {
+  const input = {
+    mode: aeMode,
+    stage: document.getElementById("ae_stage")?.value || "new",
+    contactName: document.getElementById("ae_contact_name").value.trim(),
+    accountName: document.getElementById("ae_account_name").value.trim(),
+    businessType: document.getElementById("ae_business_type").value.trim(),
+    context: document.getElementById("ae_context").value.trim(),
+    checked: checkedAeLabels(),
+    missing: missingAeLabels()
+  };
+  const script = buildAeTalkTrack(input);
+  document.getElementById("ae-script").textContent = script;
+  document.getElementById("ae-output").classList.add("on");
 }
 
 // Replace the [Your Name] placeholder with the signed-in rep's name everywhere it appears.

@@ -27,7 +27,7 @@ const sandbox = {
     getElementById() { return fakeElement(); },
     querySelectorAll() { return []; },
     querySelector() { return null; },
-    body: { classList: { add() {}, remove() {} } }
+    body: { dataset: {}, classList: { add() {}, remove() {} } }
   },
   window: { scrollTo() {} },
   alert() {},
@@ -99,6 +99,51 @@ for (const expectedLabel of ["Ask This", "Where We Win", "Careful"]) {
   if (!quickRenderSource.includes(expectedLabel)) {
     throw new Error(`Quick battlecard detail is missing ${expectedLabel}.`);
   }
+}
+
+const roleLabels = readContext("ROLE_LABELS");
+for (const role of ["sdr", "ae", "cs"]) {
+  if (!roleLabels[role]) {
+    throw new Error(`Role selector is missing ${role}.`);
+  }
+}
+const sdrSqlLabels = readContext("Object.values(freshSql()).map(field => field.label)");
+const aeBlitzLabels = readContext("AE_BLITZ_QUAL_FIELDS.map(field => field.label)");
+for (const label of sdrSqlLabels) {
+  if (!aeBlitzLabels.includes(label)) {
+    throw new Error(`AE blitz checklist should reuse SDR qualification field: ${label}.`);
+  }
+}
+const pipelineStageKeys = readContext("Object.keys(AE_PIPELINE_STAGE_GATES)");
+for (const stage of ["new", "connect", "consult", "closing"]) {
+  if (!pipelineStageKeys.includes(stage)) {
+    throw new Error(`AE pipeline checklist is missing ${stage} stage gates.`);
+  }
+}
+const aeBlitzScript = sandbox.buildAeTalkTrack({
+  mode: "blitz",
+  contactName: "Jordan",
+  accountName: "Sunny Cafe",
+  businessType: "restaurant",
+  context: "they use Homebase for scheduling and ADP for payroll",
+  checked: ["Current solution"],
+  missing: ["Purchase timeline", "Next step confirmed"]
+});
+if (!/Homebase for scheduling and ADP for payroll/i.test(aeBlitzScript) || !/How are you running payroll today/i.test(aeBlitzScript) || !/product specialist call/i.test(aeBlitzScript)) {
+  throw new Error("AE blitz talk track should use account context, payroll discovery, and a product specialist next step.");
+}
+const aePipelineScript = sandbox.buildAeTalkTrack({
+  mode: "pipeline",
+  stage: "closing",
+  contactName: "Maria",
+  accountName: "Ace Hardware",
+  businessType: "retail",
+  context: "pricing is the only open question",
+  checked: ["Approver aligned"],
+  missing: ["Commercials agreed", "Close plan confirmed"]
+});
+if (!/Closing stage/i.test(aePipelineScript) || !/commercials agreed/i.test(aePipelineScript) || !/clean pause/i.test(aePipelineScript)) {
+  throw new Error("AE pipeline talk track should reflect stage gates and close/pause language.");
 }
 
 readContext(`prospectInfo = {
