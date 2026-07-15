@@ -125,6 +125,31 @@ for (const stage of ["new", "connect", "consult", "closing"]) {
     throw new Error(`AE pipeline checklist is missing ${stage} stage gates.`);
   }
 }
+const newStageGateLabels = readContext("AE_PIPELINE_STAGE_GATES.new.map(field => field.label)");
+for (const requiredLabel of ["Customer source and story captured", "Primary decision-maker verified", "Inception or switcher identified", "Next action documented", "Next step scheduled"]) {
+  if (!newStageGateLabels.includes(requiredLabel)) {
+    throw new Error(`New -> Connect stage gates are missing ${requiredLabel}.`);
+  }
+}
+const consultStageGateLabels = readContext("AE_PIPELINE_STAGE_GATES.consult.map(field => field.label)");
+for (const requiredLabel of ["Features and benefits highlighted", "Budget range confirmed", "Target timeline to start confirmed", "Verbal commitment to move forward"]) {
+  if (!consultStageGateLabels.includes(requiredLabel)) {
+    throw new Error(`Consult -> Closing stage gates are missing ${requiredLabel}.`);
+  }
+}
+const closingStageGateLabels = readContext("AE_PIPELINE_STAGE_GATES.closing.map(field => field.label)");
+for (const requiredLabel of ["Pay Schedule Finish complete", "Bank Connect Finish complete", "Fed Auth Finish complete"]) {
+  if (!closingStageGateLabels.includes(requiredLabel)) {
+    throw new Error(`Closing -> Hand-Off stage gates are missing ${requiredLabel}.`);
+  }
+}
+const allPipelineFields = readContext("Object.values(AE_PIPELINE_STAGE_GATES).flat()");
+if (allPipelineFields.some(field => /substage/i.test(field.label) || /substage/i.test(field.key))) {
+  throw new Error("AE pipeline stage gates should ignore the Substage field.");
+}
+if (!readContext("AE_PIPELINE_STAGE_GATES.new.find(field => field.key === 'primary_decision_maker')?.required")) {
+  throw new Error("Primary decision-maker stage gate should be marked required.");
+}
 const aePricingIntel = readContext("AE_PRICING_INTEL");
 for (const requiredAeCard of ["competitor_gusto", "competitor_quickbooks", "competitor_square", "competitor_toast", "competitor_wheniwork_deputy_sling", "competitor_connecteam"]) {
   const card = aePricingIntel[requiredAeCard];
@@ -168,15 +193,15 @@ if (!/Food & Beverage owners/i.test(aeBrandOnlyScript)) {
 }
 const aePipelineScript = sandbox.buildAeTalkTrack({
   mode: "pipeline",
-  stage: "closing",
+  stage: "consult",
   contactName: "Maria",
   accountName: "Ace Hardware",
   businessType: "retail",
   context: "pricing is the only open question",
   checked: ["Approver aligned"],
-  missing: ["Commercials agreed", "Close plan confirmed"]
+  missing: ["Budget range confirmed", "Target timeline to start confirmed"]
 });
-if (!/Closing stage/i.test(aePipelineScript) || !/commercials agreed/i.test(aePipelineScript) || !/clean pause/i.test(aePipelineScript)) {
+if (!/Consult stage/i.test(aePipelineScript) || !/budget range confirmed/i.test(aePipelineScript) || !/ready for the next stage/i.test(aePipelineScript)) {
   throw new Error("AE pipeline talk track should reflect stage gates and close/pause language.");
 }
 

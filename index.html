@@ -1843,54 +1843,48 @@ const AE_BLITZ_QUAL_FIELDS = [
 
 const AE_PIPELINE_STAGE_GATES = {
   new: [
-    { key:"speed", label:"Speed-to-lead attempt completed", hint:"First call made within the fast-response window." },
-    { key:"why_now", label:"Why now identified", hint:"Payroll timing, setup need, or self-serve signal is clear." },
-    { key:"current_process", label:"Current process mapped", hint:"How they run payroll or move hours today." },
-    { key:"decision_maker", label:"Decision maker confirmed", hint:"Owner or operator with authority is known." },
-    { key:"meeting", label:"Next conversation booked", hint:"A specific time is on the calendar." }
+    { key:"customer_story", label:"Customer source and story captured", hint:"How did this customer find us, and what's their story so far?", type:"text", section:"New -> Connect" },
+    { key:"primary_decision_maker", label:"Primary decision-maker verified", hint:"You must confirm that the primary decision-maker has been identified.", type:"checkbox", required:true, section:"New -> Connect" },
+    { key:"inception_or_switcher", label:"Inception or switcher identified", hint:"Confirm whether this is an inception or switcher opportunity.", type:"select", section:"New -> Connect" },
+    { key:"next_action", label:"Next action documented", hint:"What's the next action in your sales process?", type:"text", section:"New -> Connect" },
+    { key:"next_step_scheduled", label:"Next step scheduled", hint:"When is the next step scheduled?", type:"date", section:"New -> Connect" }
   ],
   connect: [
-    { key:"live_convo", label:"First real conversation happened", hint:"You connected beyond a voicemail or text." },
-    { key:"pain", label:"Pain or priority confirmed", hint:"They named what is taking time or creating risk." },
-    { key:"timeline", label:"Target payday / timeline known", hint:"The payroll or buying clock is anchored." },
-    { key:"stakeholder", label:"Stakeholder path known", hint:"Who else needs to weigh in is clear." },
-    { key:"next_meeting", label:"Next meeting booked", hint:"Follow-up or product specialist call is scheduled." }
+    { key:"business_challenges", label:"Key business challenges captured", hint:"What key business challenges did the customer share?", type:"text", section:"Connect -> Consult" },
+    { key:"product_package_fit", label:"Product or package fit identified", hint:"Have you identified which product or package best fits their needs?", type:"checkbox", section:"Connect -> Consult" }
   ],
   consult: [
-    { key:"demo", label:"Product specialist call completed", hint:"They have seen the relevant workflow." },
-    { key:"roi", label:"Value case agreed", hint:"Time savings, stress reduction, or risk reduction is explicit." },
-    { key:"fit", label:"Fit / gaps documented", hint:"What Homebase solves and what stays outside is clear." },
-    { key:"decision", label:"Decision process confirmed", hint:"Approver, steps, and date are known." },
-    { key:"mutual_plan", label:"Mutual next step set", hint:"A concrete next step is owned by both sides." }
+    { key:"features_benefits_highlighted", label:"Features and benefits highlighted", hint:"Which features and benefits did you highlight in your conversation?", type:"text", section:"Consult -> Closing" },
+    { key:"budget_range_confirmed", label:"Budget range confirmed", hint:"Has the customer confirmed their budget range?", type:"checkbox", section:"Consult -> Closing" },
+    { key:"target_timeline_confirmed", label:"Target timeline to start confirmed", hint:"Has the customer confirmed a target timeline to start?", type:"checkbox", section:"Consult -> Closing" },
+    { key:"verbal_commitment", label:"Verbal commitment to move forward", hint:"Did the customer give a verbal commitment to move forward?", type:"checkbox", section:"Consult -> Closing" }
   ],
   closing: [
-    { key:"blocker", label:"Final blocker identified", hint:"Timing, price, stakeholder, setup, or uncertainty." },
-    { key:"approver", label:"Approver aligned", hint:"Owner/finance/operator has what they need." },
-    { key:"start_date", label:"Start date / first payroll target", hint:"The implementation clock is real." },
-    { key:"commercials", label:"Commercials agreed", hint:"Pricing, plan, and scope are understood." },
-    { key:"close_plan", label:"Close plan confirmed", hint:"Decision date or clean pause is agreed." }
+    { key:"pay_schedule_finish", label:"Pay Schedule Finish complete", hint:"Before handoff, verify pay schedule setup is complete.", type:"setup", section:"Closing -> Hand-Off" },
+    { key:"bank_connect_finish", label:"Bank Connect Finish complete", hint:"Before handoff, verify bank connection is complete.", type:"setup", section:"Closing -> Hand-Off" },
+    { key:"fed_auth_finish", label:"Fed Auth Finish complete", hint:"Before handoff, verify federal authorization is complete.", type:"setup", section:"Closing -> Hand-Off" }
   ]
 };
 
 const AE_STAGE_COPY = {
   new: {
     name: "New opp",
-    intent: "connect fast, qualify the business reason, and book the first real conversation",
+    intent: "complete the New to Connect fields and confirm the decision-maker before moving the opp forward",
     opener: "I saw the payroll setup signal come through and wanted to help while the timing is still fresh."
   },
   connect: {
     name: "Connect",
-    intent: "turn the first conversation into a committed next step",
+    intent: "capture the business challenges and identify the product or package fit",
     opener: "It was good connecting earlier. I want to make sure we do not lose momentum on getting your team set up."
   },
   consult: {
     name: "Consult",
-    intent: "reinforce the value case and make the decision process easier",
+    intent: "confirm benefits, budget, timeline, and verbal commitment before moving to Closing",
     opener: "Based on what we already covered, the biggest thing is making the next step easy to evaluate."
   },
   closing: {
     name: "Closing",
-    intent: "remove the last blocker without creating pressure",
+    intent: "verify the required setup fields before handing off to Implementation",
     opener: "I know these decisions can stall when there are a couple of loose ends, so I wanted to simplify where we are."
   }
 };
@@ -2007,7 +2001,7 @@ function renderAeChecklist() {
   root.innerHTML = fields.map(field => `
     <label class="check-card">
       <input type="checkbox" value="${escapeHtml(field.key)}" data-ae-check="${escapeHtml(field.key)}" />
-      <span><strong>${escapeHtml(field.label)}</strong><span>${escapeHtml(field.hint)}</span></span>
+      <span><strong>${escapeHtml(field.label)}</strong><span>${escapeHtml(field.section ? `${field.section}: ${field.hint}` : field.hint)}</span></span>
     </label>
   `).join("");
 }
@@ -2039,16 +2033,16 @@ function renderAeResultQualification() {
   const rows = document.getElementById("ae-result-rows");
   const note = document.getElementById("ae-result-note");
   if (!count || !fill || !rows) return;
-  if (title) title.textContent = aeMode === "pipeline" ? "Stage gates" : "AE qualification";
+  if (title) title.textContent = aeMode === "pipeline" ? "Opportunity stage gates" : "AE qualification";
   count.innerHTML = `${done} <span>/ ${fields.length}</span>`;
   fill.style.width = `${Math.round((done / total) * 100)}%`;
   rows.innerHTML = fields.map(field => {
     const isDone = checked.has(field.key);
-    const isMust = aeMode === "blitz" && ["nextstep", "contact"].includes(field.key);
+    const isMust = (aeMode === "blitz" && ["nextstep", "contact"].includes(field.key)) || !!field.required;
     const cls = isDone ? "on" : (isMust ? "must" : "");
     const v = isDone
       ? `<span class="v">confirmed</span>`
-      : `<span class="v pending">${escapeHtml(field.hint)}</span>`;
+      : `<span class="v pending">${escapeHtml(field.section ? `${field.section}: ${field.hint}` : field.hint)}</span>`;
     return `<div class="sql-row">
       <div class="sql-dot ${cls}"></div>
       <div class="sql-txt"><strong>${escapeHtml(field.label)}${isMust ? " ★" : ""}</strong>${v}</div>
@@ -2056,7 +2050,7 @@ function renderAeResultQualification() {
   }).join("");
   if (note) {
     note.innerHTML = aeMode === "pipeline"
-      ? `Stage gates come from the opportunity cadence logic. Tighten unchecked items before pushing the opp forward.`
+      ? `These mirror the required Salesforce stage-gate fields. Substage is intentionally excluded. Starred items block progression.`
       : `Same qualification fields as the SDR flow. Real handoff still needs a next step <span>+</span> best email and phone.`;
   }
 }
@@ -2072,9 +2066,9 @@ function buildAeTalkTrack(input) {
   if (input.mode === "pipeline") {
     const stage = AE_STAGE_COPY[input.stage] || AE_STAGE_COPY.new;
     const missingLine = missing.length
-      ? `The main thing I still want to tighten up is ${missing.slice(0, 2).join(" and ").toLowerCase()}.`
-      : "It looks like we have the core stage gates covered, so this is about confirming the next committed step.";
-    return `${contact}, ${stage.opener} ${context ? `I have the note that ${context}. ` : ""}For this ${stage.name} stage, my goal is to ${stage.intent}. ${missingLine}\n\nCan we take 10 minutes today or tomorrow to close that loop and decide whether the next step is setup, a product specialist call, or a clean pause?`;
+      ? `The main stage-gate field I still need to tighten up is ${missing.slice(0, 2).join(" and ").toLowerCase()}.`
+      : "It looks like the required stage-gate fields are covered, so this is about confirming the next committed step.";
+    return `${contact}, ${stage.opener} ${context ? `I have the note that ${context}. ` : ""}For this ${stage.name} stage, my goal is to ${stage.intent}. ${missingLine}\n\nCan we take 10 minutes today or tomorrow to close that loop and make sure the opportunity is ready for the next stage?`;
   }
   const knownLine = checked.length ? `I already have ${checked.slice(0, 3).join(", ").toLowerCase()} noted. ` : "";
   const missingLine = missing.length ? `The one thing I want to confirm is ${missing[0].toLowerCase()}. ` : "";
