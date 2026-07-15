@@ -1845,49 +1845,49 @@ const AE_BLITZ_QUAL_FIELDS = [
 
 const AE_PIPELINE_STAGE_GATES = {
   new: [
-    { key:"customer_story", label:"Customer source and story captured", hint:"How did this customer find us, and what's their story so far?", type:"text", section:"New -> Connect" },
-    { key:"primary_decision_maker", label:"Primary decision-maker verified", hint:"You must confirm that the primary decision-maker has been identified.", type:"checkbox", required:true, section:"New -> Connect" },
-    { key:"inception_or_switcher", label:"Inception or switcher identified", hint:"Confirm whether this is an inception or switcher opportunity.", type:"select", section:"New -> Connect" },
-    { key:"next_action", label:"Next action documented", hint:"What's the next action in your sales process?", type:"text", section:"New -> Connect" },
-    { key:"next_step_scheduled", label:"Next step scheduled", hint:"When is the next step scheduled?", type:"date", section:"New -> Connect" }
+    { key:"customer_story", label:"Customer source and story captured", hint:"Ask: I saw you started payroll setup. What prompted you to take a look at Homebase Payroll now?", type:"text", section:"New -> Connect" },
+    { key:"primary_decision_maker", label:"Primary decision-maker verified", hint:"Ask: Are you the person who owns the payroll decision, or is someone else involved before we move forward?", type:"checkbox", required:true, section:"New -> Connect" },
+    { key:"inception_or_switcher", label:"Inception or switcher identified", hint:"Ask: Are you setting up payroll for the first time, or switching over from another payroll provider?", type:"select", section:"New -> Connect" },
+    { key:"next_action", label:"Next action documented", hint:"Ask: To keep this moving, should our next step be finishing setup, reviewing the remaining steps, or looping in another decision-maker?", type:"text", section:"New -> Connect" },
+    { key:"next_step_scheduled", label:"Next step scheduled", hint:"Ask: I have tomorrow at 10am or 3pm to finish this with you. Which works better?", type:"date", section:"New -> Connect" }
   ],
   connect: [
-    { key:"business_challenges", label:"Key business challenges captured", hint:"What key business challenges did the customer share?", type:"text", section:"Connect -> Consult" },
-    { key:"product_package_fit", label:"Product or package fit identified", hint:"Have you identified which product or package best fits their needs?", type:"checkbox", section:"Connect -> Consult" }
+    { key:"business_challenges", label:"Key business challenges captured", hint:"Ask: What is the biggest headache in getting your team paid right now: hours, approvals, provider issues, timing, or something else?", type:"text", section:"Connect -> Consult" },
+    { key:"product_package_fit", label:"Product or package fit identified", hint:"Ask: Based on that, does it sound like you mainly need payroll, payroll plus time tracking, or the fuller scheduling-to-payroll workflow?", type:"checkbox", section:"Connect -> Consult" }
   ],
   consult: [
-    { key:"features_benefits_highlighted", label:"Features and benefits highlighted", hint:"Which features and benefits did you highlight in your conversation?", type:"text", section:"Consult -> Closing" },
-    { key:"budget_range_confirmed", label:"Budget range confirmed", hint:"Has the customer confirmed their budget range?", type:"checkbox", section:"Consult -> Closing" },
-    { key:"target_timeline_confirmed", label:"Target timeline to start confirmed", hint:"Has the customer confirmed a target timeline to start?", type:"checkbox", section:"Consult -> Closing" },
-    { key:"verbal_commitment", label:"Verbal commitment to move forward", hint:"Did the customer give a verbal commitment to move forward?", type:"checkbox", section:"Consult -> Closing" }
+    { key:"features_benefits_highlighted", label:"Features and benefits highlighted", hint:"Ask: The biggest value we covered was one connected flow from hours to payroll. Is that the part that would save you the most time?", type:"text", section:"Consult -> Closing" },
+    { key:"budget_range_confirmed", label:"Budget range confirmed", hint:"Ask: If we can keep this in the range we discussed, are you comfortable moving forward?", type:"checkbox", section:"Consult -> Closing" },
+    { key:"target_timeline_confirmed", label:"Target timeline to start confirmed", hint:"Ask: What first payroll date or go-live date are we trying to hit?", type:"checkbox", section:"Consult -> Closing" },
+    { key:"verbal_commitment", label:"Verbal commitment to move forward", hint:"Ask: Assuming we finish these remaining steps, are you comfortable moving forward with Homebase?", type:"checkbox", section:"Consult -> Closing" }
   ],
   closing: [
-    { key:"pay_schedule_finish", label:"Pay Schedule Finish complete", hint:"Before handoff, verify pay schedule setup is complete.", type:"setup", section:"Closing -> Hand-Off" },
-    { key:"bank_connect_finish", label:"Bank Connect Finish complete", hint:"Before handoff, verify bank connection is complete.", type:"setup", section:"Closing -> Hand-Off" },
-    { key:"fed_auth_finish", label:"Fed Auth Finish complete", hint:"Before handoff, verify federal authorization is complete.", type:"setup", section:"Closing -> Hand-Off" }
+    { key:"pay_schedule_finish", label:"Pay Schedule Finish complete", hint:"Ask: Can we quickly confirm your pay schedule is finished so Implementation is not blocked?", type:"setup", section:"Closing -> Hand-Off" },
+    { key:"bank_connect_finish", label:"Bank Connect Finish complete", hint:"Ask: Is the bank connection complete, or do we need to knock that out together now?", type:"setup", section:"Closing -> Hand-Off" },
+    { key:"fed_auth_finish", label:"Fed Auth Finish complete", hint:"Ask: Is the federal authorization complete, or is that the last item holding up handoff?", type:"setup", section:"Closing -> Hand-Off" }
   ]
 };
 
 const AE_STAGE_COPY = {
   new: {
     name: "New opp",
-    intent: "complete the New to Connect fields and confirm the decision-maker before moving the opp forward",
-    opener: "I saw the payroll setup signal come through and wanted to help while the timing is still fresh."
+    title: "New Opp · Call #1",
+    timing: "Manual · within 5 minutes of opp creation · speed-to-lead"
   },
   connect: {
     name: "Connect",
-    intent: "capture the business challenges and identify the product or package fit",
-    opener: "It was good connecting earlier. I want to make sure we do not lose momentum on getting your team set up."
+    title: "Connect Stage · Call #1",
+    timing: "Manual · day 1 of Connect stage · continue the conversation"
   },
   consult: {
     name: "Consult",
-    intent: "confirm benefits, budget, timeline, and verbal commitment before moving to Closing",
-    opener: "Based on what we already covered, the biggest thing is making the next step easy to evaluate."
+    title: "Consult Stage · Call #1",
+    timing: "Manual · day 1 of Consult stage · complete remaining setup"
   },
   closing: {
     name: "Closing",
-    intent: "verify the required setup fields before handing off to Implementation",
-    opener: "I know these decisions can stall when there are a couple of loose ends, so I wanted to simplify where we are."
+    title: "Closing Stage · Call #1",
+    timing: "Manual · day 1 of Closing stage · remove final blocker"
   }
 };
 
@@ -2033,7 +2033,7 @@ function renderAeResultQualification() {
     const cls = isDone ? "on" : (isMust ? "must" : "");
     const v = isDone
       ? `<span class="v">confirmed</span>`
-      : `<span class="v pending">${escapeHtml(field.section ? `${field.section}: ${field.hint}` : field.hint)}</span>`;
+      : `<span class="v pending">${escapeHtml(field.hint)}</span>`;
     return `<div class="sql-row">
       <input class="ae-gate-check" type="checkbox" value="${escapeHtml(field.key)}" data-ae-result-check="${escapeHtml(field.key)}" onchange="renderAeResultQualification()" ${isDone ? "checked" : ""} aria-label="${escapeHtml(field.label)}" />
       <div class="sql-txt"><strong>${escapeHtml(field.label)}${isMust ? " ★" : ""}</strong>${v}</div>
@@ -2041,9 +2041,42 @@ function renderAeResultQualification() {
   }).join("");
   if (note) {
     note.innerHTML = aeMode === "pipeline"
-      ? `These mirror the required Salesforce stage-gate fields. Substage is intentionally excluded. Starred items block progression.`
+      ? `Starred items block progression. Check items off as the conversation confirms them.`
       : `Same qualification fields as the SDR flow. Real handoff still needs a next step <span>+</span> best email and phone.`;
   }
+}
+
+function aeRepName() {
+  return sdrName || "[Rep Name]";
+}
+
+function buildAePipelineTalkTrack(input) {
+  const contact = input.contactName || "[Customer Name]";
+  const targetDate = input.targetDate || "your first payday deadline";
+  const stage = input.stage || "new";
+  const contextLine = input.context ? `\n\n[Context to use if helpful: ${input.context}]` : "";
+  const scripts = {
+    new: `${AE_STAGE_COPY.new.title}\n${AE_STAGE_COPY.new.timing}\n\nHi, is this ${contact}? Hey, this is ${aeRepName()} calling from Homebase. I saw you started the payroll process and I wanted to reach out while you're still thinking about it. Do you have 5 minutes?\n\n[If yes]\nThat makes total sense. A lot of our customers come to us for exactly that reason. Given you want to pay your team by ${targetDate}, we'd typically want to complete 2-3 quick remaining steps so we can hit your deadline. Do you have 15 more minutes today or tomorrow to do that with me?\n\n[If no answer]\nDo not leave a voicemail on Call #1. Move straight to the follow-up SMS.`,
+    connect: `${AE_STAGE_COPY.connect.title}\n${AE_STAGE_COPY.connect.timing}\n\nHi ${contact}, ${aeRepName()} from Homebase. It was great connecting with you. Are you free tomorrow to continue the conversation? I want to make sure we get your team set up to run payroll on time. Do you have a few minutes now?\n\n[If timing is tight]\nTotally fair. I can send a quick booking link, but the main thing is making sure we do not miss your payroll timeline. Does tomorrow morning or afternoon work better?`,
+    consult: `${AE_STAGE_COPY.consult.title}\n${AE_STAGE_COPY.consult.timing}\n\nHi ${contact}, ${aeRepName()} from Homebase. Excited to continue the conversation and make sure you hit your payroll deadline. Do you have 10 minutes for setup?\n\n[If yes]\nGreat. To get you live, here's all that's left: the specific remaining setup steps from our last conversation, usually docs collection, bank routing, EIN, or signed authorization. Want to knock that out right now?`,
+    closing: `${AE_STAGE_COPY.closing.title}\n${AE_STAGE_COPY.closing.timing}\n\nHi ${contact}, ${aeRepName()} from Homebase. I want to make sure you're able to pay your team by ${targetDate}. We're still missing a little info from you. Do you have 5 minutes to knock that out right now?\n\n[If yes]\nPerfect, let's get this done. The remaining step should be quick, and once it is complete we can keep your team on track to get paid on time.\n\n[If hesitant]\nTotally fair. What is the piece that is still getting in the way: timing, bank setup, authorization, or something else?`
+  };
+  return `${scripts[stage] || scripts.new}${contextLine}`;
+}
+
+function buildAeBlitzTalkTrack(input) {
+  const contact = input.contactName || "[Customer Name]";
+  const businessType = input.businessType || detectIndustry(input.brandName || input.accountName || "")?.industry || "business";
+  const context = (input.context || "").toLowerCase();
+  const switcher = /switch|adp|paychex|gusto|quickbooks|square|toast|provider|competitor|accountant|cpa/.test(context);
+  const posCentered = /pos|toast|square|clover|lightspeed/.test(context);
+  if (posCentered) {
+    return `Blitz Mode · POS-centered payroll angle\n\nHey ${contact}, it's ${aeRepName()} from Homebase. I saw you're using [POS] with us.\n\nMost owners I talk to who are using that POS are still re-entering hours to run payroll. Are you running payroll through your current provider, or doing it manually?\n\n[Follow-up]\nHow are you getting hours out of Homebase or your POS to run payroll today? Any manual entry or double work happening?`;
+  }
+  const switcherLine = switcher
+    ? `I also saw payroll may already be with another provider, so I wanted to circle back on that. On a scale of 1-10, how would you rate the current setup?\n\n[If not a 10]\nWhat is missing or frustrating about it? What's nice about running payroll with Homebase is that it eliminates the manual effort and potential mistakes with one connected system. Do you have 10 minutes to see how it works?`
+    : `Typically when I speak with ${businessType} owners at your stage, payroll and team coordination feels disconnected or manual.\n\nHow are you handling payroll today?`;
+  return `Blitz Mode · Upgrade / expansion angle\n\nHey ${contact}, it's ${aeRepName()} from Homebase. I know I'm calling you out of the blue, but I was looking at your account and saw you've been using us to help with time tracking and scheduling at your business, so I wanted to do a courtesy check-in. How is everything going?\n\n[If positive]\nThat's great to hear.\n\n[If negative]\nI'm sorry to hear that, tell me more. Try to resolve the issue before moving forward.\n\n${switcherLine}\n\n[Discovery options]\nWalk me through how you're handling payroll today. What's the most time-consuming part of that? Where do errors usually happen? How much time per pay period is that costing you?`;
 }
 
 function buildAeTalkTrack(input) {
@@ -2052,19 +2085,10 @@ function buildAeTalkTrack(input) {
   const detected = detectIndustry(input.brandName || input.accountName || "");
   const businessType = input.businessType || detected?.industry || "business";
   const context = input.context || "";
-  const checked = input.checked || [];
-  const missing = input.missing || [];
   if (input.mode === "pipeline") {
-    const stage = AE_STAGE_COPY[input.stage] || AE_STAGE_COPY.new;
-    const missingLine = missing.length
-      ? `The main stage-gate field I still need to tighten up is ${missing.slice(0, 2).join(" and ").toLowerCase()}.`
-      : "It looks like the required stage-gate fields are covered, so this is about confirming the next committed step.";
-    return `${contact}, ${stage.opener} ${context ? `I have the note that ${context}. ` : ""}For this ${stage.name} stage, my goal is to ${stage.intent}. ${missingLine}\n\nCan we take 10 minutes today or tomorrow to close that loop and make sure the opportunity is ready for the next stage?`;
+    return buildAePipelineTalkTrack({ ...input, contactName: contact, accountName: account, businessType, context });
   }
-  const knownLine = checked.length ? `I already have ${checked.slice(0, 3).join(", ").toLowerCase()} noted. ` : "";
-  const missingLine = missing.length ? `The one thing I want to confirm is ${missing[0].toLowerCase()}. ` : "";
-  const contextLine = context ? `I was looking at the account and saw ${context}. ` : "";
-  return `Hey ${contact}, it is ${sdrName || "[Your Name]"} from Homebase. ${contextLine}${knownLine}${missingLine}Typically when ${businessType} owners are already using Homebase for scheduling or time tracking, payroll becomes the next place where work gets manual or disconnected.\n\nHow are you running payroll today, and if it is worth comparing, would tomorrow at 10am or 3pm work for a quick product specialist call?`;
+  return buildAeBlitzTalkTrack({ ...input, contactName: contact, accountName: account, businessType, context });
 }
 
 function generateAeTalkTrack() {

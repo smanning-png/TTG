@@ -181,8 +181,8 @@ const aeBlitzScript = sandbox.buildAeTalkTrack({
   checked: ["Current solution"],
   missing: ["Purchase timeline", "Next step confirmed"]
 });
-if (!/Homebase for scheduling and ADP for payroll/i.test(aeBlitzScript) || !/How are you running payroll today/i.test(aeBlitzScript) || !/product specialist call/i.test(aeBlitzScript)) {
-  throw new Error("AE blitz talk track should use account context, payroll discovery, and a product specialist next step.");
+if (!/courtesy check-in/i.test(aeBlitzScript) || !/On a scale of 1-10/i.test(aeBlitzScript) || !/What's nice about running payroll with Homebase/i.test(aeBlitzScript) || !/Do you have 10 minutes to see how it works/i.test(aeBlitzScript)) {
+  throw new Error("AE blitz talk track should follow the shared blitz call-track language.");
 }
 const aeBrandOnlyScript = sandbox.buildAeTalkTrack({
   mode: "blitz",
@@ -194,8 +194,21 @@ const aeBrandOnlyScript = sandbox.buildAeTalkTrack({
   checked: [],
   missing: ["Current solution"]
 });
-if (!/Food & Beverage owners/i.test(aeBrandOnlyScript)) {
+if (!/Food & Beverage owners/i.test(aeBrandOnlyScript) || !/payroll and team coordination feels disconnected or manual/i.test(aeBrandOnlyScript) || !/How are you handling payroll today/i.test(aeBrandOnlyScript)) {
   throw new Error("AE talk track should infer business type from brand when business type is blank.");
+}
+const aePipelineNewScript = sandbox.buildAeTalkTrack({
+  mode: "pipeline",
+  stage: "new",
+  contactName: "Maria",
+  accountName: "Ace Hardware",
+  businessType: "retail",
+  context: "",
+  checked: [],
+  missing: []
+});
+if (!/New Opp · Call #1/i.test(aePipelineNewScript) || !/started the payroll process/i.test(aePipelineNewScript) || !/Do you have 5 minutes/i.test(aePipelineNewScript) || !/15 more minutes today or tomorrow/i.test(aePipelineNewScript)) {
+  throw new Error("AE New Opp pipeline talk track should follow the speed-to-lead call script.");
 }
 const aePipelineScript = sandbox.buildAeTalkTrack({
   mode: "pipeline",
@@ -207,8 +220,21 @@ const aePipelineScript = sandbox.buildAeTalkTrack({
   checked: ["Approver aligned"],
   missing: ["Budget range confirmed", "Target timeline to start confirmed"]
 });
-if (!/Consult stage/i.test(aePipelineScript) || !/budget range confirmed/i.test(aePipelineScript) || !/ready for the next stage/i.test(aePipelineScript)) {
-  throw new Error("AE pipeline talk track should reflect stage gates and close/pause language.");
+if (!/Consult Stage · Call #1/i.test(aePipelineScript) || !/Do you have 10 minutes for setup/i.test(aePipelineScript) || !/Want to knock that out right now/i.test(aePipelineScript)) {
+  throw new Error("AE Consult pipeline talk track should follow the setup-completion call script.");
+}
+const aeClosingScript = sandbox.buildAeTalkTrack({
+  mode: "pipeline",
+  stage: "closing",
+  contactName: "Maria",
+  accountName: "Ace Hardware",
+  businessType: "retail",
+  context: "",
+  checked: [],
+  missing: []
+});
+if (!/Closing Stage · Call #1/i.test(aeClosingScript) || !/still missing a little info/i.test(aeClosingScript) || !/5 minutes to knock that out right now/i.test(aeClosingScript)) {
+  throw new Error("AE Closing pipeline talk track should follow the final-blocker call script.");
 }
 
 readContext(`prospectInfo = {
