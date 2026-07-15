@@ -10,12 +10,29 @@ if (/id="ae-checklist"|data-ae-check=/.test(html)) {
 if (!/data-ae-result-check/.test(html)) {
   throw new Error("AE generated talk track should render interactive stage-gate checks in the right-side panel.");
 }
+if (html.indexOf('id="current-block"') > html.indexOf('id="history"')) {
+  throw new Error("The live/current conversation card should render above prior history.");
+}
+if (/body\.calling\s+\.card\s*\{\s*display\s*:\s*none/i.test(html)) {
+  throw new Error("Generated calls should compact the customer-info card, not hide all cards.");
+}
+for (const requiredLayoutHook of [
+  "card.live-compact:not(.expanded) .live-hide",
+  "quick-battlecards",
+  'setLiveCard("form-card", true)',
+  'setLiveCard("ae-card", true)'
+]) {
+  if (!html.includes(requiredLayoutHook)) {
+    throw new Error(`Live-call compact layout is missing ${requiredLayoutHook}.`);
+  }
+}
 
 function fakeElement() {
   return {
     value: "",
     style: {},
-    classList: { add() {}, remove() {} },
+    classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
+    querySelector() { return null; },
     focus() {},
     select() {},
     set innerHTML(value) {},

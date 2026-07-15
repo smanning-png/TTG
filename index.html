@@ -163,9 +163,26 @@ body.calling .shell { margin-top: 1.25rem; }
 .card-eyebrow {
   display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;
 }
+.card-eyebrow .spacer { flex: 1; }
+.collapse-toggle {
+  display: none; align-items: center; gap: 6px; border: 1px solid var(--line);
+  background: #fff; color: var(--purple-haze); border-radius: 8px;
+  font-family: inherit; font-size: 12px; font-weight: 800; padding: 7px 10px;
+  cursor: pointer;
+}
+.collapse-summary {
+  display: none; font-size: 12px; font-weight: 700; color: var(--ink-faint);
+  margin: -0.35rem 0 0.7rem; line-height: 1.45;
+}
 .card-eyebrow h2 {
   font-size: 13px; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: 0.05em;
 }
+.card.live-compact { padding: 1rem; }
+.card.live-compact .collapse-toggle,
+.card.live-compact .collapse-summary { display: inline-flex; }
+.card.live-compact .collapse-summary { display: block; }
+.card.live-compact:not(.expanded) .live-hide { display: none; }
+.card.live-compact .quick-battlecards { margin-top: 0.7rem; padding-top: 0.7rem; }
 .role-view { display: none; }
 body[data-role="sdr"] .role-view-sdr,
 body[data-role="ae"] .role-view-ae,
@@ -304,8 +321,6 @@ body[data-role="cs"] .role-view-cs { display: block; }
   background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg);
   padding: 0.75rem 1.1rem; box-shadow: 0 4px 20px -12px rgba(30,11,58,0.2);
 }
-body.calling .card { display: none; }
-body.calling .recap { display: flex; }
 .recap-brand { font-size: 15px; font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
 .recap-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .recap-chip {
@@ -547,88 +562,95 @@ body.calling .recap { display: flex; }
     <div class="card-eyebrow">
       <h2>Who are you calling?</h2>
       <span class="pill-req">Brand + industry required</span>
-    </div>
-    <div class="quickstart">
-      <div class="field">
-        <label>Lead first name</label>
-        <input type="text" id="lead_name" placeholder="e.g. Maria" autocomplete="off" />
-      </div>
-      <div class="field">
-        <label>Franchise brand</label>
-        <input type="text" id="brand" class="req" placeholder="e.g. Ace Hardware" oninput="autoDetectIndustry()" autocomplete="off" />
-        <span class="detect-hint" id="detect-hint"></span>
-      </div>
-      <div class="field">
-        <label>Industry</label>
-        <select id="industry" class="req" onchange="onIndustryManualChange()">
-          <option value="">Select industry...</option>
-          <option value="Food & Beverage">Food &amp; Beverage</option>
-          <option value="Retail">Retail</option>
-          <option value="Health & Fitness">Health &amp; Fitness</option>
-          <option value="Professional Services">Professional Services</option>
-          <option value="Lodging & Leisure">Lodging &amp; Leisure</option>
-          <option value="Pet Services">Pet Services</option>
-          <option value="Education & Arts">Education &amp; Arts</option>
-          <option value="Auto & Travel">Auto &amp; Travel</option>
-          <option value="Home Services">Home Services</option>
-        </select>
-      </div>
-      <button class="btn-primary" id="gen-btn" onclick="startCall()">
-        <i class="ti ti-player-play" aria-hidden="true"></i>Start call
+      <span class="spacer"></span>
+      <button type="button" class="collapse-toggle" onclick="toggleLiveCard('form-card')">
+        <i class="ti ti-pencil" aria-hidden="true"></i><span>Edit</span>
       </button>
     </div>
+    <div class="collapse-summary" id="sdr-collapse-summary"></div>
+    <div class="live-hide">
+      <div class="quickstart">
+        <div class="field">
+          <label>Lead first name</label>
+          <input type="text" id="lead_name" placeholder="e.g. Maria" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label>Franchise brand</label>
+          <input type="text" id="brand" class="req" placeholder="e.g. Ace Hardware" oninput="autoDetectIndustry()" autocomplete="off" />
+          <span class="detect-hint" id="detect-hint"></span>
+        </div>
+        <div class="field">
+          <label>Industry</label>
+          <select id="industry" class="req" onchange="onIndustryManualChange()">
+            <option value="">Select industry...</option>
+            <option value="Food & Beverage">Food &amp; Beverage</option>
+            <option value="Retail">Retail</option>
+            <option value="Health & Fitness">Health &amp; Fitness</option>
+            <option value="Professional Services">Professional Services</option>
+            <option value="Lodging & Leisure">Lodging &amp; Leisure</option>
+            <option value="Pet Services">Pet Services</option>
+            <option value="Education & Arts">Education &amp; Arts</option>
+            <option value="Auto & Travel">Auto &amp; Travel</option>
+            <option value="Home Services">Home Services</option>
+          </select>
+        </div>
+        <button class="btn-primary" id="gen-btn" onclick="startCall()">
+          <i class="ti ti-player-play" aria-hidden="true"></i>Start call
+        </button>
+      </div>
 
-    <hr class="rule" />
-    <div class="card-eyebrow">
-      <h2>Know any of this already?</h2>
-      <span class="pill-opt">Optional · the talk track asks if blank</span>
-    </div>
-    <div class="grid3">
-      <div class="field">
-        <label>Locations</label>
-        <input type="number" id="num_locs" placeholder="#" min="1" />
+      <hr class="rule" />
+      <div class="card-eyebrow">
+        <h2>Know any of this already?</h2>
+        <span class="pill-opt">Optional · the talk track asks if blank</span>
       </div>
-      <div class="field">
-        <label>Prospect role</label>
-        <select id="prospect_role">
-          <option value="">Unknown</option>
-          <option value="franchise owner">Franchise owner</option>
-          <option value="multi-unit operator">Multi-unit operator</option>
-          <option value="office manager">Office / store manager</option>
-          <option value="gatekeeper">Gatekeeper / front desk</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Current solution</label>
-        <select id="current_solution">
-          <option value="">Unknown</option>
-          <option value="competitor">Using a competitor</option>
-          <option value="spreadsheets">Spreadsheets / manual</option>
-          <option value="internal">Internal tool</option>
-          <option value="nothing">No current solution</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Timeline signal</label>
-        <select id="timeline">
-          <option value="">Unknown</option>
-          <option value="immediate">Immediate (0–30 days)</option>
-          <option value="near">Near-term (1–3 months)</option>
-          <option value="mid">Mid-term (3+ months)</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Budget signal</label>
-        <select id="budget">
-          <option value="">Unknown</option>
-          <option value="confirmed">Budget confirmed</option>
-          <option value="likely">Budget likely</option>
-          <option value="none">No budget identified</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Pain / use case known</label>
-        <input type="text" id="known_pain" placeholder="e.g. manual time card entry" />
+      <div class="grid3">
+        <div class="field">
+          <label>Locations</label>
+          <input type="number" id="num_locs" placeholder="#" min="1" />
+        </div>
+        <div class="field">
+          <label>Prospect role</label>
+          <select id="prospect_role">
+            <option value="">Unknown</option>
+            <option value="franchise owner">Franchise owner</option>
+            <option value="multi-unit operator">Multi-unit operator</option>
+            <option value="office manager">Office / store manager</option>
+            <option value="gatekeeper">Gatekeeper / front desk</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Current solution</label>
+          <select id="current_solution">
+            <option value="">Unknown</option>
+            <option value="competitor">Using a competitor</option>
+            <option value="spreadsheets">Spreadsheets / manual</option>
+            <option value="internal">Internal tool</option>
+            <option value="nothing">No current solution</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Timeline signal</label>
+          <select id="timeline">
+            <option value="">Unknown</option>
+            <option value="immediate">Immediate (0–30 days)</option>
+            <option value="near">Near-term (1–3 months)</option>
+            <option value="mid">Mid-term (3+ months)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Budget signal</label>
+          <select id="budget">
+            <option value="">Unknown</option>
+            <option value="confirmed">Budget confirmed</option>
+            <option value="likely">Budget likely</option>
+            <option value="none">No budget identified</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Pain / use case known</label>
+          <input type="text" id="known_pain" placeholder="e.g. manual time card entry" />
+        </div>
       </div>
     </div>
 
@@ -646,58 +668,65 @@ body.calling .recap { display: flex; }
     <div class="card-eyebrow">
       <h2>AE talk track generator</h2>
       <span class="pill-req">Blitz or pipeline</span>
+      <span class="spacer"></span>
+      <button type="button" class="collapse-toggle" onclick="toggleLiveCard('ae-card')">
+        <i class="ti ti-pencil" aria-hidden="true"></i><span>Edit</span>
+      </button>
     </div>
-    <p class="ae-intro">Use Blitz for fast payroll expansion calls into existing Homebase accounts. Use Pipeline when an open opportunity is stalled and the next move depends on the stage.</p>
-    <div class="mode-toggle" role="tablist" aria-label="AE mode">
-      <button type="button" class="mode-btn active" id="ae-mode-blitz" onclick="setAeMode('blitz')">Blitz mode</button>
-      <button type="button" class="mode-btn" id="ae-mode-pipeline" onclick="setAeMode('pipeline')">Pipeline mode</button>
-    </div>
-    <div class="grid3">
-      <div class="field">
-        <label>Customer first name</label>
-        <input type="text" id="ae_contact_name" placeholder="e.g. Jordan" autocomplete="off" />
+    <div class="collapse-summary" id="ae-collapse-summary"></div>
+    <div class="live-hide">
+      <p class="ae-intro">Use Blitz for fast payroll expansion calls into existing Homebase accounts. Use Pipeline when an open opportunity is stalled and the next move depends on the stage.</p>
+      <div class="mode-toggle" role="tablist" aria-label="AE mode">
+        <button type="button" class="mode-btn active" id="ae-mode-blitz" onclick="setAeMode('blitz')">Blitz mode</button>
+        <button type="button" class="mode-btn" id="ae-mode-pipeline" onclick="setAeMode('pipeline')">Pipeline mode</button>
       </div>
-      <div class="field">
-        <label>Business / account</label>
-        <input type="text" id="ae_account_name" placeholder="e.g. Sunny Cafe" oninput="autoDetectAeBusinessType()" autocomplete="off" />
+      <div class="grid3">
+        <div class="field">
+          <label>Customer first name</label>
+          <input type="text" id="ae_contact_name" placeholder="e.g. Jordan" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label>Business / account</label>
+          <input type="text" id="ae_account_name" placeholder="e.g. Sunny Cafe" oninput="autoDetectAeBusinessType()" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label>Brand / chain</label>
+          <input type="text" id="ae_brand" placeholder="e.g. Dairy Queen" oninput="autoDetectAeBusinessType()" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label>Business type</label>
+          <input type="text" id="ae_business_type" placeholder="e.g. Food & Beverage" oninput="onAeBusinessTypeManual()" autocomplete="off" />
+          <span class="detect-hint" id="ae-detect-hint"></span>
+        </div>
       </div>
-      <div class="field">
-        <label>Brand / chain</label>
-        <input type="text" id="ae_brand" placeholder="e.g. Dairy Queen" oninput="autoDetectAeBusinessType()" autocomplete="off" />
+      <div class="grid3 ae-pipeline-only" style="display:none;">
+        <div class="field">
+          <label>Opportunity stage</label>
+          <select id="ae_stage" onchange="refreshAeResultQualification()">
+            <option value="new">New opp</option>
+            <option value="connect">Connect</option>
+            <option value="consult">Consult</option>
+            <option value="closing">Closing</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Days in stage</label>
+          <input type="number" id="ae_days_in_stage" placeholder="#" min="0" />
+        </div>
+        <div class="field">
+          <label>Next meeting</label>
+          <select id="ae_meeting_status">
+            <option value="">Unknown</option>
+            <option value="none">No future meeting</option>
+            <option value="booked">Future meeting booked</option>
+            <option value="missed">No-show / missed meeting</option>
+          </select>
+        </div>
       </div>
-      <div class="field">
-        <label>Business type</label>
-        <input type="text" id="ae_business_type" placeholder="e.g. Food & Beverage" oninput="onAeBusinessTypeManual()" autocomplete="off" />
-        <span class="detect-hint" id="ae-detect-hint"></span>
+      <div class="field full">
+        <label id="ae-context-label">Known context</label>
+        <input type="text" id="ae_context" placeholder="e.g. uses Homebase for scheduling, payroll still with ADP" autocomplete="off" />
       </div>
-    </div>
-    <div class="grid3 ae-pipeline-only" style="display:none;">
-      <div class="field">
-        <label>Opportunity stage</label>
-        <select id="ae_stage" onchange="refreshAeResultQualification()">
-          <option value="new">New opp</option>
-          <option value="connect">Connect</option>
-          <option value="consult">Consult</option>
-          <option value="closing">Closing</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Days in stage</label>
-        <input type="number" id="ae_days_in_stage" placeholder="#" min="0" />
-      </div>
-      <div class="field">
-        <label>Next meeting</label>
-        <select id="ae_meeting_status">
-          <option value="">Unknown</option>
-          <option value="none">No future meeting</option>
-          <option value="booked">Future meeting booked</option>
-          <option value="missed">No-show / missed meeting</option>
-        </select>
-      </div>
-    </div>
-    <div class="field full">
-      <label id="ae-context-label">Known context</label>
-      <input type="text" id="ae_context" placeholder="e.g. uses Homebase for scheduling, payroll still with ADP" autocomplete="off" />
     </div>
     <div class="quick-battlecards" id="ae-quick-battlecards">
       <div class="quick-battle-head">
@@ -707,7 +736,7 @@ body.calling .recap { display: flex; }
       <div class="battle-tile-grid" id="ae-battlecard-tiles"></div>
       <div class="battle-detail" id="ae-battlecard-detail"></div>
     </div>
-    <button class="btn-primary" id="ae-generate-btn" onclick="generateAeTalkTrack()">
+    <button class="btn-primary live-hide" id="ae-generate-btn" onclick="generateAeTalkTrack()">
       <i class="ti ti-sparkles" aria-hidden="true"></i>Generate AE talk track
     </button>
     <div class="ae-output" id="ae-output">
@@ -747,8 +776,8 @@ body.calling .recap { display: flex; }
 
   <div class="callview" id="callview">
     <div class="track-col">
-      <div id="history"></div>
       <div id="current-block"></div>
+      <div id="history"></div>
     </div>
     <div id="sql-sidebar" style="display:none;">
       <div class="sql-card">
@@ -1940,6 +1969,8 @@ function applyRoleView() {
   selectUserRole(userRole);
   renderQuickBattlecards("ae");
   document.body.classList.remove("calling");
+  setLiveCard("form-card", false);
+  setLiveCard("ae-card", false);
   const heroEyebrow = document.querySelector(".hero-eyebrow");
   const heroTitle = document.querySelector(".hero h1");
   const heroCopy = document.querySelector(".hero p");
@@ -1981,6 +2012,7 @@ function setAeMode(mode) {
   document.getElementById("ae-mode-pipeline").classList.toggle("active", aeMode === "pipeline");
   document.querySelectorAll(".ae-pipeline-only").forEach(el => { el.style.display = aeMode === "pipeline" ? "" : "none"; });
   document.getElementById("ae-context-label").textContent = aeMode === "pipeline" ? "Stall / opportunity context" : "Known context";
+  updateAeCollapseSummary();
   refreshAeResultQualification();
 }
 
@@ -2107,6 +2139,7 @@ function generateAeTalkTrack() {
   document.getElementById("ae-script").textContent = script;
   renderAeResultQualification();
   document.getElementById("ae-output").classList.add("on");
+  setLiveCard("ae-card", true);
 }
 
 // Replace the [Your Name] placeholder with the signed-in rep's name everywhere it appears.
@@ -3934,6 +3967,75 @@ function respLoading() {
   if (s) { const d = document.createElement("div"); d.className = "loading"; d.innerHTML = `<div class="spin"></div>Writing your next line...`; s.appendChild(d); }
 }
 
+function compactParts(parts) {
+  return parts.filter(Boolean).map(part => escapeHtml(part)).join(" · ");
+}
+
+function updateSdrCollapseSummary() {
+  const summary = document.getElementById("sdr-collapse-summary");
+  if (!summary) return;
+  const brand = document.getElementById("brand")?.value.trim();
+  const industry = document.getElementById("industry")?.value;
+  const lead = document.getElementById("lead_name")?.value.trim();
+  const locs = document.getElementById("num_locs")?.value.trim();
+  const role = document.getElementById("prospect_role")?.value;
+  summary.innerHTML = compactParts([
+    lead ? `Lead: ${lead}` : "",
+    brand || "Brand not set",
+    industry || "Industry not set",
+    locs ? `${locs} location(s)` : "",
+    role || ""
+  ]);
+}
+
+function updateAeCollapseSummary() {
+  const summary = document.getElementById("ae-collapse-summary");
+  if (!summary) return;
+  const contact = document.getElementById("ae_contact_name")?.value.trim();
+  const account = document.getElementById("ae_account_name")?.value.trim();
+  const brand = document.getElementById("ae_brand")?.value.trim();
+  const type = document.getElementById("ae_business_type")?.value.trim();
+  const stage = document.getElementById("ae_stage")?.selectedOptions?.[0]?.textContent || "";
+  summary.innerHTML = compactParts([
+    contact ? `Customer: ${contact}` : "",
+    account || brand || "Account not set",
+    type || "Business type not set",
+    aeMode === "pipeline" ? `Pipeline: ${stage}` : "Blitz mode"
+  ]);
+}
+
+function updateLiveCardToggle(card) {
+  const btn = card?.querySelector?.(".collapse-toggle");
+  if (!btn) return;
+  const expanded = card.classList.contains("expanded");
+  btn.innerHTML = expanded
+    ? `<i class="ti ti-chevron-up" aria-hidden="true"></i><span>Done</span>`
+    : `<i class="ti ti-pencil" aria-hidden="true"></i><span>Edit</span>`;
+}
+
+function setLiveCard(cardId, active) {
+  const card = document.getElementById(cardId);
+  if (!card) return;
+  if (active) {
+    card.classList.add("live-compact");
+    card.classList.remove("expanded");
+  } else {
+    card.classList.remove("live-compact", "expanded");
+  }
+  if (cardId === "form-card") updateSdrCollapseSummary();
+  if (cardId === "ae-card") updateAeCollapseSummary();
+  updateLiveCardToggle(card);
+}
+
+function toggleLiveCard(cardId) {
+  const card = document.getElementById(cardId);
+  if (!card) return;
+  card.classList.toggle("expanded");
+  if (cardId === "form-card") updateSdrCollapseSummary();
+  if (cardId === "ae-card") updateAeCollapseSummary();
+  updateLiveCardToggle(card);
+}
+
 function populateRecap() {
   document.getElementById("recap-brand").textContent = prospectInfo.brand;
   const chips = [];
@@ -3970,6 +4072,7 @@ async function startCall() {
   document.getElementById("callview").classList.add("on");
   document.getElementById("sql-sidebar").style.display = "block";
   document.body.classList.add("calling");
+  setLiveCard("form-card", true);
   populateRecap();
   updateSql();
 
@@ -3988,7 +4091,6 @@ async function startCall() {
 
   renderCurrent(opening, "opening");
   document.getElementById("gen-btn").disabled = false;
-  document.getElementById("callview").scrollIntoView({ behavior:"smooth", block:"start" });
 }
 
 async function handleResponse(responseId, label) {
@@ -4065,6 +4167,9 @@ function resetAll() {
   document.getElementById("callview").classList.remove("on");
   document.getElementById("sql-sidebar").style.display = "none";
   document.body.classList.remove("calling");
+  setLiveCard("form-card", false);
+  setLiveCard("ae-card", false);
+  document.getElementById("ae-output")?.classList.remove("on");
   ["lead_name","brand","num_locs","known_pain"].forEach(id => document.getElementById(id).value = "");
   ["industry","prospect_role","current_solution","timeline","budget"].forEach(id => document.getElementById(id).value = "");
   industryManuallySet = false;
