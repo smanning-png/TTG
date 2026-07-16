@@ -2257,12 +2257,12 @@ function commonExistingToolExamples(info) {
 function existingToolsBridge(info) {
   const brand = (info && info.brand) || "businesses like yours";
   if (isShippingPrintContext(info)) {
-    return `A lot of ${brand} owners already have systems for shipping, rates, printing, POS, or accounting, and that is fine. Homebase usually fits around those; the gap we help with is scheduling, timecards, payroll, hiring, and team messages.`;
+    return `Most ${brand} owners I talk with already have tools for shipping, rates, printing, POS, or accounting. Totally makes sense. Homebase usually fits around those and helps with the employee side: schedules, timecards, payroll, hiring, and team messages.`;
   }
   if (isHospitalityContext(info)) {
-    return `A lot of ${brand || "hotel"} operators already have systems for PMS, rates, inventory, accounting, or property ops, and that is fine. Homebase usually fits around those; the gap we help with is managing and paying the hourly team.`;
+    return `Most ${brand || "hotel"} operators I talk with already have systems for PMS, rates, inventory, accounting, or property ops. Totally makes sense. Homebase usually fits around those and helps with the property team side: managing and paying hourly staff.`;
   }
-  return `A lot of owners already have tools in place, and that is fine. Homebase usually fits around the existing stack; the gap we help with is scheduling, timecards, payroll, hiring, and team messages.`;
+  return `Most owners I talk with already have a few tools in place. Totally makes sense. Homebase usually fits around the existing stack and helps with the employee side: schedules, timecards, payroll, hiring, and team messages.`;
 }
 
 function ownerProofPhrase(peer) {
@@ -2306,7 +2306,7 @@ function buildOpeningInstant(info) {
   const variants = [
     {
       mode: "permission",
-      text: `Hey ${name}, it's [Your Name] with Homebase. ${proofLine} Can I give you the 30-second version?`,
+      text: `Hey ${name}, it's [Your Name] with Homebase. I know I'm catching you in the middle of the day. ${proofLine} Can I give you the 30-second version?`,
       tip: `Coaching tip: Lead with proof, ask for a small 30-second window, then let their answer point you toward pain, timing, or the right contact.`
     },
     {
@@ -2316,7 +2316,7 @@ function buildOpeningInstant(info) {
     },
     {
       mode: "permission",
-      text: `Hey ${name}, [Your Name] with Homebase. ${proofLine} I know you may already have tools in place. Can I take 30 seconds to explain where we usually fit?`,
+      text: `Hey ${name}, [Your Name] with Homebase. I know this is out of the blue, so I'll be brief. ${proofLine} You may already have tools in place. Can I take 30 seconds to explain where we usually fit?`,
       tip: `Coaching tip: Proactively acknowledge existing tools, then earn a short window before positioning Homebase.`
     },
     {
@@ -2336,7 +2336,7 @@ function buildOpeningInstant(info) {
     },
     {
       mode: "discovery",
-      text: `Hey ${name}, [Your Name] with Homebase. ${stackBridge}\n\nAre the employee-side pieces pretty buttoned up today, or is any of that still taking more time than it should?`,
+      text: `Hey ${name}, [Your Name] with Homebase. I might be catching you cold, so I'll keep it simple. ${stackBridge}\n\nQuick gut check: are those employee-side pieces pretty buttoned up today, or is any of it still taking more time than it should?`,
       tip: `Coaching tip: Separate their existing operating systems from the employee workflow, then ask about fit without assuming pain.`
     },
     {
@@ -2415,7 +2415,7 @@ UPS STORE / SHIPPING-PRINT MODE (critical for ${info.brand}):
 - Do not imply Homebase replaces shipping, rate-shopping, package tracking, print production, mailbox, POS, inventory, or accounting tools.
 - Say Homebase usually fits around those existing systems and focuses on managing and paying the hourly team: schedules, timecards, payroll, hiring, onboarding, team messages, breaks, late arrivals, PTO, and manager approvals.
 - Common tools they may mention: Webtimeclock, MPOS/Managed Point of Sale, ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square, a CPA/bookkeeper, or corporate/franchisor-provided tools.
-- Early credibility line to use naturally: "A lot of UPS Store owners already have tools for shipping, rates, printing, POS, or accounting. We fit around those; the part we usually help with is managing and paying the team."
+- Early credibility line to use naturally: "Most UPS Store owners I talk with already have tools for shipping, rates, printing, POS, or accounting. Totally makes sense. We fit around those; the part we usually help with is managing and paying the team."
 ` : "";
 
   return `You are a cold call script assistant for Homebase SDRs calling franchise owners. Homebase is the ALL-IN-ONE app for running an hourly team: scheduling, time tracking, payroll, hiring, team messaging, and HR, all in one place.

@@ -465,6 +465,24 @@ if (/ADP|Paychex|QuickBooks|Gusto|Deputy|When I Work|Sling|Connecteam/i.test(ups
 if (!/already have tools in place/i.test(upsSpokenOpening) || !/30 seconds/i.test(upsSpokenOpening)) {
   throw new Error("UPS Store existing-tools opener should stay subtle and ask for a 30-second window.");
 }
+if (!/out of the blue|I'll be brief/i.test(upsSpokenOpening)) {
+  throw new Error("Existing-tools permission opener should include a small humanizing phrase before the ask.");
+}
+sandbox.Math.random = () => 0.61;
+const stackBridgeOpening = sandbox.buildOpeningInstant({
+  brand: "UPS Store",
+  industry: "Professional Services",
+  lead_name: "May",
+  num_locs: "2",
+  prospect_role: "owner",
+  known_pain: ""
+});
+if (/that is fine|A lot of owners already have tools in place/i.test(stackBridgeOpening)) {
+  throw new Error("Existing-tools discovery opener should avoid blunt 'that is fine' phrasing.");
+}
+if (!/I might be catching you cold|Totally makes sense|Quick gut check/i.test(stackBridgeOpening)) {
+  throw new Error("Existing-tools discovery opener should build a little human rapport before discovery.");
+}
 sandbox.Math.random = () => 0.95;
 const sanityCheckOpening = sandbox.buildOpeningInstant({
   brand: "UPS Store",
@@ -739,7 +757,7 @@ if (!/one system, a few different tools, or are you doing those manually/i.test(
   throw new Error("UPS Store fallback should use the shortened stack question.");
 }
 const upsBridge = readContext('existingToolsBridge({brand:"UPS Store", industry:"Professional Services"})');
-if (!/shipping, rates, printing, POS, or accounting/i.test(upsBridge) || !/scheduling, timecards, payroll/i.test(upsBridge)) {
+if (!/Most UPS Store owners I talk with already have tools for shipping, rates, printing, POS, or accounting/i.test(upsBridge) || !/Totally makes sense/i.test(upsBridge) || !/schedules, timecards, payroll/i.test(upsBridge)) {
   throw new Error("UPS Store opening bridge should proactively address existing tools.");
 }
 
