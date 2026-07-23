@@ -92,6 +92,11 @@ for (const requiredQuickCard of ["competitor_adp", "competitor_paychex", "compet
     throw new Error(`Quick battlecard tiles are missing ${requiredQuickCard}.`);
   }
 }
+for (const coffeeCard of ["competitor_clover", "competitor_lightspeed"]) {
+  if (!quickBattlecardIds.includes(coffeeCard)) {
+    throw new Error(`Quick battlecard tiles are missing coffee/cafe card ${coffeeCard}.`);
+  }
+}
 for (const id of quickBattlecardIds) {
   if (!competitorIntel[id]) {
     throw new Error(`Quick battlecard ${id} has no competitor intel.`);
@@ -102,6 +107,7 @@ const quickWebtimeclockQuestions = readContext('quickBattlecardQuestions(COMPETI
 const quickMposQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_mpos)');
 const quickCpaQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_cpa)');
 const quickInnFlowQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_innflow)');
+const quickCloverQuestions = readContext('quickBattlecardQuestions(COMPETITOR_INTEL.competitor_clover)');
 if (!quickAdpQuestions.some(q => /hours getting from schedules or timecards into payroll/i.test(q))) {
   throw new Error("ADP quick battlecard should include payroll handoff discovery.");
 }
@@ -116,6 +122,9 @@ if (!quickCpaQuestions.some(q => /prep before it gets to them/i.test(q)) || !qui
 }
 if (!quickInnFlowQuestions.some(q => /property team using it day to day/i.test(q))) {
   throw new Error("Inn-Flow quick battlecard should include property-team usage discovery.");
+}
+if (!quickCloverQuestions.some(q => /POS and payments/i.test(q) && /tips/i.test(q))) {
+  throw new Error("Clover quick battlecard should include cafe POS/team workflow discovery.");
 }
 const quickRenderSource = readContext("selectQuickBattlecard.toString()");
 for (const expectedLabel of ["Ask This", "Where We Win", "Careful"]) {
@@ -174,7 +183,7 @@ if (!readContext("AE_PIPELINE_STAGE_GATES.new.find(field => field.key === 'prima
   throw new Error("Primary decision-maker stage gate should be marked required.");
 }
 const aePricingIntel = readContext("AE_PRICING_INTEL");
-for (const requiredAeCard of ["competitor_gusto", "competitor_quickbooks", "competitor_square", "competitor_toast", "competitor_wheniwork_deputy_sling", "competitor_connecteam"]) {
+for (const requiredAeCard of ["competitor_gusto", "competitor_quickbooks", "competitor_square", "competitor_clover", "competitor_lightspeed", "competitor_toast", "competitor_wheniwork_deputy_sling", "competitor_connecteam"]) {
   const card = aePricingIntel[requiredAeCard];
   if (!card?.pricing || !card?.promo || !card?.leverage) {
     throw new Error(`AE pricing intel is incomplete for ${requiredAeCard}.`);
@@ -577,6 +586,57 @@ if (!/restaurant workflow|tips or POS handoff/i.test(restaurant7shiftsFallback) 
 }
 if (!/Food & Beverage brands|tips\/POS handoff|restaurant/i.test(restaurant7shiftsPrompt) || /front desk|housekeeping|PMS|hotel back office/i.test(restaurant7shiftsPrompt)) {
   throw new Error("Restaurant 7shifts prompt should be explicitly non-hotel.");
+}
+
+readContext(`prospectInfo = {
+  brand: "Biggby Coffee",
+  industry: "Food & Beverage",
+  lead_name: "Maya",
+  num_locs: "3",
+  prospect_role: "owner",
+  current_solution: "",
+  timeline: "",
+  budget: "",
+  known_pain: ""
+}; sqlState = freshSql(); activeCompetitor = null;`);
+if (!readContext('isCoffeeTeaContext(prospectInfo)')) {
+  throw new Error("Biggby Coffee should trigger coffee/tea/cafe mode.");
+}
+for (const targetBrand of ["Duck Donuts", "Ziggi's Coffee", "The Coffee Bean & Tea Leaf", "Sharetea"]) {
+  const detected = readContext(`detectIndustry(${JSON.stringify(targetBrand)})`);
+  if (detected?.industry !== "Food & Beverage") {
+    throw new Error(`${targetBrand} should auto-detect as Food & Beverage through coffee/tea targeting.`);
+  }
+}
+const coffeeStackIds = new Set(readContext('getResponseOptions("interested")').map(option => option.id));
+for (const required of ["competitor_square", "competitor_clover", "competitor_toast", "competitor_lightspeed", "competitor_7shifts", "competitor_wheniwork_deputy_sling", "competitor_cpa", "pain_scheduling", "pain_payroll", "pain_comms"]) {
+  if (!coffeeStackIds.has(required)) {
+    throw new Error(`Coffee/tea current-stack options are missing ${required}.`);
+  }
+}
+if (coffeeStackIds.has("competitor_webtimeclock") || coffeeStackIds.has("competitor_innflow") || coffeeStackIds.has("competitor_hotel_ops")) {
+  throw new Error("Coffee/tea current-stack options should not include UPS or hotel-specific tools.");
+}
+const coffeePrompt = sandbox.buildNextPrompt("interested", "Yeah, what does it do?");
+if (!/barista schedules|tips|Square|Clover|Lightspeed/i.test(coffeePrompt) || /PMS|hotel|shipping, rates/i.test(coffeePrompt)) {
+  throw new Error("Coffee/tea prompt should use cafe workflow language and avoid hotel/UPS language.");
+}
+const coffeeFallback = sandbox.buildFallbackTalkTrack("who_are_you", "What is Homebase?");
+if (!/coffee and tea shops|barista schedules|tips|Square, Clover, Toast/i.test(coffeeFallback) || /property-level|shipping, rates/i.test(coffeeFallback)) {
+  throw new Error("Coffee/tea fallback should explain Homebase with cafe-specific workflow language.");
+}
+const coffeeCloverFallback = sandbox.buildFallbackTalkTrack("competitor_clover", "We use Clover");
+if (!/What parts does Clover cover today: POS\/payments, scheduling, timecards, tips, payroll, hiring, team communication, or most of the cafe workflow/i.test(coffeeCloverFallback)) {
+  throw new Error("Clover coffee fallback should ask a cafe-specific scope question.");
+}
+const coffeeCards = readContext("COFFEE_TEA_BATTLECARD_IDS");
+for (const required of ["competitor_square", "competitor_clover", "competitor_toast", "competitor_lightspeed", "competitor_7shifts", "competitor_gusto"]) {
+  if (!coffeeCards.includes(required)) {
+    throw new Error(`Coffee/tea battlecards are missing ${required}.`);
+  }
+}
+if (coffeeCards.includes("competitor_innflow") || coffeeCards.includes("competitor_mpos")) {
+  throw new Error("Coffee/tea battlecards should not prioritize hotel or UPS-specific tools.");
 }
 
 readContext(`prospectInfo = {

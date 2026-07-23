@@ -986,6 +986,27 @@ function isShippingPrintContext(info = prospectInfo) {
   return SHIPPING_PRINT_BRAND_HINTS.some(hint => brandKeyContainsPhrase(key, normalizeBrandKey(hint)));
 }
 
+const COFFEE_TEA_BRAND_HINTS = [
+  "coffee", "cafe", "café", "espresso", "tea", "boba", "bubble tea", "donut", "donuts", "doughnut", "bagel", "bakery",
+  "duck donuts", "nothing bundt cakes", "shipley do-nuts", "shipley donuts", "shipleys donuts", "gigi's cupcakes",
+  "gigis cupcakes", "peach cobbler factory", "biggby coffee", "ziggi's coffee", "ziggis coffee", "cookies by design",
+  "wetzel's pretzels", "wetzels pretzels", "einstein bros bagels", "perkins restaurant bakery", "dunn brothers coffee",
+  "caribou coffee", "manhattan bagel", "the human bean", "honey dew donuts", "coffee beanery", "bruegger's bagels",
+  "brueggers bagels", "atlanta bread company", "just love coffee", "twisted sugar", "eileen's colossal cookies",
+  "eileens colossal cookies", "coffee bean tea leaf", "the coffee bean and tea leaf", "sharetea", "share tea",
+  "nrgize lifestyle cafe", "pickleman's gourmet cafe", "picklemans gourmet cafe", "ben's soft pretzels",
+  "bens soft pretzels", "tous les jours", "caffebene", "another broken egg cafe", "aroma joes", "scooters coffee",
+  "pj's coffee", "pjs coffee", "dunkin", "tim hortons", "starbucks", "peets coffee", "gong cha", "happy lemon"
+];
+
+function isCoffeeTeaContext(info = prospectInfo) {
+  const key = normalizeBrandKey(info && info.brand);
+  const type = normalizeBrandKey((info && (info.industry || info.businessType)) || "");
+  const combined = [key, type].filter(Boolean).join(" ");
+  if (!combined) return false;
+  return COFFEE_TEA_BRAND_HINTS.some(hint => brandKeyContainsPhrase(combined, normalizeBrandKey(hint)));
+}
+
 // Keyword fallback for brands not in our known-franchisee data
 const INDUSTRY_KEYWORDS = [
   { kw: ["salon","spa","barber","nails","lash","brow","wax","tan","sauna","massage","hair","beauty","fitness","gym","yoga","pilates","crossfit","cycle","wellness","chiropractic","therapy","med spa","medspa"], industry: "Health & Fitness" },
@@ -1007,6 +1028,7 @@ function detectIndustry(brand) {
   // 1) Exact match against known franchisee brands
   if (BRAND_INDUSTRY[b]) return { industry: BRAND_INDUSTRY[b], exact: true };
   if (isHospitalityBrand(brand)) return { industry: "Lodging & Leisure", exact: false };
+  if (isCoffeeTeaContext({ brand })) return { industry: "Food & Beverage", exact: true };
   // 2) Partial match: brand contains a known brand name or vice versa
   for (const key in BRAND_INDUSTRY) {
     if (b === key) return { industry: BRAND_INDUSTRY[key], exact: true };
@@ -1033,6 +1055,7 @@ function onIndustryManualChange() {
   industryManuallySet = true;
   sel.classList.remove("autofilled");
   hint.textContent = "";
+  renderQuickBattlecards("sdr");
 }
 
 function autoDetectIndustry() {
@@ -1055,6 +1078,7 @@ function autoDetectIndustry() {
     hint.textContent = "";
     if (!industryManuallySet) sel.value = "";
   }
+  renderQuickBattlecards("sdr");
 }
 
 function onAeBusinessTypeManual() {
@@ -1063,6 +1087,7 @@ function onAeBusinessTypeManual() {
   aeBusinessTypeManuallySet = true;
   input.classList.remove("autofilled");
   hint.textContent = "";
+  renderQuickBattlecards("ae");
 }
 
 function autoDetectAeBusinessType() {
@@ -1084,6 +1109,7 @@ function autoDetectAeBusinessType() {
     hint.textContent = "";
     if (!aeBusinessTypeManuallySet) input.value = "";
   }
+  renderQuickBattlecards("ae");
 }
 
 const SOCIAL_PROOF = {
@@ -1131,7 +1157,7 @@ const SUB_CATEGORIES = [
   { kw:["paint","painter","certa","twist"], peers:["Certa Pro Painters"], noun:"crews" },
   { kw:["clean","janitorial","maid","jan-pro","chem-dry","molly maid"], peers:["Chem-Dry","Jan-Pro","Molly Maid"], noun:"crews" },
   // Food sub-splits (for tighter peers)
-  { kw:["coffee","cafe","café","espresso","scooters","aroma joe","biggby","dunkin"], peers:["Scooters Coffee","Aroma Joes","Biggby Coffee"], noun:"shops" },
+  { kw:["coffee","cafe","café","espresso","tea","boba","bubble tea","donut","doughnut","bagel","bakery","cupcake","pretzel","scooters","aroma joe","biggby","ziggi","caribou","dunn brothers","human bean","sharetea","coffee bean","duck donuts","shipley","nothing bundt","einstein bros"], peers:["Scooters Coffee","Biggby Coffee","Sharetea","PJ's Coffee"], noun:"shops" },
   { kw:["pizza","pizzeria"], peers:["Marco's Pizza","Hungry Howie's"], noun:"shops" },
   { kw:["ice cream","cream","frozen yogurt","froyo","gelato","custard"], peers:["Cold Stone","Baskin Robbins","Ben & Jerrys"], noun:"shops" },
   { kw:["smoothie","juice","bowl","açai","acai","playa"], peers:["Playa Bowls","Smoothie King"], noun:"shops" },
@@ -1218,6 +1244,29 @@ const CURRENT_STACK_RESPONSE_OPTIONS = [
   { id:"pain_payroll", icon:"ti-receipt", label:"Payroll is the problem", sub:"Pain surfaces" },
   { id:"pain_scheduling", icon:"ti-calendar", label:"Scheduling is our headache", sub:"Pain surfaces" },
   { id:"pain_hiring", icon:"ti-user-plus", label:"Hiring is tough right now", sub:"Pain surfaces" },
+  { id:"decision_maker_no", icon:"ti-user-question", label:"Someone else handles that", sub:"Wrong contact" },
+  { id:"not_interested", icon:"ti-x", label:"We're covered, thanks", sub:"Status quo" }
+];
+
+const COFFEE_TEA_STACK_RESPONSE_OPTIONS = [
+  { id:"competitor_square", icon:"ti-square", label:"Square handles POS / payroll", sub:"Coffee POS / payroll" },
+  { id:"competitor_clover", icon:"ti-device-cash-register", label:"Clover handles POS / payments", sub:"Cafe POS" },
+  { id:"competitor_toast", icon:"ti-tools-kitchen-2", label:"Toast handles POS / team tools", sub:"Cafe / QSR stack" },
+  { id:"competitor_lightspeed", icon:"ti-bolt", label:"Lightspeed handles POS", sub:"Cafe POS / inventory" },
+  { id:"competitor_7shifts", icon:"ti-calendar-time", label:"7shifts handles scheduling", sub:"Cafe scheduling" },
+  { id:"competitor_wheniwork_deputy_sling", icon:"ti-calendar-time", label:"When I Work / Deputy / Sling schedules", sub:"Scheduling / time app" },
+  { id:"competitor_gusto", icon:"ti-receipt", label:"Gusto handles payroll", sub:"Payroll / HR" },
+  { id:"competitor_adp", icon:"ti-receipt", label:"ADP handles payroll", sub:"Payroll incumbent" },
+  { id:"competitor_paychex", icon:"ti-receipt", label:"Paychex handles payroll", sub:"Payroll incumbent" },
+  { id:"competitor_quickbooks", icon:"ti-calculator", label:"QuickBooks handles payroll / books", sub:"Accounting-led payroll" },
+  { id:"competitor_cpa", icon:"ti-calculator", label:"Our CPA / bookkeeper handles payroll", sub:"Accountant / bookkeeper" },
+  { id:"competitor_other", icon:"ti-layout-grid", label:"Different tools for POS, schedules, and payroll", sub:"Mixed cafe stack" },
+  { id:"curious_why", icon:"ti-file-spreadsheet", label:"Paper schedules, texts, or spreadsheets", sub:"Manual process" },
+  { id:"franchise_hq", icon:"ti-building", label:"Corporate / franchisor provides it", sub:"HQ-provided tools" },
+  { id:"pain_scheduling", icon:"ti-calendar", label:"Rush coverage and scheduling are hard", sub:"Scheduling pain" },
+  { id:"pain_payroll", icon:"ti-receipt", label:"Tips, timecards, or payroll are the headache", sub:"Payroll pain" },
+  { id:"pain_hiring", icon:"ti-user-plus", label:"Barista hiring / turnover is tough", sub:"Hiring pain" },
+  { id:"pain_comms", icon:"ti-message", label:"Keeping the team updated is messy", sub:"Team comms pain" },
   { id:"decision_maker_no", icon:"ti-user-question", label:"Someone else handles that", sub:"Wrong contact" },
   { id:"not_interested", icon:"ti-x", label:"We're covered, thanks", sub:"Status quo" }
 ];
@@ -1369,20 +1418,36 @@ const COMPETITOR_INTEL = {
     angles:["Respect MPOS as the official store register and POS lane", "Separate POS clock-ins from the owner/manager work around schedules, edits, breaks, approvals, and payroll", "Position Homebase as complementary to the register: employee workflow before payroll, not shipping or sales transactions"],
     caution:"Do not suggest replacing the official POS/register system. Keep the conversation on timecards, payroll prep, scheduling, and employee admin."
   },
+  competitor_clover: {
+    name:"Clover",
+    aliases:["clover", "clover pos", "clover payroll", "clover shifts", "clover team"],
+    wedge:"keeping Clover in the POS and payments lane while Homebase owns the cafe employee workflow: barista scheduling, clock-ins, timecard edits, payroll-ready hours, hiring, and team messages",
+    ask:"Is Clover mainly handling POS and payments, or are schedules, timecards, payroll, hiring, and team communication running there too?",
+    angles:["Respect Clover for checkout, payments, reporting, loyalty, and customer engagement", "Ask what still happens outside POS: schedule changes, missed punches, break compliance, tips, approvals, and payroll handoff", "Position Homebase as the people workflow around the cafe POS, not a POS replacement"],
+    caution:"Do not imply Homebase replaces Clover POS or payment processing. Win by separating counter operations from employee operations."
+  },
+  competitor_lightspeed: {
+    name:"Lightspeed",
+    aliases:["lightspeed", "lightspeed restaurant", "lightspeed pos"],
+    wedge:"respecting Lightspeed for cafe POS, menu, inventory, and reporting while Homebase simplifies the staff workflow around scheduling, time, payroll, hiring, and team communication",
+    ask:"Is Lightspeed mainly your POS and inventory system, or is it also handling staff schedules, timecards, payroll, hiring, and team communication?",
+    angles:["Respect Lightspeed for POS, menu, inventory, multi-site reporting, and payments", "Ask whether shift coverage, timecard cleanup, tip handoff, payroll prep, and manager communication live somewhere else", "Position Homebase as complementary to cafe operations software: easier hourly-team management before payroll"],
+    caution:"Do not fight POS or inventory. Keep the comparison on employee workflow and payroll handoff."
+  },
   competitor_square: {
     name:"Square Payroll",
-    aliases:["square", "square payroll"],
-    wedge:"deeper hourly-team management for restaurants, retail counters, and service locations that have outgrown a simple POS-tied payroll setup",
-    ask:"Are you mostly using Square because of POS, or because payroll and scheduling are working well too?",
-    angles:["Ask about scheduling depth, timecard edits, tip pooling where relevant, and support during payroll errors", "Position Homebase as deeper hourly-team management while still fitting retail and restaurant workflows", "Use scalability as they add employees, departments, or locations"],
+    aliases:["square", "square payroll", "square pos", "square team"],
+    wedge:"deeper hourly-team management for cafes, restaurants, retail counters, and service locations that have outgrown a simple POS-tied payroll setup",
+    ask:"Are you mostly using Square because of POS, or are scheduling, timecards, tips, payroll, and team communication working well there too?",
+    angles:["Ask about scheduling depth, timecard edits, tip pooling where relevant, and support during payroll errors", "For coffee and tea shops, compare rush coverage, barista shift swaps, break tracking, and tip/timecard handoff before payroll", "Position Homebase as deeper hourly-team management while still fitting around POS workflows"],
     caution:"Square is price-simple and POS-sticky. Win only where scheduling, tips, compliance, or growth creates pain."
   },
   competitor_toast: {
     name:"Toast",
     aliases:["toast", "toast payroll"],
-    wedge:"Homebase can layer scheduling, time, payroll, hiring, and team messaging around their existing POS instead of making the conversation only about POS hardware",
+    wedge:"Homebase can layer scheduling, time, payroll, hiring, and team messaging around their existing cafe or restaurant POS instead of making the conversation about POS hardware",
     ask:"Are you using Toast for POS only, or are scheduling, payroll, tips, and employee communication all running there too?",
-    angles:["Homebase integrates with Toast, so the prospect does not have to rip out POS to improve hourly-team ops", "Ask whether payroll, scheduling, and tips feel simple or just connected to POS", "If hardware or processing is sensitive, keep the conversation on team management"],
+    angles:["Homebase integrates with Toast, so the prospect does not have to rip out POS to improve hourly-team ops", "For coffee and tea shops, ask whether barista schedules, tip handoff, timecard edits, and payroll feel simple or just connected to POS", "If hardware or processing is sensitive, keep the conversation on team management"],
     caution:"Toast is strong in restaurants and advertises 24/7 support. Do not attack support; ask how the full team workflow feels."
   },
   competitor_hotschedules: {
@@ -1396,9 +1461,9 @@ const COMPETITOR_INTEL = {
   competitor_7shifts: {
     name:"7shifts",
     aliases:["7shifts", "7 shifts", "7shift"],
-    wedge:"moving beyond restaurant scheduling into one simpler workflow for schedules, time clocks, payroll, hiring, and team communication",
+    wedge:"moving beyond restaurant or cafe scheduling into one simpler workflow for schedules, time clocks, payroll, hiring, and team communication",
     ask:"Is 7shifts mainly handling scheduling, or are timecards, payroll, hiring, and team communication in there too?",
-    angles:["Respect 7shifts for restaurant scheduling and tip-heavy teams", "For restaurants like Dairy Queen, ask what happens after the schedule: punches, timecard edits, payroll, hiring, and manager messages", "For hotels or multi-department teams, ask whether non-F&B employees are managed somewhere else"],
+    angles:["Respect 7shifts for restaurant scheduling and tip-heavy teams", "For coffee and tea shops, ask what happens after the posted schedule: rush coverage, swaps, punches, tips, payroll, and manager messages", "For hotels or multi-department teams, ask whether non-F&B employees are managed somewhere else"],
     caution:"7shifts can be a good fit for restaurant scheduling. Win where the full hourly-team workflow still takes manager time or lives across multiple systems."
   },
   competitor_connecteam: {
@@ -1508,6 +1573,8 @@ const QUICK_BATTLECARD_IDS = [
   "competitor_webtimeclock",
   "competitor_mpos",
   "competitor_square",
+  "competitor_clover",
+  "competitor_lightspeed",
   "competitor_cpa",
   "competitor_toast",
   "competitor_hotschedules",
@@ -1526,6 +1593,8 @@ const AE_BATTLECARD_IDS = [
   "competitor_quickbooks",
   "competitor_quickbooks_time",
   "competitor_square",
+  "competitor_clover",
+  "competitor_lightspeed",
   "competitor_toast",
   "competitor_hotschedules",
   "competitor_7shifts",
@@ -1537,6 +1606,48 @@ const AE_BATTLECARD_IDS = [
   "competitor_innflow",
   "competitor_hcm_hotel",
   "competitor_hotel_ops"
+];
+
+const COFFEE_TEA_BATTLECARD_IDS = [
+  "competitor_square",
+  "competitor_clover",
+  "competitor_toast",
+  "competitor_lightspeed",
+  "competitor_7shifts",
+  "competitor_wheniwork_deputy_sling",
+  "competitor_gusto",
+  "competitor_adp",
+  "competitor_paychex",
+  "competitor_quickbooks",
+  "competitor_quickbooks_time",
+  "competitor_cpa",
+  "competitor_connecteam"
+];
+
+const SHIPPING_PRINT_BATTLECARD_IDS = [
+  "competitor_webtimeclock",
+  "competitor_mpos",
+  "competitor_adp",
+  "competitor_paychex",
+  "competitor_quickbooks",
+  "competitor_quickbooks_time",
+  "competitor_gusto",
+  "competitor_wheniwork_deputy_sling",
+  "competitor_connecteam",
+  "competitor_square",
+  "competitor_cpa"
+];
+
+const HOSPITALITY_BATTLECARD_IDS = [
+  "competitor_innflow",
+  "competitor_hotel_ops",
+  "competitor_hcm_hotel",
+  "competitor_hotschedules",
+  "competitor_7shifts",
+  "competitor_wheniwork_deputy_sling",
+  "competitor_adp",
+  "competitor_paychex",
+  "competitor_cpa"
 ];
 
 const AE_PRICING_INTEL = {
@@ -1569,6 +1680,16 @@ const AE_PRICING_INTEL = {
     pricing:"Full-service payroll is public at $35/mo + $6 per person paid; contractor-only is $6/person paid.",
     promo:"No public payroll promo verified. Square does emphasize no long-term commitment and simple onboarding.",
     leverage:"Square is simple and POS-sticky. Win where scheduling depth, hiring, team communication, or non-Square workflows matter."
+  },
+  competitor_clover: {
+    pricing:"Clover pricing varies by business type and package. Public pricing says merchants pay a monthly software fee plus processing rates; restaurant packages route many bundles through contact-sales pricing.",
+    promo:"Public Clover terms currently mention a hardware promotion through December 31, 2026, and a Clover Software promotional 90-day SaaS trial for qualified selected business types from March 5, 2026 through September 5, 2026.",
+    leverage:"Keep POS and payments intact. Ask whether the cafe still needs better staff scheduling, breaks, timecards, payroll prep, hiring, and team messages outside the register."
+  },
+  competitor_lightspeed: {
+    pricing:"Lightspeed Restaurant publicly lists Starter at $69/mo, Essential at $189/mo, Premium at $399/mo, and Enterprise by quote.",
+    promo:"No public always-on payroll or workforce promo verified. Ask whether they are paying for POS only, add-ons, KDS, multiple locations, or implementation.",
+    leverage:"Respect POS, inventory, and reporting. Compare employee workflow outside POS: schedule changes, timecard cleanup, tip handoff, payroll prep, and manager communication."
   },
   competitor_toast: {
     pricing:"Flexible / quote-based. Toast says upfront costs include hardware and implementation; Pay-as-You-Go can reduce upfront hardware/install costs via platform rate.",
@@ -1648,7 +1769,10 @@ function quickBattlecardQuestions(intel) {
   } else if (/CPA|bookkeeper|accountant/i.test(name)) {
     questions.push("What do you still prep before it gets to them: timecards, edits, new hires, or approvals?");
     questions.push("If they keep doing the books, would it help if payroll hours were cleaner before they got involved?");
-  } else if (/ADP|Paychex|Gusto|QuickBooks|Square|Paylocity|Paycor|UKG|SurePayroll/i.test(name)) {
+  } else if (/Toast|Square|Clover|Lightspeed/i.test(name)) {
+    questions.push("Is that mainly POS and payments, or does it also cover scheduling, timecards, tips, payroll, and team messages?");
+    questions.push("What still happens outside the POS before payroll is ready?");
+  } else if (/ADP|Paychex|Gusto|QuickBooks|Paylocity|Paycor|UKG|SurePayroll/i.test(name)) {
     questions.push("How are hours getting from schedules or timecards into payroll today?");
     questions.push("What still takes manager time before payroll can run?");
   } else if (/Toast|7shifts|HotSchedules|Fourth|When I Work|Deputy|Sling/i.test(name)) {
@@ -1664,10 +1788,30 @@ function quickBattlecardQuestions(intel) {
   return questions;
 }
 
+function battlecardContextInfo(context = "sdr") {
+  if (context === "ae") {
+    const brand = document.getElementById("ae_brand")?.value || document.getElementById("ae_account_name")?.value || "";
+    const industry = document.getElementById("ae_business_type")?.value || "";
+    return { brand, industry };
+  }
+  return {
+    brand: document.getElementById("brand")?.value || "",
+    industry: document.getElementById("industry")?.value || ""
+  };
+}
+
+function contextualBattlecardIds(context = "sdr") {
+  const info = battlecardContextInfo(context);
+  if (isCoffeeTeaContext(info)) return COFFEE_TEA_BATTLECARD_IDS;
+  if (isShippingPrintContext(info)) return SHIPPING_PRINT_BATTLECARD_IDS;
+  if (isHospitalityContext(info)) return HOSPITALITY_BATTLECARD_IDS;
+  return context === "ae" ? AE_BATTLECARD_IDS : QUICK_BATTLECARD_IDS;
+}
+
 function battlecardDom(context) {
   const isAe = context === "ae";
   return {
-    ids: isAe ? AE_BATTLECARD_IDS : QUICK_BATTLECARD_IDS,
+    ids: contextualBattlecardIds(context),
     tileRoot: document.getElementById(isAe ? "ae-battlecard-tiles" : "battlecard-tiles"),
     detail: document.getElementById(isAe ? "ae-battlecard-detail" : "battlecard-detail"),
     active: isAe ? activeAeBattlecardId : activeBattlecardId
@@ -1675,8 +1819,17 @@ function battlecardDom(context) {
 }
 
 function renderQuickBattlecards(context = "sdr") {
-  const { ids, tileRoot, active } = battlecardDom(context);
+  let { ids, tileRoot, detail, active } = battlecardDom(context);
   if (!tileRoot) return;
+  if (active && !ids.includes(active)) {
+    if (context === "ae") activeAeBattlecardId = null;
+    else activeBattlecardId = null;
+    active = null;
+    if (detail) {
+      detail.classList.remove("on");
+      detail.innerHTML = "";
+    }
+  }
   tileRoot.innerHTML = ids
     .map(id => {
       const intel = COMPETITOR_INTEL[id];
@@ -1794,6 +1947,9 @@ function competitorScopeChoices(competitor, info = prospectInfo || {}) {
   if (hospitality) {
     return "hotel scheduling/time, payroll/HCM, finance or reporting, team communication, department ops, or most of the property workflow";
   }
+  if (isCoffeeTeaContext(info)) {
+    return "POS/payments, scheduling, timecards, tips, payroll, hiring, team communication, or most of the cafe workflow";
+  }
   if (isPayrollHcmCompetitor(competitor)) {
     return "scheduling, time tracking, payroll, and team communications";
   }
@@ -1809,6 +1965,9 @@ function competitorScopeChoices(competitor, info = prospectInfo || {}) {
 function competitorScopeCoaching(competitor, info = prospectInfo || {}) {
   if (isHospitalityContext(info)) {
     return "Use hotel/property language only because this is a hospitality account.";
+  }
+  if (isCoffeeTeaContext(info)) {
+    return "For coffee, tea, bakery, and cafe teams, keep this around rush coverage, barista scheduling, clock-ins, breaks, tips/POS handoff, payroll, hiring, and team messages.";
   }
   if (isRestaurantSchedulingCompetitor(competitor)) {
     return "For restaurants, keep this around schedules, timecards, tips/POS handoff, payroll, hiring, and manager communication.";
@@ -2082,6 +2241,13 @@ function aeRepName() {
   return sdrName || "[Rep Name]";
 }
 
+function aeBusinessTypeLabel(input) {
+  if (isCoffeeTeaContext({ brand: input.brandName || input.accountName || "", industry: input.businessType || "" })) {
+    return "coffee and tea shop";
+  }
+  return input.businessType || detectIndustry(input.brandName || input.accountName || "")?.industry || "business";
+}
+
 function buildAePipelineTalkTrack(input) {
   const contact = input.contactName || "[Customer Name]";
   const targetDate = input.targetDate || "your first payday deadline";
@@ -2098,7 +2264,7 @@ function buildAePipelineTalkTrack(input) {
 
 function buildAeBlitzTalkTrack(input) {
   const contact = input.contactName || "[Customer Name]";
-  const businessType = input.businessType || detectIndustry(input.brandName || input.accountName || "")?.industry || "business";
+  const businessType = aeBusinessTypeLabel(input);
   const context = (input.context || "").toLowerCase();
   const switcher = /switch|adp|paychex|gusto|quickbooks|square|toast|provider|competitor|accountant|cpa/.test(context);
   const posCentered = /pos|toast|square|clover|lightspeed/.test(context);
@@ -2114,8 +2280,7 @@ function buildAeBlitzTalkTrack(input) {
 function buildAeTalkTrack(input) {
   const contact = input.contactName || "there";
   const account = input.accountName || input.brandName || "your business";
-  const detected = detectIndustry(input.brandName || input.accountName || "");
-  const businessType = input.businessType || detected?.industry || "business";
+  const businessType = aeBusinessTypeLabel(input);
   const context = input.context || "";
   if (input.mode === "pipeline") {
     return buildAePipelineTalkTrack({ ...input, contactName: contact, accountName: account, businessType, context });
@@ -2239,6 +2404,9 @@ function brandLocations(brand, n) {
 }
 
 function commonExistingToolExamples(info) {
+  if (isCoffeeTeaContext(info)) {
+    return "POS, payroll, scheduling, or tip tools";
+  }
   if (isShippingPrintContext(info)) {
     return "payroll or timekeeping tools";
   }
@@ -2261,6 +2429,9 @@ function existingToolsBridge(info) {
   }
   if (isHospitalityContext(info)) {
     return `Most ${brand || "hotel"} operators I talk with already have systems for PMS, rates, inventory, accounting, or property ops. Totally makes sense. Homebase usually fits around those and helps with the property team side: managing and paying hourly staff.`;
+  }
+  if (isCoffeeTeaContext(info)) {
+    return `Most ${brand} owners I talk with already have POS, payment, or payroll tools in place. Totally makes sense. Homebase usually fits around those and helps with the cafe team side: schedules, timecards, tips, payroll, hiring, and team messages.`;
   }
   return `Most owners I talk with already have a few tools in place. Totally makes sense. Homebase usually fits around the existing stack and helps with the employee side: schedules, timecards, payroll, hiring, and team messages.`;
 }
@@ -2293,11 +2464,16 @@ function buildOpeningInstant(info) {
     ? `we already work with ${brandSocialProofLocationRef(getBrandSocialProof(brand))}`
     : `we work with a lot of ${industry} teams, including ${peerContext}`;
   const hospitality = isHospitalityContext(info);
+  const coffeeTea = isCoffeeTeaContext(info);
   const ownerGroup = hospitality
     ? `${brand || "hotel"} operators`
+    : coffeeTea
+      ? `${brand || "coffee and tea shop"} owners`
     : `${brand || industry} owners`;
   const peopleWorkflow = hospitality
     ? "scheduling, payroll, hiring, and keeping the team on the same page"
+    : coffeeTea
+      ? "barista schedules, clock-ins, payroll, hiring, and keeping the team on the same page"
     : "scheduling, payroll, hiring, and keeping everyone on the same page";
   const knownPainContext = known_pain
     ? `I saw ${known_pain.toLowerCase()} may already be on your radar. `
@@ -2382,6 +2558,7 @@ function buildSystemPrompt(info) {
   const proof = getProof(info.industry, info.brand);
   const brandProof = getBrandSocialProof(info.brand);
   const hospitality = isHospitalityContext(info);
+  const coffeeTea = isCoffeeTeaContext(info);
   const missing = getMissingFields();
   const desc = {
     pain:"what their specific pain or problem is", timeline:"when they want to make a change (0-30 days, 1-3 months, 3+ months)",
@@ -2409,6 +2586,15 @@ NON-HOTEL COMPETITOR MODE (critical for ${info.brand}):
 - For Retail or service brands such as UPS Store, ask about shifts, timecards, payroll approvals, breaks, late arrivals, hiring/onboarding, team messages, and manager follow-up.
 - Before any objection handling, map what the competitor actually covers. A named competitor is current-solution intel, not proof of pain.
 ` : "";
+  const coffeeTeaPositioning = coffeeTea ? `
+COFFEE / TEA / CAFE MODE (critical for ${info.brand}):
+- Treat this as a coffee, tea, donut, bagel, bakery-cafe, or quick-service counter team, not a full-service restaurant unless the brand clearly is one.
+- Use cafe language naturally: baristas, counter team, morning rush, afternoon rush, shift swaps, availability, breaks, tips, timecards, payroll, hiring, and team messages.
+- Common tools they may mention: Square, Clover, Toast, Lightspeed, 7shifts, When I Work, Deputy, Sling, Gusto, ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, a CPA/bookkeeper, paper schedules, spreadsheets, group texts, or franchisor-provided tools.
+- Do not imply Homebase replaces POS, payments, loyalty, menu management, online ordering, inventory, or accounting. Homebase should fit around those and win on the employee workflow.
+- Strong discovery angles: rush coverage, callouts, barista turnover, availability changes, breaks, tip/timecard handoff, payroll prep, and manager chasing in texts.
+- Value language to use where natural: customers spend 50% less time scheduling per week, 83% saved payroll time after switching to Homebase Payroll, and 82% report less stress with Homebase. Do not repeat stats back to back.
+` : "";
   const shippingPrintPositioning = isShippingPrintContext(info) ? `
 UPS STORE / SHIPPING-PRINT MODE (critical for ${info.brand}):
 - Assume they may already have software for shipping, rates, print orders, mailboxes, POS, inventory, accounting, or corporate/franchisor workflows.
@@ -2427,6 +2613,7 @@ POSITIONING (critical):
 - A great pitch is "everything to run your hourly team, in one app", not "we do payroll".
 ${hospitalityPositioning}
 ${nonHospitalityCompetitorMode}
+${coffeeTeaPositioning}
 ${shippingPrintPositioning}
 
 BRAND VOICE (follow exactly):
@@ -2708,6 +2895,8 @@ const RESP = {
   competitor_webtimeclock: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_mpos: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_square: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
+  competitor_clover: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
+  competitor_lightspeed: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_toast: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_hotschedules: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
   competitor_7shifts: COMPETITOR_SCOPE_RESPONSE_OPTIONS,
@@ -3223,6 +3412,7 @@ function getResponseOptions(phase) {
   if (phase === "opening" && currentOpeningMode === "gatekeeper") return OPENING_GATEKEEPER_RESPONSE_OPTIONS;
   if (STACK_DISCOVERY_PHASES.has(phase) && isShippingPrintContext()) return SHIPPING_PRINT_STACK_RESPONSE_OPTIONS;
   if (STACK_DISCOVERY_PHASES.has(phase) && isHospitalityContext()) return HOSPITALITY_STACK_RESPONSE_OPTIONS;
+  if (STACK_DISCOVERY_PHASES.has(phase) && isCoffeeTeaContext()) return COFFEE_TEA_STACK_RESPONSE_OPTIONS;
   return RESP[phase] || [];
 }
 
@@ -3417,6 +3607,9 @@ function getFinalQuestionGuidance(responseId, options) {
   if (STACK_DISCOVERY_PHASES.has(responseId) && isHospitalityContext()) {
     return "End by asking: What are you using today for managing and paying staff? This should let them answer with a hotel suite, labor tool, finance system, payroll/HCM, scheduling app, ops tool, management-company system, manual process, or status quo.";
   }
+  if (STACK_DISCOVERY_PHASES.has(responseId) && isCoffeeTeaContext()) {
+    return "End by asking what they use today for the cafe team workflow: POS/payments, scheduling, timecards, tips, payroll, hiring, and team communication. This should let them answer with Square, Clover, Toast, Lightspeed, 7shifts, When I Work/Deputy/Sling, Gusto, ADP, Paychex, QuickBooks, CPA/bookkeeper, corporate tools, manual work, wrong contact, status quo, or a cafe pain area.";
+  }
   if (FINAL_QUESTION_GUIDANCE[responseId]) return FINAL_QUESTION_GUIDANCE[responseId];
   const labels = options.map(o => o.label).join(", ");
   return `End with one question that clearly invites one of these replies: ${labels}.`;
@@ -3426,6 +3619,7 @@ function buildNextPrompt(responseId, responseLabel) {
   const { brand, industry } = prospectInfo;
   const hospitality = isHospitalityContext(prospectInfo);
   const shippingPrint = isShippingPrintContext(prospectInfo);
+  const coffeeTea = isCoffeeTeaContext(prospectInfo);
   const proof = getProof(industry, brand);
   const peer = proof.peers[0];
   const brandProof = getBrandSocialProof(brand);
@@ -3444,17 +3638,23 @@ function buildNextPrompt(responseId, responseLabel) {
     ? "payroll/time tools like ADP or QuickBooks Time, scheduling apps, corporate tools, or manual work"
     : hospitality
       ? "hotel back-office suites, labor tools, PMS/finance-adjacent tools, payroll/HCM, scheduling apps, management-company systems, spreadsheets, or manual work"
-      : "tools, competitors, corporate systems, spreadsheets, or manual work";
+      : coffeeTea
+        ? "cafe POS tools like Square, Clover, Toast, or Lightspeed; schedulers like 7shifts, When I Work, Deputy, or Sling; payroll tools like Gusto, ADP, Paychex, QuickBooks, a CPA, or manual work"
+        : "tools, competitors, corporate systems, spreadsheets, or manual work";
   const discoveryScope = shippingPrint
     ? `what they use today for scheduling, timecards, payroll, hiring, and team communication at ${brand}`
     : hospitality
       ? `what they use today for managing and paying staff`
-      : `how they run the team at ${brand} day to day`;
+      : coffeeTea
+        ? `how they handle barista schedules, clock-ins, tips, payroll, hiring, and team communication at ${brand}`
+        : `how they run the team at ${brand} day to day`;
   const pitchScope = shippingPrint
     ? `Homebase fits around the shipping, rates, print, POS, and accounting tools ${brand} may already use, and helps with scheduling, timecards, payroll, hiring, and team messages`
     : hospitality
       ? `Homebase is the property-level people workflow for hotels, so schedules, time clocks, payroll, hiring, and team communication all live in one place`
-      : `Homebase is everything to run an hourly team in one app`;
+      : coffeeTea
+        ? `Homebase fits around the POS tools cafes already use and helps coffee and tea shops run barista schedules, timecards, payroll, hiring, and team messages in one place`
+        : `Homebase is everything to run an hourly team in one app`;
 
   // The prospect will answer by tapping one of these buttons. The script's closing
   // question MUST be answerable by these options, so the rep never asks something the
@@ -3605,17 +3805,22 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
   const industry = info.industry || "franchise";
   const hospitality = isHospitalityContext(info);
   const shippingPrint = isShippingPrintContext(info);
-  const industryLabel = hospitality ? "hotel" : industry;
+  const coffeeTea = isCoffeeTeaContext(info);
+  const industryLabel = hospitality ? "hotel" : coffeeTea ? "coffee and tea shop" : industry;
   const peopleWorkflow = hospitality
     ? "schedules, time clocks, payroll, hiring, and team communication"
     : shippingPrint
       ? "schedules, timecards, payroll, hiring, and team messages"
-      : "scheduling, time tracking, payroll, hiring, and team messages";
+      : coffeeTea
+        ? "barista schedules, timecards, tips, payroll, hiring, and team messages"
+        : "scheduling, time tracking, payroll, hiring, and team messages";
   const currentStackQuestion = shippingPrint
     ? `How are you handling those pieces at ${brand} today: one system, a few different tools, or are you doing those manually?`
     : hospitality
       ? `What are you using today for managing and paying staff, or is one part of that the headache?`
-      : `How are you handling those pieces at ${brand} today: one system, a few different tools, or are you doing those manually?`;
+      : coffeeTea
+        ? `How are you handling those pieces at ${brand} today: Square, Clover, Toast, another POS, a few separate tools, or are you doing those manually?`
+        : `How are you handling those pieces at ${brand} today: one system, a few different tools, or are you doing those manually?`;
   const proof = getProof(industry, brand);
   const peer = proof.peers[0] || "similar owners";
   const brandProof = getBrandSocialProof(brand);
@@ -3652,11 +3857,15 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
       ? `${lead}absolutely. A lot of ${brand} owners already have systems for shipping, rates, printing, POS, or accounting. Homebase fits around those and helps with ${peopleWorkflow}. ${currentStackQuestion}\n${baseTip}`
       : hospitality
       ? `${lead}absolutely. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
+      : coffeeTea
+      ? `${lead}absolutely. Homebase fits around the POS and payroll tools coffee shops already use, then helps with ${peopleWorkflow} in one place. ${currentStackQuestion}\n${baseTip}`
       : `${lead}absolutely. Homebase helps ${industryLabel} owners run ${peopleWorkflow} in one place, and ${proofRef} use it to cut down the weekly admin work. How are you handling the hourly team at ${brand} today?\n${baseTip}`,
     give_more: shippingPrint
       ? `${lead}totally. Homebase is not trying to replace the shipping, rates, print, POS, or accounting tools you already use. We usually help with the employee side: ${peopleWorkflow}. ${currentStackQuestion}\n${baseTip}`
       : hospitality
       ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
+      : coffeeTea
+      ? `${lead}totally. Homebase is not trying to replace your POS, menu, loyalty, or accounting tools. We usually help with the cafe team side: ${peopleWorkflow}. ${currentStackQuestion}\n${baseTip}`
       : `${lead}totally. The simplest way to think about Homebase is one app for the hourly team, from schedules and clock-ins through payroll, hiring, and team communication, so managers are not piecing five tools together. ${currentStackQuestion}\n${baseTip}`,
     too_busy: `${lead}completely get it, I caught you in the middle of the day. I do think this could be useful for ${brand}, so when is a better time to catch you, later today or tomorrow morning?\n[Coaching tip: Respect the interruption, then trade for a specific callback time.]`,
     not_interested: previousSellerUsedCustomerProof()
@@ -3667,9 +3876,13 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
       ? `${lead}great question. Homebase fits around the shipping, rates, print, POS, and accounting tools ${brand} may already use, and helps with ${peopleWorkflow}. ${currentStackQuestion}\n${baseTip}`
       : hospitality
       ? `${lead}great question. Homebase is the property-level people workflow for hotels, so ${peopleWorkflow} all live in one place, and ${proofRef} already use it. ${currentStackQuestion}\n${baseTip}`
+      : coffeeTea
+      ? `${lead}yeah, of course. Homebase is the team workflow for coffee and tea shops, so barista schedules, clock-ins, tips, payroll, hiring, and team messages live in one place. ${currentStackQuestion}\n${baseTip}`
       : `${lead}yeah, of course. We are Homebase, the all-in-one app for hourly teams, ${peopleWorkflow}, and ${peerOwnerRef} use us to simplify the week. ${currentStackQuestion}\n${baseTip}`,
     happy_with_current: shippingPrint
       ? `${lead}that makes sense, most ${brand} owners already have a few tools in place. We are not trying to replace shipping, rates, print, POS, or accounting; we usually compare the employee side. What are you using today for schedules, timecards, payroll, hiring, and team messages?\n${baseTip}`
+      : coffeeTea
+      ? `${lead}that makes sense, most cafe owners we talk to have a POS or payroll setup already. Four in five customers would recommend Homebase, so it can still be worth a quick compare around schedules, timecards, tips, payroll, and team messages. What are you using today for the team side?\n${baseTip}`
       : `${lead}that makes sense, most owners we talk to have something in place already. Four in five customers would recommend Homebase, so it can still be worth a quick compare. What are you using today to handle ${hospitality ? "hotel scheduling, time clocks, payroll, hiring, and team communication" : "scheduling, time tracking, and payroll"}?\n${baseTip}`,
     competitor_other: `${lead}got it, most owners already have a tool somewhere in the process. Does it mainly cover scheduling and time, payroll too, is payroll separate, is switching the concern, or are you not sure yet?\n${baseTip}`,
     competitor_cost: `${lead}totally fair, price only matters once we know the real total. With ${currentCompetitor ? currentCompetitor.name : "your current setup"}, the useful comparison is base price, add-ons, year-end fees, and time spent fixing payroll or schedules. How many hourly employees would we be comparing for ${brand}?\n[Coaching tip: Treat price as a value and fit question, not a discount fight.]`,
@@ -3702,7 +3915,7 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     locked_contract: `${lead}that makes sense, no one wants to rip something out mid-contract. Since four in five customers would recommend Homebase, it may be worth planning before renewal. When does that come up: soon, in a few months, or closer to year-end?\n[Coaching tip: Turn contract lock into a renewal-timing conversation.]`,
     named_tool: `${lead}got it, that is helpful context. Does that tool also handle payroll for you, is payroll separate, or are you not totally sure?\n[Coaching tip: Confirm payroll ownership before comparing workflows.]`,
     pain_payroll: `${lead}that is exactly the kind of thing we help with. When payroll is messy, it usually means hours are being checked, copied, or corrected by hand before payday. How long does payroll usually take you each pay period?\n[Coaching tip: Expand the pain before you pitch the fix.]`,
-    pain_scheduling: `${lead}yeah, scheduling can eat the week fast, especially when swaps and callouts start stacking up. About how many hourly employees are you scheduling at ${brand}?\n[Coaching tip: Quantify the team size so the pain feels concrete.]`,
+    pain_scheduling: `${lead}yeah, scheduling can eat the week fast, especially ${coffeeTea ? "when the morning rush, barista availability, and callouts start moving around" : "when swaps and callouts start stacking up"}. About how many hourly employees are you scheduling at ${brand}?\n[Coaching tip: Quantify the team size so the pain feels concrete.]`,
     sched_size_small: `${lead}got it. Even with a smaller team, scheduling can still create a lot of back-and-forth when availability changes. What part is most painful right now: building the schedule, covering callouts and swaps, tracking availability and time off, or avoiding overtime and coverage surprises?\n[Coaching tip: Stay in the scheduling lane and define the specific scheduling pain.]`,
     sched_size_medium: `${lead}yeah, with 15 to 30 people, the schedule can start changing all week. What is the biggest scheduling headache right now: building it, covering callouts and swaps, tracking availability and time off, or avoiding overtime and coverage surprises?\n[Coaching tip: Stay in the scheduling lane before you show the fix.]`,
     sched_size_large: `${lead}with a team that size, scheduling is usually a coverage and visibility problem, not just a calendar problem. Which part is hardest to control: building schedules, callouts and swaps, availability and time off, or overtime and coverage surprises?\n[Coaching tip: Keep the pain specific so the specialist call has a reason.]`,
@@ -3715,7 +3928,7 @@ function buildFallbackTalkTrack(responseId, responseLabel) {
     schedule_impact_coverage: `${lead}coverage gaps are exactly what scheduling software should prevent before the day falls apart. Homebase helps track availability and time off, flags conflicts, and keeps the team updated when things change. Want to see the coverage controls?\n[Coaching tip: Tie coverage pain to visibility and conflict prevention.]`,
     schedule_impact_cost: `${lead}that is a real business reason to fix scheduling. Homebase can show overtime alerts and labor costs as you build the schedule, with sales and labor visibility from POS integrations. Want to see the overtime and labor view with a product specialist?\n[Coaching tip: Connect scheduling to dollars, then ask for the specialist call.]`,
     pain_hiring: `${lead}that makes sense, turnover creates a lot of hidden work. Is hiring the thing you would want to see improved, is payroll actually the bigger problem, or is hiring not the focus right now?\n${baseTip}`,
-    pain_comms: `${lead}that makes sense. How are you reaching your ${brand} staff today: group texts, WhatsApp, posted notes, managers passing messages along, or another app?\n[Coaching tip: Capture the current method before diagnosing pain.]`,
+    pain_comms: `${lead}that makes sense. How are you reaching your ${coffeeTea ? "baristas and counter team" : `${brand} staff`} today: group texts, WhatsApp, posted notes, managers passing messages along, or another app?\n[Coaching tip: Capture the current method before diagnosing pain.]`,
     workflow_payroll_separate: `${lead}got it, so payroll is separate. How are hours getting into payroll today: copied over manually, handled by the payroll provider, still unresolved, or are you not sure?\n[Coaching tip: Map the handoff before calling it painful.]`,
     workflow_scheduling_separate: `${lead}got it, so scheduling is separate. Is scheduling a real headache today, handled in a separate scheduler, mostly manual, or working fine?\n[Coaching tip: Separate tool scope from actual scheduling pain.]`,
     workflow_hiring_separate: `${lead}got it, so hiring or onboarding is separate. Is that a real headache today, handled in a separate hiring tool, mostly manual, or working fine?\n[Coaching tip: Separate tool scope from actual hiring pain.]`,
