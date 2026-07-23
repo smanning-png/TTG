@@ -1230,9 +1230,9 @@ const CURRENT_STACK_RESPONSE_OPTIONS = [
   { id:"competitor_gusto", icon:"ti-receipt", label:"Gusto handles payroll", sub:"Payroll / HR" },
   { id:"competitor_adp", icon:"ti-receipt", label:"ADP handles payroll", sub:"Payroll incumbent" },
   { id:"competitor_paychex", icon:"ti-receipt", label:"Paychex handles payroll", sub:"Payroll incumbent" },
-  { id:"competitor_quickbooks", icon:"ti-calculator", label:"QuickBooks handles payroll", sub:"Accounting-led payroll" },
+  { id:"competitor_quickbooks", icon:"ti-calculator", label:"QuickBooks is in place", sub:"Accounting / payroll ecosystem" },
   { id:"competitor_quickbooks_time", icon:"ti-clock", label:"QuickBooks Time handles timecards", sub:"Time tracking / TSheets" },
-  { id:"competitor_square", icon:"ti-square", label:"Square handles POS / payroll", sub:"POS-tied payroll" },
+  { id:"competitor_square", icon:"ti-square", label:"Square is in place", sub:"POS / payments / payroll" },
   { id:"competitor_7shifts", icon:"ti-calendar-time", label:"7shifts handles scheduling", sub:"Restaurant scheduling" },
   { id:"competitor_hotschedules", icon:"ti-calendar-stats", label:"HotSchedules handles scheduling", sub:"Workforce scheduling" },
   { id:"competitor_wheniwork_deputy_sling", icon:"ti-calendar-time", label:"When I Work / Deputy / Sling schedules", sub:"Scheduling / time app" },
@@ -1249,7 +1249,7 @@ const CURRENT_STACK_RESPONSE_OPTIONS = [
 ];
 
 const COFFEE_TEA_STACK_RESPONSE_OPTIONS = [
-  { id:"competitor_square", icon:"ti-square", label:"Square handles POS / payroll", sub:"Coffee POS / payroll" },
+  { id:"competitor_square", icon:"ti-square", label:"Square is in place", sub:"Coffee POS / payments / payroll" },
   { id:"competitor_clover", icon:"ti-device-cash-register", label:"Clover handles POS / payments", sub:"Cafe POS" },
   { id:"competitor_toast", icon:"ti-tools-kitchen-2", label:"Toast handles POS / team tools", sub:"Cafe / QSR stack" },
   { id:"competitor_lightspeed", icon:"ti-bolt", label:"Lightspeed handles POS", sub:"Cafe POS / inventory" },
@@ -1258,7 +1258,7 @@ const COFFEE_TEA_STACK_RESPONSE_OPTIONS = [
   { id:"competitor_gusto", icon:"ti-receipt", label:"Gusto handles payroll", sub:"Payroll / HR" },
   { id:"competitor_adp", icon:"ti-receipt", label:"ADP handles payroll", sub:"Payroll incumbent" },
   { id:"competitor_paychex", icon:"ti-receipt", label:"Paychex handles payroll", sub:"Payroll incumbent" },
-  { id:"competitor_quickbooks", icon:"ti-calculator", label:"QuickBooks handles payroll / books", sub:"Accounting-led payroll" },
+  { id:"competitor_quickbooks", icon:"ti-calculator", label:"QuickBooks is in place", sub:"Accounting / payroll ecosystem" },
   { id:"competitor_cpa", icon:"ti-calculator", label:"Our CPA / bookkeeper handles payroll", sub:"Accountant / bookkeeper" },
   { id:"competitor_other", icon:"ti-layout-grid", label:"Different tools for POS, schedules, and payroll", sub:"Mixed cafe stack" },
   { id:"curious_why", icon:"ti-file-spreadsheet", label:"Paper schedules, texts, or spreadsheets", sub:"Manual process" },
@@ -1274,14 +1274,14 @@ const COFFEE_TEA_STACK_RESPONSE_OPTIONS = [
 const SHIPPING_PRINT_STACK_RESPONSE_OPTIONS = [
   { id:"competitor_adp", icon:"ti-receipt", label:"ADP handles payroll / time", sub:"Payroll / time" },
   { id:"competitor_paychex", icon:"ti-receipt", label:"Paychex handles payroll / time", sub:"Payroll / time" },
-  { id:"competitor_quickbooks", icon:"ti-calculator", label:"QuickBooks handles payroll", sub:"Accounting-led payroll" },
+  { id:"competitor_quickbooks", icon:"ti-calculator", label:"QuickBooks is in place", sub:"Accounting / payroll ecosystem" },
   { id:"competitor_quickbooks_time", icon:"ti-clock", label:"QuickBooks Time handles timecards", sub:"Time tracking / TSheets" },
   { id:"competitor_webtimeclock", icon:"ti-clock-hour-4", label:"Webtimeclock handles time punches", sub:"UPS time clock" },
   { id:"competitor_mpos", icon:"ti-device-cash-register", label:"MPOS handles clock-ins", sub:"UPS register time clock" },
   { id:"competitor_gusto", icon:"ti-receipt", label:"Gusto handles payroll / HR", sub:"Payroll / HR" },
   { id:"competitor_wheniwork_deputy_sling", icon:"ti-calendar-time", label:"Deputy / When I Work / Sling schedules", sub:"Scheduling / time app" },
   { id:"competitor_connecteam", icon:"ti-apps", label:"Connecteam handles team comms / ops", sub:"Ops / comms app" },
-  { id:"competitor_square", icon:"ti-square", label:"Square or POS handles payroll", sub:"POS-tied payroll" },
+  { id:"competitor_square", icon:"ti-square", label:"Square / POS is in place", sub:"POS / payments / payroll" },
   { id:"competitor_cpa", icon:"ti-calculator", label:"Our CPA / bookkeeper handles payroll", sub:"Accountant / bookkeeper" },
   { id:"franchise_hq", icon:"ti-building", label:"UPS / corporate tools cover some of it", sub:"Brand-provided tools" },
   { id:"competitor_other", icon:"ti-layout-grid", label:"Different tools for each piece", sub:"Mixed stack" },
@@ -1387,7 +1387,7 @@ const COMPETITOR_INTEL = {
     caution:"Paychex is strong on payroll and HR. Win on fit, simplicity, and total cost."
   },
   competitor_quickbooks: {
-    name:"QuickBooks Payroll",
+    name:"QuickBooks",
     aliases:["quickbooks", "quickbooks payroll", "qb", "qbo"],
     wedge:"keep QuickBooks for accounting while Homebase owns scheduling, time, payroll prep, hiring, and hourly-team operations",
     ask:"Are you using QuickBooks mainly for accounting, or are schedules and time cards living there too?",
@@ -1435,7 +1435,7 @@ const COMPETITOR_INTEL = {
     caution:"Do not fight POS or inventory. Keep the comparison on employee workflow and payroll handoff."
   },
   competitor_square: {
-    name:"Square Payroll",
+    name:"Square",
     aliases:["square", "square payroll", "square pos", "square team"],
     wedge:"deeper hourly-team management for cafes, restaurants, retail counters, and service locations that have outgrown a simple POS-tied payroll setup",
     ask:"Are you mostly using Square because of POS, or are scheduling, timecards, tips, payroll, and team communication working well there too?",
@@ -2590,7 +2590,7 @@ NON-HOTEL COMPETITOR MODE (critical for ${info.brand}):
 COFFEE / TEA / CAFE MODE (critical for ${info.brand}):
 - Treat this as a coffee, tea, donut, bagel, bakery-cafe, or quick-service counter team, not a full-service restaurant unless the brand clearly is one.
 - Use cafe language naturally: baristas, counter team, morning rush, afternoon rush, shift swaps, availability, breaks, tips, timecards, payroll, hiring, and team messages.
-- Common tools they may mention: Square, Clover, Toast, Lightspeed, 7shifts, When I Work, Deputy, Sling, Gusto, ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, a CPA/bookkeeper, paper schedules, spreadsheets, group texts, or franchisor-provided tools.
+- Common tools they may mention: Square, Clover, Toast, Lightspeed, 7shifts, When I Work, Deputy, Sling, Gusto, ADP, Paychex, QuickBooks, QuickBooks Time/TSheets, a CPA/bookkeeper, paper schedules, spreadsheets, group texts, or franchisor-provided tools.
 - Do not imply Homebase replaces POS, payments, loyalty, menu management, online ordering, inventory, or accounting. Homebase should fit around those and win on the employee workflow.
 - Strong discovery angles: rush coverage, callouts, barista turnover, availability changes, breaks, tip/timecard handoff, payroll prep, and manager chasing in texts.
 - Value language to use where natural: customers spend 50% less time scheduling per week, 83% saved payroll time after switching to Homebase Payroll, and 82% report less stress with Homebase. Do not repeat stats back to back.
@@ -2600,7 +2600,7 @@ UPS STORE / SHIPPING-PRINT MODE (critical for ${info.brand}):
 - Assume they may already have software for shipping, rates, print orders, mailboxes, POS, inventory, accounting, or corporate/franchisor workflows.
 - Do not imply Homebase replaces shipping, rate-shopping, package tracking, print production, mailbox, POS, inventory, or accounting tools.
 - Say Homebase usually fits around those existing systems and focuses on managing and paying the hourly team: schedules, timecards, payroll, hiring, onboarding, team messages, breaks, late arrivals, PTO, and manager approvals.
-- Common tools they may mention: Webtimeclock, MPOS/Managed Point of Sale, ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square, a CPA/bookkeeper, or corporate/franchisor-provided tools.
+- Common tools they may mention: Webtimeclock, MPOS/Managed Point of Sale, ADP, Paychex, QuickBooks, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square, a CPA/bookkeeper, or corporate/franchisor-provided tools.
 - Early credibility line to use naturally: "Most UPS Store owners I talk with already have tools for shipping, rates, printing, POS, or accounting. Totally makes sense. We fit around those; the part we usually help with is managing and paying the team."
 ` : "";
 
@@ -2874,9 +2874,9 @@ const RESP = {
     { id:"competitor_gusto", icon:"ti-tool", label:"We use Gusto", sub:"Payroll / HR" },
     { id:"competitor_adp", icon:"ti-tool", label:"We use ADP", sub:"Payroll incumbent" },
     { id:"competitor_paychex", icon:"ti-tool", label:"We use Paychex", sub:"Payroll incumbent" },
-    { id:"competitor_quickbooks", icon:"ti-tool", label:"We use QuickBooks Payroll", sub:"Accounting-led payroll" },
+    { id:"competitor_quickbooks", icon:"ti-tool", label:"We use QuickBooks", sub:"Accounting / payroll ecosystem" },
     { id:"competitor_quickbooks_time", icon:"ti-clock", label:"We use QuickBooks Time", sub:"Time tracking / TSheets" },
-    { id:"competitor_square", icon:"ti-tool", label:"We use Square Payroll", sub:"POS-tied payroll" },
+    { id:"competitor_square", icon:"ti-tool", label:"We use Square", sub:"POS / payments / payroll" },
     { id:"competitor_wheniwork_deputy_sling", icon:"ti-calendar-time", label:"We use Deputy / When I Work / Sling", sub:"Scheduling / time app" },
     { id:"competitor_toast", icon:"ti-tools-kitchen-2", label:"We use Toast", sub:"Restaurant POS / team tools" },
     { id:"competitor_hotschedules", icon:"ti-calendar-stats", label:"We use HotSchedules", sub:"Scheduling / workforce" },
@@ -3602,7 +3602,7 @@ function getFinalQuestionGuidance(responseId, options) {
     return "End by asking what part of the current setup is worth discussing: cost/add-ons, support, missing workflows, contract timing, switching pain, seeing the difference, or staying put.";
   }
   if (STACK_DISCOVERY_PHASES.has(responseId) && isShippingPrintContext()) {
-    return "End by asking what they use today for scheduling, timecards, payroll, hiring, and team communication. This should let them answer with ADP, Paychex, QuickBooks Payroll, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square/POS, CPA/bookkeeper, corporate/franchisor tools, manual work, wrong contact, or status quo.";
+    return "End by asking what they use today for scheduling, timecards, payroll, hiring, and team communication. This should let them answer with ADP, Paychex, QuickBooks, QuickBooks Time/TSheets, Gusto, Deputy, When I Work, Sling, Connecteam, Square/POS, CPA/bookkeeper, corporate/franchisor tools, manual work, wrong contact, or status quo.";
   }
   if (STACK_DISCOVERY_PHASES.has(responseId) && isHospitalityContext()) {
     return "End by asking: What are you using today for managing and paying staff? This should let them answer with a hotel suite, labor tool, finance system, payroll/HCM, scheduling app, ops tool, management-company system, manual process, or status quo.";

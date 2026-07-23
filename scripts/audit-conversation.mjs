@@ -72,6 +72,13 @@ const phases = new Set(Object.keys(resp));
 const missingTargets = [];
 const missingGuidance = [];
 
+if (competitorIntel.competitor_square.name !== "Square") {
+  throw new Error("Square should be labeled as Square until the prospect confirms which Square product they use.");
+}
+if (competitorIntel.competitor_quickbooks.name !== "QuickBooks") {
+  throw new Error("QuickBooks should be labeled as QuickBooks until the prospect confirms which QuickBooks product they use.");
+}
+
 for (const [phase, options] of Object.entries(resp)) {
   if (options.length && !guidance[phase] && !competitorIntel[phase]) missingGuidance.push(phase);
   for (const option of options) {
@@ -628,6 +635,10 @@ if (!/coffee and tea shops|barista schedules|tips|Square, Clover, Toast/i.test(c
 const coffeeCloverFallback = sandbox.buildFallbackTalkTrack("competitor_clover", "We use Clover");
 if (!/What parts does Clover cover today: POS\/payments, scheduling, timecards, tips, payroll, hiring, team communication, or most of the cafe workflow/i.test(coffeeCloverFallback)) {
   throw new Error("Clover coffee fallback should ask a cafe-specific scope question.");
+}
+const coffeeSquareFallback = sandbox.buildFallbackTalkTrack("competitor_square", "We use Square");
+if (/Square Payroll/i.test(coffeeSquareFallback) || !/What parts does Square cover today: POS\/payments, scheduling, timecards, tips, payroll, hiring, team communication, or most of the cafe workflow/i.test(coffeeSquareFallback)) {
+  throw new Error("Square coffee fallback should use the company name and ask a cafe-specific scope question.");
 }
 const coffeeCards = readContext("COFFEE_TEA_BATTLECARD_IDS");
 for (const required of ["competitor_square", "competitor_clover", "competitor_toast", "competitor_lightspeed", "competitor_7shifts", "competitor_gusto"]) {
